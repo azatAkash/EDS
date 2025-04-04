@@ -21,9 +21,9 @@ public class JwtService {
     @Value("${application.security.jwt.secret-key}")
     private String secretKey;
     @Value("${application.security.jwt.expiration}")
-    private long jwtExpiration;
+    private Integer jwtExpiration;
     @Value("${application.security.jwt.refresh-token.expiration}")
-    private long refreshExpiration;
+    private Integer refreshExpiration;
 
     public String extractUsername(String token) {
         return extractClaim(token, Claims::getSubject);
@@ -54,7 +54,7 @@ public class JwtService {
     private String buildToken(
             Map<String, Object> extraClaims,
             UserDetails userDetails,
-            long expiration
+            Integer expiration
     ) {
         return Jwts
                 .builder()

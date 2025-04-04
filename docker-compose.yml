@@ -1,0 +1,18 @@
+
+
+services:
+  postgres:
+    image: postgres:17.4
+    container_name: eds-postgres
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: eds
+      POSTGRES_USER: eds
+      POSTGRES_PASSWORD: 12345
+    volumes:
+      - eds-data:/var/lib/postgresql/data
+    restart: unless-stopped
+
+volumes:
+  eds-data:

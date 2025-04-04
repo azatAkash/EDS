@@ -1,6 +1,6 @@
 package com.student.edsbackend.dal.user;
 
-import com.student.edsbackend.dal.declaration.Declaration;
+import com.student.edsbackend.dal.declaration.InitialDeclaration;
 import com.student.edsbackend.dal.token.Token;
 import jakarta.persistence.*;
 import lombok.*;
@@ -18,29 +18,51 @@ import java.util.List;
 @AllArgsConstructor
 @Table(name = "users")
 public class User implements UserDetails {
+
     @Id
-    @GeneratedValue(strategy= GenerationType.AUTO, generator = "G_USER_ENTITY")
-    @SequenceGenerator(allocationSize = 1, name = "G_USER_ENTITY", sequenceName = "SEQ_USER_ENTITY")
+    @GeneratedValue(strategy= GenerationType.IDENTITY)
     @Column(name = "id")
     private Integer id;
-    @Column(name = "email", length = 100, nullable = false, unique = true)
+
+    @Column(name = "email", length = 500, nullable = false, unique = true)
     private String email;
-    @Column(name = "password", length = 100, nullable = false)
+
+    @Column(name = "password", length = 2000, nullable = false)
     private String password;
+
     @Column(name = "lastname", length = 100, nullable = false)
     private String lastname;
+
     @Column(name = "firstname", length = 100, nullable = false)
     private String firstname;
+
     @Column(name = "middlename", length = 100)
     private String middlename;
+
+    @Column(name = "position")
+    private String position;
+
+    @Column(name = "department")
+    private String department;
+
     @Enumerated(EnumType.STRING)
+    @Column(name = "role")
     private Role role;
 
     @OneToMany(mappedBy = "user")
     private List<Token> tokens;
 
+    @OneToMany(mappedBy = "createdBy")
+    private List<UserManagementPlan> managementPlans;
+
     @OneToMany(mappedBy = "user")
-    private List<Declaration> declarations;
+    private List<UserAdHocExclude> adHocExcludes;
+
+    @OneToMany(mappedBy = "user")
+    private List<UserAdHocDeclare> adHocDeclares;
+
+    @OneToMany(mappedBy = "createdBy")
+    private List<InitialDeclaration> initialDecalarations;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
@@ -48,13 +70,13 @@ public class User implements UserDetails {
     }
 
     @Override
-    public String getPassword() {
-        return password;
+    public String getUsername() {
+        return email;
     }
 
     @Override
-    public String getUsername() {
-        return email;
+    public String getPassword() {
+        return password;
     }
 
     @Override
@@ -76,5 +98,4 @@ public class User implements UserDetails {
     public boolean isEnabled() {
         return true;
     }
-
 }

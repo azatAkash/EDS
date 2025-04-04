@@ -1,24 +1,24 @@
-package com.student.edsbackend.web.service;
+// package com.student.edsbackend.web.service;
 
-import com.student.edsbackend.dal.declaration.DeclarationDTO;
-import java.util.List;
+// import com.student.edsbackend.dal.declaration.DeclarationDTO;
+// import java.util.List;
 
-public interface DeclarationService {
+// public interface DeclarationService {
 
-    /**
-     * Returns the declaration for the currently authenticated user. Expects the
-     * user's ID to be available from the security context.
-     */
-    DeclarationDTO findDeclarationForUser();
+//     /**
+//      * Returns the declaration for the currently authenticated user. Expects the
+//      * user's ID to be available from the security context.
+//      */
+//     DeclarationDTO findDeclarationForUser();
 
-    /**
-     * Returns all declarations for an admin user.
-     */
-    List<DeclarationDTO> findAllForAdmin();
+//     /**
+//      * Returns all declarations for an admin user.
+//      */
+//     List<DeclarationDTO> findAllForAdmin();
 
-    void createDeclaration(DeclarationDTO dto);
+//     void createDeclaration(DeclarationDTO dto);
 
-    void updateDeclaration(DeclarationDTO dto);
+//     void updateDeclaration(DeclarationDTO dto);
 
-    void deleteDeclaration(Integer id);
-}
+//     void deleteDeclaration(Integer id);
+// }
