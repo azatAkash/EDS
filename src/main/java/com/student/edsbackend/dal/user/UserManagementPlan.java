@@ -63,10 +63,10 @@ public class UserManagementPlan {
     private LocalDateTime executionDate;
 
     @Column(name = "notification_date")
-    private Boolean notificationDate;
+    private LocalDateTime notificationDate;
 
     @Column(name = "confirmation_date")
-    private Boolean confirmationDate;
+    private LocalDateTime confirmationDate;
 
     @Column(name = "reason_non_execution", columnDefinition = "text")
     private String reasonNonExecution;

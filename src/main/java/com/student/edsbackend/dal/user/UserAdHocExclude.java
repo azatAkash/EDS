@@ -5,6 +5,8 @@ import lombok.*;
 
 import java.time.LocalDateTime;
 
+import com.student.edsbackend.dal.enums.UserDeclarationStatus;
+
 /**
  * Entity representing the user_ad_hoc_excludes table.
  */
@@ -40,6 +42,13 @@ public class UserAdHocExclude {
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status", nullable = false)
+    private UserDeclarationStatus status;
+
     @Column(name = "is_deleted")
     private Boolean isDeleted;
+
+    @Column(name = "is_confirmed")
+    private Boolean isConfirmed;
 }

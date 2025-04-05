@@ -15,6 +15,18 @@ import static com.student.edsbackend.dal.user.Permission.*;
 public enum Role {
 
     USER(Collections.emptySet()),
+    SUPER_ADMIN(
+            Set.of(
+                    ADMIN_READ,
+                    ADMIN_UPDATE,
+                    ADMIN_DELETE,
+                    ADMIN_CREATE,
+                    MANAGER_READ,
+                    MANAGER_UPDATE,
+                    MANAGER_DELETE,
+                    MANAGER_CREATE
+            )
+    ),
     ADMIN(
             Set.of(
                     ADMIN_READ,

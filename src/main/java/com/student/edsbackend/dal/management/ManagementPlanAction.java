@@ -23,8 +23,8 @@ public class ManagementPlanAction {
     @Column(name = "id")
     private Integer id;
 
-    @Column(name = "text", columnDefinition = "json")
-    private String text; // JSON structure for multilingual text {en, ru, kz}
+    @Column(name = "description", columnDefinition = "json")
+    private String description; // JSON structure for multilingual text {en, ru, kz}
 
     @OneToMany(mappedBy = "action")
     private List<UserManagementPlan> managementPlans;
