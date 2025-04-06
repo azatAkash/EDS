@@ -10,6 +10,7 @@ import com.student.edsbackend.web.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.annotation.Secured;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.core.Authentication;

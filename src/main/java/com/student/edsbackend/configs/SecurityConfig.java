@@ -13,6 +13,8 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.authentication.logout.LogoutHandler;
 
+import com.student.edsbackend.features.user.dal.Permission;
+
 import static com.student.edsbackend.features.user.dal.Permission.*;
 import static com.student.edsbackend.features.user.dal.Role.ADMIN;
 import static com.student.edsbackend.features.user.dal.Role.MANAGER;
@@ -38,12 +40,12 @@ public class SecurityConfig {
             .csrf(AbstractHttpConfigurer::disable)
             .authorizeHttpRequests(req ->
                 req
-                    // Management endpoints require specific roles/authorities
+                    // Management endpoints require specific roles
                     .requestMatchers("/api/v1/management/**").hasAnyRole(ADMIN.name(), MANAGER.name())
-                    .requestMatchers(GET, "/api/v1/management/**").hasAnyAuthority(ADMIN_READ.name(), MANAGER_READ.name())
-                    .requestMatchers(POST, "/api/v1/management/**").hasAnyAuthority(ADMIN_CREATE.name(), MANAGER_CREATE.name())
-                    .requestMatchers(PUT, "/api/v1/management/**").hasAnyAuthority(ADMIN_UPDATE.name(), MANAGER_UPDATE.name())
-                    .requestMatchers(DELETE, "/api/v1/management/**").hasAnyAuthority(ADMIN_DELETE.name(), MANAGER_DELETE.name())
+                    .requestMatchers(GET, "/api/v1/management/**").hasAnyAuthority(Permission.MANAGER.getPermission())
+                    .requestMatchers(POST, "/api/v1/management/**").hasAnyAuthority(Permission.MANAGER.getPermission())
+                    .requestMatchers(PUT, "/api/v1/management/**").hasAnyAuthority(Permission.MANAGER.getPermission())
+                    .requestMatchers(DELETE, "/api/v1/management/**").hasAnyAuthority(Permission.MANAGER.getPermission())
                     
                     // Public endpoints for auth, declarations, and users
                     .requestMatchers("/api/v1/auth/**", "/api/v1/declarations/**", "/api/v1/users/**").permitAll()
