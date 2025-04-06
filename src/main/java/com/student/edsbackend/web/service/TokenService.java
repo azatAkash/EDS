@@ -1,11 +1,11 @@
 package com.student.edsbackend.web.service;
 
-import com.student.edsbackend.dal.token.Token;
-import com.student.edsbackend.dal.token.TokenDTO;
-import com.student.edsbackend.dal.user.User;
-import com.student.edsbackend.dal.user.UserDTO;
-
 import java.util.Optional;
+
+import com.student.edsbackend.features.token.Token;
+import com.student.edsbackend.features.token.TokenDTO;
+import com.student.edsbackend.features.user.dal.User;
+import com.student.edsbackend.features.user.dal.UserDTO;
 
 public interface TokenService {
     Optional<Token> findToken(Integer id);

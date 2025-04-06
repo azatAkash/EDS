@@ -13,9 +13,9 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.authentication.logout.LogoutHandler;
 
-import static com.student.edsbackend.dal.user.Permission.*;
-import static com.student.edsbackend.dal.user.Role.ADMIN;
-import static com.student.edsbackend.dal.user.Role.MANAGER;
+import static com.student.edsbackend.features.user.dal.Permission.*;
+import static com.student.edsbackend.features.user.dal.Role.ADMIN;
+import static com.student.edsbackend.features.user.dal.Role.MANAGER;
 import static org.springframework.http.HttpMethod.DELETE;
 import static org.springframework.http.HttpMethod.GET;
 import static org.springframework.http.HttpMethod.POST;

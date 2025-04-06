@@ -1,8 +1,8 @@
 package com.student.edsbackend.web.service.implementations;
 
-import com.student.edsbackend.dal.token.Token;
-import com.student.edsbackend.dal.token.TokenDTO;
-import com.student.edsbackend.dal.token.TokenRepository;
+import com.student.edsbackend.features.token.Token;
+import com.student.edsbackend.features.token.TokenDTO;
+import com.student.edsbackend.features.token.TokenRepository;
 import com.student.edsbackend.web.service.TokenService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

@@ -1,9 +1,9 @@
 package com.student.edsbackend.web.service.implementations;
 
-import com.student.edsbackend.dal.user.User;
-import com.student.edsbackend.dal.user.UserDTO;
-import com.student.edsbackend.dal.user.Role; // Ensure you import your Role enum
-import com.student.edsbackend.dal.user.UserRepository;
+import com.student.edsbackend.features.user.dal.Role;
+import com.student.edsbackend.features.user.dal.User;
+import com.student.edsbackend.features.user.dal.UserDTO;
+import com.student.edsbackend.features.user.dal.UserRepository;
 import com.student.edsbackend.web.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -30,7 +30,7 @@ public class UserServiceImpl implements UserService {
                 .firstname(dto.getFirstname())
                 .lastname(dto.getLastname())
                 .middlename(dto.getMiddlename())
-                .role(Role.valueOf(dto.getRole()))
+                .role(dto.getRole())
 
                 .build();
         return userRepository.save(user);
@@ -52,7 +52,7 @@ public class UserServiceImpl implements UserService {
             user.setFirstname(dto.getFirstname());
             user.setLastname(dto.getLastname());
             user.setMiddlename(dto.getMiddlename());
-            user.setRole(Role.valueOf(dto.getRole()));
+            user.setRole(dto.getRole());
             userRepository.save(user);
         } else {
             throw new RuntimeException("User not found with id: " + dto.getId());

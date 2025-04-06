@@ -1,6 +1,5 @@
 package com.student.edsbackend.configs;
 
-import com.student.edsbackend.dal.token.TokenRepository;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -21,6 +20,8 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
+
+import com.student.edsbackend.features.token.TokenRepository;
 
 @Component
 @RequiredArgsConstructor

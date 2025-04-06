@@ -1,10 +1,10 @@
 package com.student.edsbackend.web.service;
 
-import com.student.edsbackend.dal.user.User;
-import com.student.edsbackend.dal.user.UserDTO;
-
 import java.util.List;
 import java.util.Optional;
+
+import com.student.edsbackend.features.user.dal.User;
+import com.student.edsbackend.features.user.dal.UserDTO;
 
 public interface UserService {
     Optional<User> findUser(Integer id);

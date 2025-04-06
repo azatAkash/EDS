@@ -1,7 +1,7 @@
 package com.student.edsbackend.web.contoller;
 
-import com.student.edsbackend.dal.user.User;
-import com.student.edsbackend.dal.user.UserDTO;
+import com.student.edsbackend.features.user.dal.User;
+import com.student.edsbackend.features.user.dal.UserDTO;
 import com.student.edsbackend.web.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
