@@ -17,5 +17,5 @@ public class UserDTO {
     private Role role;
     private String position;
     private String department;
-
+    private Boolean isActive;
 }

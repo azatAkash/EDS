@@ -11,13 +11,14 @@ import org.springframework.web.server.ResponseStatusException;
 public class GlobalExceptionHandler {
 
     @ExceptionHandler(UsernameNotFoundException.class)
-    public ResponseEntity<String> handleUsernameNotFound(UsernameNotFoundException ex) {
-        // If you prefer to return 404 instead of 403 for missing users:
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
+    public ResponseEntity<ApiResponse> handleUsernameNotFound(UsernameNotFoundException ex) {
+        ApiResponse response = new ApiResponse(ex.getMessage());
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
     }
 
     @ExceptionHandler(ResponseStatusException.class)
-    public ResponseEntity<String> handleResponseStatusException(ResponseStatusException ex) {
-        return ResponseEntity.status(ex.getStatusCode()).body(ex.getReason());
+    public ResponseEntity<ApiResponse> handleResponseStatusException(ResponseStatusException ex) {
+        ApiResponse response = new ApiResponse(ex.getReason());
+        return ResponseEntity.status(ex.getStatusCode()).body(response);
     }
 }

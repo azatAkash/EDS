@@ -34,7 +34,7 @@ public class UserValidationService {
         } else if (!isValidEmail(userDTO.getEmail())) {
             errors.add("Invalid email format");
         }
-         // Add duplicate email check here
+        
         
     
         // Validate password
@@ -68,7 +68,7 @@ public class UserValidationService {
      * @param email The email to validate
      * @return true if email is valid, false otherwise
      */
-    public boolean isValidEmail(String email) {
+    public static boolean isValidEmail(String email) {
         return EMAIL_PATTERN.matcher(email).matches();
     }
     

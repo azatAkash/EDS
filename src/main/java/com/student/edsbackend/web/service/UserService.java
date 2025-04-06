@@ -11,5 +11,6 @@ public interface UserService {
     User createUser(UserDTO dto);
     List<User> getAllUsers();
     void updateUser(UserDTO dto);
+    String editUser(UserDTO dto, Integer userId);
     void deleteUser(Integer id);
 }

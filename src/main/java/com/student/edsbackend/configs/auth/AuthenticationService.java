@@ -15,6 +15,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -36,7 +37,7 @@ public class AuthenticationService {
     private final UserValidationService validationService;
 
     /**
-     * Registers a new user based on the provided UserDTO. 
+     * Registers a new user based on the provided UserDTO.
      * Validates the user data using the UserValidationService.
      *
      * @param userDTO the user data transfer object to register
@@ -46,14 +47,12 @@ public class AuthenticationService {
         // Validate the incoming UserDTO
         List<String> errors = validationService.validateRegistrationRequest(userDTO);
         if (!errors.isEmpty()) {
-            throw new IllegalArgumentException(String.join(", ", errors));
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, String.join(", ", errors));
         }
-         // Add duplicate email check here
+        // Add duplicate email check here
         if (repository.findByEmail(userDTO.getEmail()).isPresent()) {
-            throw new IllegalArgumentException("Email already in use");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Email already in use");
         }
-
-
 
         // Map UserDTO to the User entity
         User user = User.builder()
@@ -65,10 +64,11 @@ public class AuthenticationService {
                 .role(userDTO.getRole())
                 .position(userDTO.getPosition())
                 .department(userDTO.getDepartment())
+                .isActive(true)
                 .build();
 
         User savedUser = repository.save(user);
-
+        
         // Generate JWT access and refresh tokens
         String jwtToken = jwtService.generateToken(Collections.singletonMap("role", user.getRole()), user);
         String refreshToken = jwtService.generateRefreshToken(user);
@@ -76,9 +76,22 @@ public class AuthenticationService {
         // Persist the JWT token in the database
         saveUserToken(savedUser, jwtToken);
 
+        UserDTO responseUserDTO = UserDTO.builder()
+            .id(savedUser.getId())
+            .email(savedUser.getEmail())
+            .firstname(savedUser.getFirstname())
+            .lastname(savedUser.getLastname())
+            .middlename(savedUser.getMiddlename())
+            .role(savedUser.getRole())
+            .position(savedUser.getPosition())
+            .department(savedUser.getDepartment())
+            .isActive(savedUser.getIsActive())
+            .build();
+
         return AuthenticationResponse.builder()
                 .accessToken(jwtToken)
                 .refreshToken(refreshToken)
+                .user(responseUserDTO)
                 .build();
     }
 
@@ -86,19 +99,40 @@ public class AuthenticationService {
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
                         request.getEmail(),
-                        request.getPassword()
-                )
-        );
+                        request.getPassword()));
         User user = repository.findByEmail(request.getEmail())
-                .orElseThrow();
-        String jwtToken = jwtService.generateToken(user);
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "User not found"));
+        
+        if (user.getIsActive() == false) {
+            System.out.println("Account is not active");
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN,"Account is not active");    
+        }
+        // Generate tokens with role information
+        String jwtToken = jwtService.generateToken(Collections.singletonMap("role", user.getRole()), user);
         String refreshToken = jwtService.generateRefreshToken(user);
-        revokeAllUserTokens(user);
-        saveUserToken(user, jwtToken);
+
+        // Map the User entity to a UserDTO (be cautious about sensitive fields like
+        // password)
+        UserDTO userDTO = UserDTO.builder()
+                .id(user.getId())
+                .email(user.getEmail())
+                .firstname(user.getFirstname())
+                .lastname(user.getLastname())
+                .middlename(user.getMiddlename())
+                .role(user.getRole())
+                .position(user.getPosition())
+                .department(user.getDepartment())
+                .isActive(user.getIsActive())
+                .build();
+
+        
+        // Build and return the response with tokens and user data
         return AuthenticationResponse.builder()
                 .accessToken(jwtToken)
                 .refreshToken(refreshToken)
+                .user(userDTO)
                 .build();
+
     }
 
     private void saveUserToken(User user, String jwtToken) {
@@ -137,7 +171,7 @@ public class AuthenticationService {
             User user = repository.findByEmail(userEmail)
                     .orElseThrow();
             if (jwtService.isTokenValid(refreshToken, user)) {
-                String accessToken = jwtService.generateToken(user);
+                String accessToken = jwtService.generateToken(Collections.singletonMap("role", user.getRole()), user);
                 revokeAllUserTokens(user);
                 saveUserToken(user, accessToken);
                 AuthenticationResponse authResponse = AuthenticationResponse.builder()

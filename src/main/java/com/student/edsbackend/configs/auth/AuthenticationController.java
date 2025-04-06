@@ -30,26 +30,15 @@ public class AuthenticationController {
 
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody UserDTO userDTO) {
-        try {
-            // Process registration and return the authentication tokens in JSON format
             AuthenticationResponse authResponse = service.register(userDTO);
             return ResponseEntity.ok(authResponse);
-        } catch (Exception e) {
-            // Return a 400 Bad Request with a JSON body containing the error message
-            return ResponseEntity.badRequest().body(new ApiResponse(e.getMessage()));
-        }
     }
 
     @PostMapping("/authenticate")
     public ResponseEntity<?> authenticate(@RequestBody AuthenticationRequest request) {
-        try {
-            // Process authentication and return the authentication tokens in JSON format
             AuthenticationResponse authResponse = service.authenticate(request);
             return ResponseEntity.ok(authResponse);
-        } catch (Exception e) {
-            // Return a 400 Bad Request with a JSON body containing the error message
-            return ResponseEntity.badRequest().body(new ApiResponse(e.getMessage()));
-        }
+
     }
 
     @PostMapping("/refresh-token")

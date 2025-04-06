@@ -35,27 +35,32 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-                .csrf(AbstractHttpConfigurer::disable)
-                .authorizeHttpRequests(req ->
-                        req.requestMatchers("/api/v1/management/**").hasAnyRole(ADMIN.name(), MANAGER.name())
-                                .requestMatchers(GET, "/api/v1/management/**").hasAnyAuthority(ADMIN_READ.name(), MANAGER_READ.name())
-                                .requestMatchers(POST, "/api/v1/management/**").hasAnyAuthority(ADMIN_CREATE.name(), MANAGER_CREATE.name())
-                                .requestMatchers(PUT, "/api/v1/management/**").hasAnyAuthority(ADMIN_UPDATE.name(), MANAGER_UPDATE.name())
-                                .requestMatchers(DELETE, "/api/v1/management/**").hasAnyAuthority(ADMIN_DELETE.name(), MANAGER_DELETE.name())
-                                .requestMatchers("/api/v1/auth/**", "/api/v1/declarations/**", "/api/v1/users/**").permitAll().requestMatchers("/api/v1/auth/**", "/api/v1/declarations/**", "/api/v1/users/**").permitAll()
-                                .anyRequest()
-                                .authenticated()
-                )
-                .sessionManagement(session -> session.sessionCreationPolicy(STATELESS))
-                .authenticationProvider(authenticationProvider)
-                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
-                .logout(logout ->
-                        logout.logoutUrl("/api/v1/auth/logout")
-                                .addLogoutHandler(logoutHandler)
-                                .logoutSuccessHandler((request, response, authentication) -> SecurityContextHolder.clearContext())
-                )
-        ;
+            .csrf(AbstractHttpConfigurer::disable)
+            .authorizeHttpRequests(req ->
+                req
+                    // Management endpoints require specific roles/authorities
+                    .requestMatchers("/api/v1/management/**").hasAnyRole(ADMIN.name(), MANAGER.name())
+                    .requestMatchers(GET, "/api/v1/management/**").hasAnyAuthority(ADMIN_READ.name(), MANAGER_READ.name())
+                    .requestMatchers(POST, "/api/v1/management/**").hasAnyAuthority(ADMIN_CREATE.name(), MANAGER_CREATE.name())
+                    .requestMatchers(PUT, "/api/v1/management/**").hasAnyAuthority(ADMIN_UPDATE.name(), MANAGER_UPDATE.name())
+                    .requestMatchers(DELETE, "/api/v1/management/**").hasAnyAuthority(ADMIN_DELETE.name(), MANAGER_DELETE.name())
+                    
+                    // Public endpoints for auth, declarations, and users
+                    .requestMatchers("/api/v1/auth/**", "/api/v1/declarations/**", "/api/v1/users/**").permitAll()
+                    
+                    // All other requests require authentication
+                    .anyRequest().authenticated()
+            )
+            .sessionManagement(session -> session.sessionCreationPolicy(STATELESS))
+            .authenticationProvider(authenticationProvider)
+            .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
+            .logout(logout ->
+                logout.logoutUrl("/api/v1/auth/logout")
+                      .addLogoutHandler(logoutHandler)
+                      .logoutSuccessHandler((request, response, authentication) -> SecurityContextHolder.clearContext())
+            );
 
         return http.build();
     }
 }
+

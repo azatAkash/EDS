@@ -1,6 +1,8 @@
 package com.student.edsbackend.configs.auth;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.student.edsbackend.features.user.dal.UserDTO;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -16,4 +18,7 @@ public class AuthenticationResponse {
     private String accessToken;
     @JsonProperty("refresh_token")
     private String refreshToken;
+
+    @JsonProperty("user")
+    private UserDTO user;
 }
