@@ -65,6 +65,7 @@ public class AuthenticationService {
                 .position(userDTO.getPosition())
                 .department(userDTO.getDepartment())
                 .isActive(true)
+                .registrationDate(java.time.LocalDateTime.now())
                 .build();
 
         User savedUser = repository.save(user);
@@ -86,6 +87,7 @@ public class AuthenticationService {
             .position(savedUser.getPosition())
             .department(savedUser.getDepartment())
             .isActive(savedUser.getIsActive())
+            .registrationDate(savedUser.getRegistrationDate())
             .build();
 
         return AuthenticationResponse.builder()
@@ -123,6 +125,7 @@ public class AuthenticationService {
                 .position(user.getPosition())
                 .department(user.getDepartment())
                 .isActive(user.getIsActive())
+                .registrationDate(user.getRegistrationDate())
                 .build();
 
         

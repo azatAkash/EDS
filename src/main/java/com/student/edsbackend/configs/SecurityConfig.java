@@ -8,6 +8,7 @@ import org.springframework.security.config.annotation.method.configuration.Enabl
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.config.core.GrantedAuthorityDefaults;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
@@ -47,8 +48,11 @@ public class SecurityConfig {
                     .requestMatchers(PUT, "/api/v1/management/**").hasAnyAuthority(Permission.MANAGER.getPermission())
                     .requestMatchers(DELETE, "/api/v1/management/**").hasAnyAuthority(Permission.MANAGER.getPermission())
                     
-                    // Public endpoints for auth, declarations, and users
-                    .requestMatchers("/api/v1/auth/**", "/api/v1/declarations/**", "/api/v1/users/**").permitAll()
+                    // Public endpoints for auth and declarations only
+                    .requestMatchers("/api/v1/auth/**", "/api/v1/declarations/**").permitAll()
+                    
+                    // User endpoints restricted to ADMIN and SUPER_ADMIN only
+                    .requestMatchers("/api/v1/users/**").hasAnyRole(ADMIN.name(), "SUPER_ADMIN")
                     
                     // All other requests require authentication
                     .anyRequest().authenticated()
@@ -64,5 +68,6 @@ public class SecurityConfig {
 
         return http.build();
     }
-}
 
+
+}

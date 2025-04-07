@@ -6,7 +6,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import com.student.edsbackend.configs.ApiResponse;
+import com.student.edsbackend.features.ApiResponse;
 import com.student.edsbackend.features.user.dal.UserDTO;
 
 import java.io.IOException;
