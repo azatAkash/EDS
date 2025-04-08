@@ -33,8 +33,7 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ApiResponse> handleAccessDeniedException(AccessDeniedException ex) {
         // Extract more information from the exception message if available
         String message = ex.getMessage();
-        String responseMessage = "Access denied: You do not have sufficient permissions to access this resource";
-        
+        String responseMessage = "You don't have permission to use this endpoint";
         
         // Log the access denied event for security monitoring
         // This helps administrators track unauthorized access attempts

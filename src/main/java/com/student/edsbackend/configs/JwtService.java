@@ -22,10 +22,18 @@ public class JwtService {
     private String secretKey;
 
     @Value("${application.security.jwt.expiration}")
-    private long jwtExpiration;
+    private long jwtExpiration; // 1 hour (3600000 ms)
 
     @Value("${application.security.jwt.refresh-token.expiration}")
-    private long refreshExpiration;
+    private long refreshExpiration; // 7 days (604800000 ms)
+    
+    /**
+     * The JWT authentication system uses two types of tokens:
+     * 1. Access tokens: Short-lived (1 hour), not stored in database
+     * 2. Refresh tokens: Long-lived (7 days), stored in database
+     * 
+     * Refresh tokens can only be used once and are deleted after use.
+     */
 
     public String extractUsername(String token) {
         return extractClaim(token, Claims::getSubject);

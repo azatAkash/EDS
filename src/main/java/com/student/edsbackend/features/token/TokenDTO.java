@@ -9,4 +9,6 @@ import lombok.Setter;
 @Builder
 public class TokenDTO {
     private Integer id;
+    private Integer userId;
+    private String token;
 }

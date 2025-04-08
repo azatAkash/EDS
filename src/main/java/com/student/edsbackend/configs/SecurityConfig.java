@@ -12,11 +12,14 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.springframework.security.web.authentication.logout.LogoutHandler;
 
 import com.student.edsbackend.features.user.dal.Permission;
 import com.student.edsbackend.features.user.dal.Role;
+import com.student.edsbackend.features.ApiResponse;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.servlet.http.HttpServletResponse;
 import static org.springframework.http.HttpMethod.*;
+
 
 @Configuration
 @EnableWebSecurity
@@ -26,7 +29,6 @@ public class SecurityConfig {
 
     private final JwtAuthenticationFilter jwtAuthFilter;
     private final AuthenticationProvider authenticationProvider;
-    private final LogoutService logoutHandler;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -76,10 +78,21 @@ public class SecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authenticationProvider(authenticationProvider)
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
-                .logout(logout -> logout.logoutUrl("/api/v1/auth/logout")
-                        .addLogoutHandler(logoutHandler)
-                        .logoutSuccessHandler(
-                                (request, response, authentication) -> SecurityContextHolder.clearContext()));
+                .exceptionHandling(exceptionHandling -> exceptionHandling
+                        .accessDeniedHandler((request, response, accessDeniedException) -> {
+                            response.setContentType("application/json;charset=UTF-8");
+                            response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+                            
+                            // Create the same response as in GlobalExceptionHandler
+                            ApiResponse apiResponse = new ApiResponse("You don't have permission to use this endpoint");
+                            
+                            // Log the access denied event for security monitoring
+                            System.out.println("Access denied: " + accessDeniedException.getMessage());
+                            
+                            // Convert ApiResponse to JSON and write to response
+                            ObjectMapper mapper = new ObjectMapper();
+                            mapper.writeValue(response.getWriter(), apiResponse);
+                        }));
 
         return http.build();
     }

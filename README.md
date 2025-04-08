@@ -14,4 +14,3 @@ to do tomorrow:
 2) update existing declaration
 3) delete existing declaration
 4) get existing declaration
-сч
