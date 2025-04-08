@@ -35,15 +35,6 @@ public class GlobalExceptionHandler {
         String message = ex.getMessage();
         String responseMessage = "Access denied: You do not have sufficient permissions to access this resource";
         
-        // If there's specific information about required role in the exception message, include it
-        if (message != null && !message.isEmpty()) {
-            if (message.contains("ROLE_")) {
-                // Extract the role information from the exception message
-                responseMessage += ". Required role: " + message.substring(message.indexOf("ROLE_"));
-            } else {
-                responseMessage += ". Details: " + message;
-            }
-        }
         
         // Log the access denied event for security monitoring
         // This helps administrators track unauthorized access attempts

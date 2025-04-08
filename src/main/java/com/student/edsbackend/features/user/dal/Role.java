@@ -13,7 +13,7 @@ import java.util.stream.Collectors;
 public enum Role {
 
     USER(EnumSet.of(Permission.USER)),
-    SUPER_ADMIN(EnumSet.allOf(Permission.class)),
+    SUPER_ADMIN(EnumSet.of(Permission.SUPER_ADMIN, Permission.ADMIN, Permission.MANAGER, Permission.USER)),
     ADMIN(EnumSet.of(Permission.ADMIN, Permission.MANAGER, Permission.USER)),
     MANAGER(EnumSet.of(Permission.MANAGER, Permission.USER));
 

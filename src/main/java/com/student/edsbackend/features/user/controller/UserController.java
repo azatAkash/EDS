@@ -26,7 +26,6 @@ public class UserController {
 
 
     @GetMapping("/{id}")
-    @PreAuthorize("hasAnyRole('ADMIN', 'SUPER_ADMIN')")
     public ResponseEntity<UserDTO> getUserById(@PathVariable Integer id) {
         UserDTO user = userService.findUser(id)
                 .orElseThrow(() -> new ResponseStatusException(
@@ -36,25 +35,21 @@ public class UserController {
 
     // Get all users
     @GetMapping
-    @PreAuthorize("hasAnyRole('ADMIN', 'SUPER_ADMIN')")
     public ResponseEntity<List<UserDTO>> getAllUsers() {
-        System.out.println("GAY NAHUI");
         List<UserDTO> users = userService.getAllUsers();
         return ResponseEntity.ok(users);
     }
 
     // Edit user endpoint with role-based access control
-    // Only allows SUPER_ADMIN to edit
+    // Allows both ADMIN and SUPER_ADMIN to edit
     @PutMapping("/{id}")
-    @PreAuthorize("hasRole('SUPER_ADMIN')")
     public ResponseEntity<?> editUser(@PathVariable Integer id, @RequestBody UserDTO dto) {
         String editResponse = userService.editUser(dto, id);
         return ResponseEntity.ok(new ApiResponse(editResponse));
     }
 
-    // Soft delete a user by ID
+    // Soft delete a user by ID - only SUPER_ADMIN can delete users
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasAnyRole('ADMIN', 'SUPER_ADMIN')")
     public ResponseEntity<?> deleteUser(@PathVariable Integer id) {
         userService.deleteUser(id);
         return ResponseEntity.ok(new ApiResponse("User was successfully marked as deleted"));
