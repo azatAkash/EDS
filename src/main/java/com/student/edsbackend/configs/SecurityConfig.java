@@ -73,6 +73,17 @@ public class SecurityConfig {
                         .requestMatchers(DELETE, "/api/v1/management/**")
                         .hasAnyAuthority(Role.ADMIN.name(), Role.SUPER_ADMIN.name())
 
+                        .requestMatchers("/api/v1/declarations/**")
+                        .hasAnyRole(Role.ADMIN.name(), Role.SUPER_ADMIN.name())
+                        .requestMatchers(GET,"/api/v1/declarations/**")
+                        .hasAnyAuthority(Role.SUPER_ADMIN.name(), Role.ADMIN.name())
+                        .requestMatchers(POST,"/api/v1/declarations/**")
+                        .hasAuthority(Role.SUPER_ADMIN.name())
+                        .requestMatchers(PUT,"/api/v1/declarations/**")
+                        .hasAuthority(Role.SUPER_ADMIN.name())
+                        .requestMatchers(DELETE,"/api/v1/declarations/**")
+                        .hasAuthority(Role.SUPER_ADMIN.name())
+
                         // All other endpoints require authentication
                         .anyRequest().authenticated())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
