@@ -28,7 +28,7 @@ public class InitialDeclarationQuestionRequestDTO {
     @Schema(description = "Question description", example = "Do you have any conflicts of interest?")
     private String description;
     
-    @Schema(description = "Type of question", example = "MULTIPLE_CHOICE")
+    @Schema(description = "Type of question", example = "YES_NO")
     private QuestionType questionType;
     
     @Schema(description = "Additional note for the question", example = "Please select all that apply")

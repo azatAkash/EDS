@@ -31,7 +31,14 @@ public class InitialDeclarationQuestionController {
         return ResponseEntity.ok(questions);
     }
 
-    
+    /**
+     * Get all non-deleted questions for a specific declaration
+     */
+    @GetMapping("/by-declaration/{declarationId}")
+    public ResponseEntity<List<InitialDeclarationQuestionDTO>> getQuestionsByDeclarationId(@PathVariable Integer declarationId) {
+        List<InitialDeclarationQuestionDTO> questions = questionService.getQuestionsByDeclarationId(declarationId);
+        return ResponseEntity.ok(questions);
+    }
 
     /**
      * Get a specific question by ID

@@ -2,6 +2,7 @@ package com.student.edsbackend.configs;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.DisabledException;
@@ -12,10 +13,16 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.server.ResponseStatusException;
 
+import com.fasterxml.jackson.databind.exc.InvalidFormatException;
 import com.student.edsbackend.features.ApiResponse;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<ApiResponse> handleHttpMessageNotReadable(HttpMessageNotReadableException ex) {
+        ApiResponse response = new ApiResponse(ex.getMostSpecificCause().getMessage());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+    }
 
     @ExceptionHandler(UsernameNotFoundException.class)
     public ResponseEntity<ApiResponse> handleUsernameNotFound(UsernameNotFoundException ex) {
@@ -28,48 +35,52 @@ public class GlobalExceptionHandler {
         ApiResponse response = new ApiResponse(ex.getReason());
         return ResponseEntity.status(ex.getStatusCode()).body(response);
     }
-    
+
     @ExceptionHandler(AccessDeniedException.class)
     public ResponseEntity<ApiResponse> handleAccessDeniedException(AccessDeniedException ex) {
         // Extract more information from the exception message if available
         String message = ex.getMessage();
         String responseMessage = "You don't have permission to use this endpoint";
-        
+
         // Log the access denied event for security monitoring
         // This helps administrators track unauthorized access attempts
         System.out.println("Access denied: " + message);
-        
+
         ApiResponse response = new ApiResponse(responseMessage);
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(response);
     }
-    
+
     /**
-     * Handles BadCredentialsException which occurs when login credentials are incorrect
+     * Handles BadCredentialsException which occurs when login credentials are
+     * incorrect
      */
     @ExceptionHandler(BadCredentialsException.class)
     public ResponseEntity<ApiResponse> handleBadCredentialsException(BadCredentialsException ex) {
         ApiResponse response = new ApiResponse("Authentication failed: Invalid username or password");
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
     }
-    
+
     /**
-     * Handles DisabledException which occurs when a disabled user attempts to authenticate
+     * Handles DisabledException which occurs when a disabled user attempts to
+     * authenticate
      */
     @ExceptionHandler(DisabledException.class)
     public ResponseEntity<ApiResponse> handleDisabledException(DisabledException ex) {
         ApiResponse response = new ApiResponse("Authentication failed: Account is disabled");
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(response);
     }
-    
+
     /**
-     * Handles InsufficientAuthenticationException which occurs when authentication is required but not provided
+     * Handles InsufficientAuthenticationException which occurs when authentication
+     * is required but not provided
      */
     @ExceptionHandler(InsufficientAuthenticationException.class)
-    public ResponseEntity<ApiResponse> handleInsufficientAuthenticationException(InsufficientAuthenticationException ex) {
+    public ResponseEntity<ApiResponse> handleInsufficientAuthenticationException(
+            InsufficientAuthenticationException ex) {
         ApiResponse response = new ApiResponse("Authentication required: Please log in to access this resource");
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
     }
-    
+
     /**
      * Handles any other authentication exceptions not covered by specific handlers
      */
