@@ -7,9 +7,10 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
-import com.student.edsbackend.features.declaration.initial.dal.InitialDeclaration;
-import com.student.edsbackend.features.declaration.initial.dal.InitialDeclarationDTO;
-import com.student.edsbackend.features.declaration.initial.dal.InitialDeclarationRepository;
+import com.student.edsbackend.features.declaration.initial.dal.declaration_metadata.InitialDeclaration;
+import com.student.edsbackend.features.declaration.initial.dal.declaration_metadata.InitialDeclarationDTO;
+import com.student.edsbackend.features.declaration.initial.dal.declaration_metadata.InitialDeclarationRepository;
+import com.student.edsbackend.features.declaration.initial.dal.declaration_metadata.InitialDeclarationRequestDTO;
 import com.student.edsbackend.features.declaration.initial.service.InitialDeclarationService;
 import com.student.edsbackend.features.user.dal.User;
 import com.student.edsbackend.features.user.dal.UserDTO;
@@ -92,58 +93,68 @@ public class InitialDeclarationServiceImpl implements InitialDeclarationService 
     }
 
     @Override
-    public InitialDeclarationDTO createDeclaration(InitialDeclaration declaration) {
+    public InitialDeclarationDTO createDeclaration(InitialDeclarationRequestDTO requestDTO) {
         // Set a default name if none provided
-        if (declaration.getName() == null || declaration.getName().isEmpty()) {
-            declaration.setName("New Initial Declaration");
+        String name = requestDTO.getName();
+        if (name == null || name.isEmpty()) {
+            name = "New Initial Declaration";
         }
 
-        // Set the creation date to now
-        declaration.setCreationDate(LocalDateTime.now());
-
+        
         // Configure activation flags and dates based on isActive
-        if (declaration.getIsActive() == null) {
-            declaration.setIsActive(false);
-            declaration.setActivationDate(null);
-        } else if (declaration.getIsActive()) {
-            declaration.setActivationDate(LocalDateTime.now());
+        Boolean isActive = requestDTO.getIsActive();
+        LocalDateTime activationDate = requestDTO.getActivationDate();
+        if (isActive == null) {
+            isActive = false;
+            activationDate = null;
+        } else if (isActive) {
+            activationDate = LocalDateTime.now();
         }
 
         // Retrieve the current authenticated user's email from the SecurityContext
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String currentUserEmail = authentication.getName();
 
-        // Lookup the full User entity using UserRepository.
-        // (Assumes userRepository is injected in this service.)
+        // Lookup the full User entity using UserRepository
         User createdBy = userRepository.findByEmail(currentUserEmail)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
-
-        // Set the createdBy field from the authenticated user
-        declaration.setCreatedBy(createdBy);
-
-        repository.save(declaration);
-
-        UserDTO createdByDto = UserDTO.builder()
-                .id(declaration.getCreatedBy().getId())
-                .firstname(declaration.getCreatedBy().getFirstname())
-                .lastname(declaration.getCreatedBy().getLastname())
-                .email(declaration.getCreatedBy().getEmail())
-                .middlename(declaration.getCreatedBy().getMiddlename())
-                .role(declaration.getCreatedBy().getRole())
-                .position(declaration.getCreatedBy().getPosition())
-                .department(declaration.getCreatedBy().getDepartment())
-                .isActive(declaration.getCreatedBy().getIsActive())
-                .isDeleted(declaration.getCreatedBy().getIsDeleted())
-                .registrationDate(declaration.getCreatedBy().getRegistrationDate())
+        
+        // Create the entity from the request DTO
+        InitialDeclaration declaration = InitialDeclaration.builder()
+                .name(name)
+                .creationDate(LocalDateTime.now())
+                .activationDate(activationDate)
+                .isActive(isActive)
+                .isDeleted(false) // Default value for new declarations
+                .createdBy(createdBy)
                 .build();
 
+        // Save the entity
+        InitialDeclaration savedDeclaration = repository.save(declaration);
+
+        // Create UserDTO for the response
+        UserDTO createdByDto = UserDTO.builder()
+                .id(savedDeclaration.getCreatedBy().getId())
+                .firstname(savedDeclaration.getCreatedBy().getFirstname())
+                .lastname(savedDeclaration.getCreatedBy().getLastname())
+                .email(savedDeclaration.getCreatedBy().getEmail())
+                .middlename(savedDeclaration.getCreatedBy().getMiddlename())
+                .role(savedDeclaration.getCreatedBy().getRole())
+                .position(savedDeclaration.getCreatedBy().getPosition())
+                .department(savedDeclaration.getCreatedBy().getDepartment())
+                .isActive(savedDeclaration.getCreatedBy().getIsActive())
+                .isDeleted(savedDeclaration.getCreatedBy().getIsDeleted())
+                .registrationDate(savedDeclaration.getCreatedBy().getRegistrationDate())
+                .build();
+
+        // Return the DTO with the saved entity data
         return InitialDeclarationDTO.builder()
-                .id(declaration.getId())
-                .name(declaration.getName())
-                .creationDate(declaration.getCreationDate())
-                .activationDate(declaration.getActivationDate())
-                .isActive(declaration.getIsActive())
-                .isDeleted(declaration.getIsDeleted())
+                .id(savedDeclaration.getId())
+                .name(savedDeclaration.getName())
+                .creationDate(savedDeclaration.getCreationDate())
+                .activationDate(savedDeclaration.getActivationDate())
+                .isActive(savedDeclaration.getIsActive())
+                .isDeleted(savedDeclaration.getIsDeleted())
                 .createdBy(createdByDto)
                 .build();
     }

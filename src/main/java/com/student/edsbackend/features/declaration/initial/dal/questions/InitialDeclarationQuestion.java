@@ -1,10 +1,12 @@
-package com.student.edsbackend.features.declaration.initial.dal;
+package com.student.edsbackend.features.declaration.initial.dal.questions;
 
 import jakarta.persistence.*;
 import lombok.*;
 
 import java.util.List;
 
+import com.student.edsbackend.features.declaration.initial.dal.declaration_metadata.InitialDeclaration;
+import com.student.edsbackend.features.declaration.initial.dal.option.InitialDeclarationOption;
 import com.student.edsbackend.features.enums.QuestionType;
 
 /**
@@ -46,7 +48,4 @@ public class InitialDeclarationQuestion {
 
     @Column(name = "is_deleted", nullable = false)
     private Boolean isDeleted;
-
-    @OneToMany(mappedBy = "question")
-    private List<InitialDeclarationOption> options;
 }

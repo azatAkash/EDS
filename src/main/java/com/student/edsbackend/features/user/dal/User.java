@@ -7,7 +7,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 import com.student.edsbackend.features.declaration.adhoc.UserAdHocDeclare;
 import com.student.edsbackend.features.declaration.adhoc.UserAdHocExclude;
-import com.student.edsbackend.features.declaration.initial.dal.InitialDeclaration;
+import com.student.edsbackend.features.declaration.initial.dal.declaration_metadata.InitialDeclaration;
 import com.student.edsbackend.features.management.UserManagementPlan;
 import com.student.edsbackend.features.token.Token;
 

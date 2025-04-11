@@ -1,4 +1,4 @@
-package com.student.edsbackend.features.declaration.initial.dal;
+package com.student.edsbackend.features.declaration.initial.dal.declaration_metadata;
 
 import jakarta.persistence.*;
 import lombok.*;
@@ -6,6 +6,7 @@ import lombok.*;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import com.student.edsbackend.features.declaration.initial.dal.questions.InitialDeclarationQuestion;
 import com.student.edsbackend.features.user.dal.User;
 import com.student.edsbackend.features.user.dal.UserInitialDeclaration;
 /**

@@ -1,4 +1,4 @@
-package com.student.edsbackend.features.declaration.initial.dal;
+package com.student.edsbackend.features.declaration.initial.dal.option;
 
 import jakarta.persistence.*;
 import lombok.*;

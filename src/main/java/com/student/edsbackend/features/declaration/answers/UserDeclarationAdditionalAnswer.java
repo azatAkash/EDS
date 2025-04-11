@@ -1,6 +1,7 @@
 package com.student.edsbackend.features.declaration.answers;
 
-import com.student.edsbackend.features.declaration.initial.dal.AdditionalAnswerOption;
+
+import com.student.edsbackend.features.declaration.initial.dal.option.AdditionalAnswerOption;
 
 import jakarta.persistence.*;
 import lombok.*;

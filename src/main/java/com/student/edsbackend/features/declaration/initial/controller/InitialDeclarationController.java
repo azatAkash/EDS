@@ -4,27 +4,34 @@ package com.student.edsbackend.features.declaration.initial.controller;
 import lombok.RequiredArgsConstructor;
 
 import com.student.edsbackend.features.user.dal.User;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.security.core.Authentication;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
-import com.student.edsbackend.features.ApiResponse;
-import com.student.edsbackend.features.declaration.initial.dal.InitialDeclaration;
-import com.student.edsbackend.features.declaration.initial.dal.InitialDeclarationDTO;
+import com.student.edsbackend.features.declaration.initial.dal.declaration_metadata.InitialDeclaration;
+import com.student.edsbackend.features.declaration.initial.dal.declaration_metadata.InitialDeclarationDTO;
+import com.student.edsbackend.features.declaration.initial.dal.declaration_metadata.InitialDeclarationRequestDTO;
 import com.student.edsbackend.features.declaration.initial.service.InitialDeclarationService;
 import com.student.edsbackend.features.user.dal.UserRepository;
 
-import org.springframework.security.core.context.SecurityContextHolder; 
+import org.springframework.security.core.context.SecurityContextHolder;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/declarations")
 public class InitialDeclarationController {
-    private final UserRepository userRepository;
 
     private final InitialDeclarationService declarationService;
 
@@ -43,20 +50,7 @@ public class InitialDeclarationController {
     }
 
     @PostMapping
-    public ResponseEntity<InitialDeclarationDTO> createDeclaration(@RequestBody InitialDeclaration declaration) {
-        // Get the currently authenticated user from the SecurityContext
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        // The auth.getName() should return the username (e.g. the "sub" claim of the token)
-        String userEmail = auth.getName();
-        
-        // Fetch the full User entity by email
-        User user = userRepository.findByEmail(userEmail)
-            .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "User not found"));
-    
-        // Set the createdBy field of the declaration to this user
-        declaration.setCreatedBy(user);
-    
-        // Proceed with creating the declaration
+    public ResponseEntity<InitialDeclarationDTO> createDeclaration(@RequestBody InitialDeclarationRequestDTO declaration) {
         InitialDeclarationDTO createdDeclaration = declarationService.createDeclaration(declaration);
         return new ResponseEntity<>(createdDeclaration, HttpStatus.CREATED);
     }

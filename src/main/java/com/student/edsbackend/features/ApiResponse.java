@@ -1,7 +1,7 @@
 package com.student.edsbackend.features;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.student.edsbackend.features.declaration.initial.dal.InitialDeclaration;
+import com.student.edsbackend.features.declaration.initial.dal.declaration_metadata.InitialDeclaration;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

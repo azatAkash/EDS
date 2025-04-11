@@ -1,4 +1,4 @@
-package com.student.edsbackend.features.declaration.initial.dal;
+package com.student.edsbackend.features.declaration.initial.dal.option;
 
 import jakarta.persistence.*;
 import lombok.*;
@@ -6,6 +6,7 @@ import lombok.*;
 import java.util.List;
 
 import com.student.edsbackend.features.declaration.answers.UserDeclarationAnswer;
+import com.student.edsbackend.features.declaration.initial.dal.questions.InitialDeclarationQuestion;
 
 /**
  * Entity representing the initial_declaration_options table.

@@ -8,7 +8,7 @@ import java.util.List;
 
 import com.student.edsbackend.features.declaration.adhoc.UserAdHocExclude;
 import com.student.edsbackend.features.declaration.answers.UserDeclarationAnswer;
-import com.student.edsbackend.features.declaration.initial.dal.InitialDeclaration;
+import com.student.edsbackend.features.declaration.initial.dal.declaration_metadata.InitialDeclaration;
 import com.student.edsbackend.features.enums.UserDeclarationStatus;
 import com.student.edsbackend.features.management.UserManagementPlan;
 
