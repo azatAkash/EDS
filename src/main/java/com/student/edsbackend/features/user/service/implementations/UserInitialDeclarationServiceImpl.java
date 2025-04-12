@@ -86,36 +86,7 @@ public class UserInitialDeclarationServiceImpl implements UserInitialDeclaration
         return mapToDTO(savedDeclaration);
     }
 
-//     @Override
-//     public UserInitialDeclarationDTO updateUserInitialDeclaration(Integer id, UserInitialDeclarationUpdateDTO updateDTO) {
-//         // Find the declaration
-//         UserInitialDeclaration declaration = userInitialDeclarationRepository.findById(id)
-//                 .filter(d -> !d.getIsDeleted())
-//                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
-//                 "User declaration not found with id: " + id));
 
-//         // Update status if provided
-//         if (updateDTO.getStatus() != null) {
-//             declaration.setStatus(updateDTO.getStatus());
-//         }
-
-//         // Update responsible if provided
-//         if (updateDTO.getResponsibleId() != null) {
-//             User responsible = userRepository.findById(updateDTO.getResponsibleId())
-//                     .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
-//                     "Responsible user not found with id: " + updateDTO.getResponsibleId()));
-//             declaration.setResponsible(responsible);
-//         }
-
-//         // Update isDeleted if provided
-//         if (updateDTO.getIsDeleted() != null) {
-//             declaration.setIsDeleted(updateDTO.getIsDeleted());
-//         }
-
-//         // Save and return
-//         UserInitialDeclaration updatedDeclaration = userInitialDeclarationRepository.save(declaration);
-//         return mapToDTO(updatedDeclaration);
-//     }
 
     @Override
     public void deleteUserInitialDeclaration(Integer id) {
