@@ -12,7 +12,6 @@ to do in future:
 
    ACTIVATE ROUTE FOR DECLARATION IT SHOULD GET CURRENTLY ACTIVE DECLARATION DEACTIVATE IT AND ACTIVATE BY ID
 
-
 1. on change of role auto logout
 
 localhost:8080/swagger-ui/index.html

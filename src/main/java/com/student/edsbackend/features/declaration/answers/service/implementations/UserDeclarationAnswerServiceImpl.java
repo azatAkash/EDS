@@ -218,8 +218,6 @@ public class UserDeclarationAnswerServiceImpl implements UserDeclarationAnswerSe
         Short orderIndex = 1;
         // Process each group of additional answers
         for (UserDeclarationAnswerRequestDTO.AdditionalAnswerGroupDTO groupDTO : additionalAnswerGroups) {
-            
-            
             // Process each additional answer in the group
             for (UserDeclarationAnswerRequestDTO.AdditionalAnswerDTO additionalAnswerDTO : groupDTO.getAnswers()) {
                 // Validate additional answer option exists
