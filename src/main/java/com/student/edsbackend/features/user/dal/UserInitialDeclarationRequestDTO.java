@@ -8,7 +8,8 @@ import lombok.NoArgsConstructor;
 import jakarta.validation.constraints.NotNull;
 
 /**
- * DTO for creating a new UserInitialDeclaration
+ * DTO for creating a new UserInitialDeclaration The active declaration will be
+ * automatically fetched by the service
  */
 @Data
 @Builder
@@ -18,7 +19,4 @@ public class UserInitialDeclarationRequestDTO {
 
     @NotNull(message = "User ID is required")
     private Integer userId;
-
-    @NotNull(message = "Declaration ID is required")
-    private Integer declarationId;
 }

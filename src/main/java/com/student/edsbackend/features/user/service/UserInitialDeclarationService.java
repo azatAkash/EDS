@@ -46,6 +46,24 @@ public interface UserInitialDeclarationService {
     UserInitialDeclarationDTO updateUserInitialDeclaration(Integer id, UserInitialDeclarationUpdateDTO updateDTO);
 
     /**
+     * Send a user initial declaration for approval
+     *
+     * @param id The ID of the user initial declaration to send for approval
+     * @return The updated user initial declaration with status set to
+     * SENT_FOR_APPROVAL
+     */
+    UserInitialDeclarationDTO sendForApproval(Integer id);
+
+    /**
+     * Verify a user initial declaration
+     *
+     * @param id The ID of the user initial declaration to verify
+     * @param status The new status to set for the declaration
+     * @return The updated user initial declaration with the new status
+     */
+    UserInitialDeclarationDTO verifyDeclaration(Integer id, UserInitialDeclarationUpdateDTO updateDTO);
+
+    /**
      * Delete a user initial declaration (soft delete)
      *
      * @param id The ID of the user initial declaration to delete

@@ -24,14 +24,25 @@ public class UserInitialDeclarationController {
 
     private final UserInitialDeclarationService userInitialDeclarationService;
 
-    @GetMapping("/{id}")
-    @Operation(summary = "Get a user initial declaration by ID",
-            description = "Accessible by super_admin, admin, manager, and user")
-    public ResponseEntity<UserInitialDeclarationDTO> getUserInitialDeclarationById(@PathVariable Integer id) {
-        UserInitialDeclarationDTO declarationDTO = userInitialDeclarationService.getUserInitialDeclarationById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
-                "User declaration not found with id: " + id));
-        return ResponseEntity.ok(declarationDTO);
+    // GET /{id} endpoint removed as per requirements
+    @PatchMapping("/{id}/send-for-approval")
+    @Operation(summary = "Send a user initial declaration for approval",
+            description = "Sets the declaration status to SENT_FOR_APPROVAL. Accessible by USER and SUPER_ADMIN only")
+    @PreAuthorize("hasAnyAuthority('USER', 'SUPER_ADMIN')")
+    public ResponseEntity<UserInitialDeclarationDTO> sendForApproval(@PathVariable Integer id) {
+        UserInitialDeclarationDTO updatedDeclaration = userInitialDeclarationService.sendForApproval(id);
+        return ResponseEntity.ok(updatedDeclaration);
+    }
+
+    @PatchMapping("/{id}/verify")
+    @Operation(summary = "Verify a user initial declaration",
+            description = "Changes the declaration status. Accessible by SUPER_ADMIN, ADMIN, and MANAGER")
+    @PreAuthorize("hasAnyAuthority('SUPER_ADMIN', 'ADMIN', 'MANAGER')")
+    public ResponseEntity<UserInitialDeclarationDTO> verifyDeclaration(
+            @PathVariable Integer id,
+            @RequestBody UserInitialDeclarationUpdateDTO updateDTO) {
+        UserInitialDeclarationDTO verifiedDeclaration = userInitialDeclarationService.verifyDeclaration(id, updateDTO);
+        return ResponseEntity.ok(verifiedDeclaration);
     }
 
     @GetMapping

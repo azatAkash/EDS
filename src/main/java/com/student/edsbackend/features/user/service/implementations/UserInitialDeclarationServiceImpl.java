@@ -14,6 +14,8 @@ import com.student.edsbackend.features.user.service.UserInitialDeclarationServic
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -52,21 +54,17 @@ public class UserInitialDeclarationServiceImpl implements UserInitialDeclaration
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
                 "User not found with id: " + requestDTO.getUserId()));
 
-        // Validate declaration exists
-        InitialDeclaration declaration = initialDeclarationRepository.findById(requestDTO.getDeclarationId())
+        // Find the active declaration
+        InitialDeclaration declaration = initialDeclarationRepository.findAll().stream()
+                .filter(d -> d.getIsActive() && !d.getIsDeleted())
+                .findFirst()
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
-                "Declaration not found with id: " + requestDTO.getDeclarationId()));
-
-        // Check if declaration is deleted
-        if (declaration.getIsDeleted()) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                    "Cannot create a user declaration for a deleted declaration");
-        }
+                "No active declaration found. Please ask Adminisrator to activate a declaration first."));
 
         // Check if a record already exists for this user and declaration
         Optional<UserInitialDeclaration> existingDeclaration
                 = userInitialDeclarationRepository.findByUserIdAndDeclarationIdAndIsDeletedFalse(
-                        requestDTO.getUserId(), requestDTO.getDeclarationId());
+                        requestDTO.getUserId(), declaration.getId());
 
         if (existingDeclaration.isPresent()) {
             throw new ResponseStatusException(HttpStatus.CONFLICT,
@@ -129,6 +127,72 @@ public class UserInitialDeclarationServiceImpl implements UserInitialDeclaration
         // Soft delete
         declaration.setIsDeleted(true);
         userInitialDeclarationRepository.save(declaration);
+    }
+
+    @Override
+    public UserInitialDeclarationDTO sendForApproval(Integer id) {
+        // Find the declaration
+        UserInitialDeclaration declaration = userInitialDeclarationRepository.findById(id)
+                .filter(d -> !d.getIsDeleted())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+                "User declaration not found with id: " + id));
+
+        // Check if the declaration is already sent for approval
+        if (declaration.getStatus() == UserDeclarationStatus.SENT_FOR_APPROVAL) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "Declaration is already sent for approval");
+        }
+
+        // Update status to SENT_FOR_APPROVAL
+        declaration.setStatus(UserDeclarationStatus.SENT_FOR_APPROVAL);
+
+        // Save and return
+        UserInitialDeclaration updatedDeclaration = userInitialDeclarationRepository.save(declaration);
+        return mapToDTO(updatedDeclaration);
+    }
+
+    @Override
+    public UserInitialDeclarationDTO verifyDeclaration(Integer id, UserInitialDeclarationUpdateDTO updateDTO) {
+        // Find the declaration
+        UserInitialDeclaration declaration = userInitialDeclarationRepository.findById(id)
+                .filter(d -> !d.getIsDeleted())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+                "User declaration not found with id: " + id));
+
+        // Check if the declaration is in SENT_FOR_APPROVAL status
+        if (declaration.getStatus() != UserDeclarationStatus.SENT_FOR_APPROVAL) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "Only declarations in SENT_FOR_APPROVAL status can be verified");
+        }
+
+        // Validate the new status
+        if (updateDTO.getStatus() == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "Status must be provided for verification");
+        }
+
+        // Update status
+        declaration.setStatus(updateDTO.getStatus());
+
+        // Update responsible if provided
+        if (updateDTO.getResponsibleId() != null) {
+            User responsible = userRepository.findById(updateDTO.getResponsibleId())
+                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+                    "Responsible user not found with id: " + updateDTO.getResponsibleId()));
+            declaration.setResponsible(responsible);
+        } else {
+            // Set the current user as responsible if not provided
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            String currentUserEmail = authentication.getName();
+            User currentUser = userRepository.findByEmail(currentUserEmail)
+                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+                    "Current user not found"));
+            declaration.setResponsible(currentUser);
+        }
+
+        // Save and return
+        UserInitialDeclaration updatedDeclaration = userInitialDeclarationRepository.save(declaration);
+        return mapToDTO(updatedDeclaration);
     }
 
     /**
