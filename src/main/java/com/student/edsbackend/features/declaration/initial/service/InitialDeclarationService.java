@@ -8,13 +8,14 @@ import com.student.edsbackend.features.declaration.initial.dal.declaration_metad
 import com.student.edsbackend.features.declaration.initial.dal.declaration_metadata.InitialDeclarationRequestDTO;
 
 public interface InitialDeclarationService {
+
     List<InitialDeclarationDTO> getAllDeclarations();
-    
+
     Optional<InitialDeclarationDTO> getDeclarationById(Integer id);
-    
+
     InitialDeclarationDTO createDeclaration(InitialDeclarationRequestDTO declaration);
-    
-    // InitialDeclaration updateDeclaration(Integer id, InitialDeclaration declaration);
-    
+
+    InitialDeclarationDTO updateDeclaration(Integer id, InitialDeclarationRequestDTO declaration);
+
     void deleteDeclaration(Integer id);
 }

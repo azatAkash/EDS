@@ -137,13 +137,11 @@ public class InitialDeclarationOptionServiceImpl implements InitialDeclarationOp
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
                         "Agree question type cannot have more than 1 option");
             }
-            if (request.getIsConflict() != false) {
-                request.setIsConflict(false);
-            }
 
-            if (request.getMultipleAdditionalAnswers() != false) {
-                request.setMultipleAdditionalAnswers(false);
-            }
+            request.setIsConflict(false);
+
+            request.setMultipleAdditionalAnswers(false);
+
         }
 
         return question;

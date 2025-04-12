@@ -1,10 +1,13 @@
 package com.student.edsbackend.features.declaration.initial.service.implementations;
 
+import java.time.LocalDateTime;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import com.student.edsbackend.features.declaration.initial.dal.declaration_metadata.InitialDeclaration;
@@ -32,6 +35,7 @@ public class InitialDeclarationServiceImpl implements InitialDeclarationService 
     public List<InitialDeclarationDTO> getAllDeclarations() {
         return repository.findAll()
                 .stream()
+                .filter(declaration -> !declaration.getIsDeleted()) // Only include non-deleted declarations
                 .map(declaration -> {
                     // Build a simple UserDTO for the createdBy user to avoid recursive references.
                     UserDTO createdByDto = UserDTO.builder()
@@ -64,6 +68,7 @@ public class InitialDeclarationServiceImpl implements InitialDeclarationService 
     @Override
     public Optional<InitialDeclarationDTO> getDeclarationById(Integer id) {
         return repository.findById(id)
+                .filter(declaration -> !declaration.getIsDeleted()) // Only include non-deleted declarations
                 .map(declaration -> {
                     // Build a simple UserDTO for the createdBy relationship
                     UserDTO createdByDto = UserDTO.builder()
@@ -93,6 +98,7 @@ public class InitialDeclarationServiceImpl implements InitialDeclarationService 
     }
 
     @Override
+    @Transactional
     public InitialDeclarationDTO createDeclaration(InitialDeclarationRequestDTO requestDTO) {
         // Set a default name if none provided
         String name = requestDTO.getName();
@@ -100,14 +106,22 @@ public class InitialDeclarationServiceImpl implements InitialDeclarationService 
             name = "New Initial Declaration";
         }
 
-        
         // Configure activation flags and dates based on isActive
         Boolean isActive = requestDTO.getIsActive();
-        LocalDateTime activationDate = requestDTO.getActivationDate();
+        LocalDateTime activationDate = LocalDateTime.now();
         if (isActive == null) {
             isActive = false;
             activationDate = null;
         } else if (isActive) {
+            // If this declaration is being set as active, deactivate all other declarations
+            repository.findAll().stream()
+                    .filter(d -> d.getIsActive() && !d.getIsDeleted())
+                    .forEach(d -> {
+                        d.setIsActive(false);
+                        d.setActivationDate(null);
+                        repository.save(d);
+                    });
+
             activationDate = LocalDateTime.now();
         }
 
@@ -118,7 +132,7 @@ public class InitialDeclarationServiceImpl implements InitialDeclarationService 
         // Lookup the full User entity using UserRepository
         User createdBy = userRepository.findByEmail(currentUserEmail)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
-        
+
         // Create the entity from the request DTO
         InitialDeclaration declaration = InitialDeclaration.builder()
                 .name(name)
@@ -159,29 +173,79 @@ public class InitialDeclarationServiceImpl implements InitialDeclarationService 
                 .build();
     }
 
-    // @Override
-    // public InitialDeclaration updateDeclaration(Integer id, InitialDeclaration
-    // declaration) {
-    // return repository.findById(id)
-    // .map(existing -> {
-    // existing.setName(declaration.getName());
-    // existing.setActivationDate(declaration.getActivationDate());
-    // existing.setIsActive(declaration.getIsActive());
-    // existing.setIsDeleted(declaration.getIsDeleted());
-    // // Optionally update relationships if required
-    // return repository.save(existing);
-    // })
-    // .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
-    // "Declaration not found with id: " + id));
-    // }
+    @Override
+    public InitialDeclarationDTO updateDeclaration(Integer id, InitialDeclarationRequestDTO requestDTO) {
+        return repository.findById(id)
+                .filter(declaration -> !declaration.getIsDeleted()) // Only update non-deleted declarations
+                .map(existing -> {
+                    // Update fields from the request DTO
+                    if (requestDTO.getName() != null && !requestDTO.getName().isEmpty()) {
+                        existing.setName(requestDTO.getName());
+                    }
+
+                    // Configure activation flags and dates based on isActive
+                    if (requestDTO.getIsActive() != null) {
+                        existing.setIsActive(requestDTO.getIsActive());
+
+                        // If activating, set activation date to now if not provided
+                        if (requestDTO.getIsActive()) {
+
+                            existing.setActivationDate(LocalDateTime.now());
+
+                        } else {
+                            // If deactivating, clear activation date
+                            existing.setActivationDate(null);
+                        }
+                    } else {
+                        // If only activation date is provided, update it
+                        existing.setActivationDate(null);
+                    }
+
+                    // Save the updated entity
+                    InitialDeclaration savedDeclaration = repository.save(existing);
+
+                    // Create UserDTO for the response
+                    UserDTO createdByDto = UserDTO.builder()
+                            .id(savedDeclaration.getCreatedBy().getId())
+                            .firstname(savedDeclaration.getCreatedBy().getFirstname())
+                            .lastname(savedDeclaration.getCreatedBy().getLastname())
+                            .email(savedDeclaration.getCreatedBy().getEmail())
+                            .middlename(savedDeclaration.getCreatedBy().getMiddlename())
+                            .role(savedDeclaration.getCreatedBy().getRole())
+                            .position(savedDeclaration.getCreatedBy().getPosition())
+                            .department(savedDeclaration.getCreatedBy().getDepartment())
+                            .isActive(savedDeclaration.getCreatedBy().getIsActive())
+                            .isDeleted(savedDeclaration.getCreatedBy().getIsDeleted())
+                            .registrationDate(savedDeclaration.getCreatedBy().getRegistrationDate())
+                            .build();
+
+                    // Return the DTO with the updated entity data
+                    return InitialDeclarationDTO.builder()
+                            .id(savedDeclaration.getId())
+                            .name(savedDeclaration.getName())
+                            .creationDate(savedDeclaration.getCreationDate())
+                            .activationDate(savedDeclaration.getActivationDate())
+                            .isActive(savedDeclaration.getIsActive())
+                            .isDeleted(savedDeclaration.getIsDeleted())
+                            .createdBy(createdByDto)
+                            .build();
+                })
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+                "Declaration not found with id: " + id));
+    }
 
     @Override
     public void deleteDeclaration(Integer id) {
         repository.findById(id)
-                .ifPresentOrElse(repository::delete,
-                        () -> {
-                            throw new ResponseStatusException(HttpStatus.NOT_FOUND,
-                                    "Declaration not found with id: " + id);
-                        });
+                .filter(declaration -> !declaration.getIsDeleted()) // Only delete non-deleted declarations
+                .ifPresentOrElse(declaration -> {
+                    // Soft delete by setting isDeleted to true
+                    declaration.setIsDeleted(true);
+                    declaration.setIsActive(false);
+                    repository.save(declaration);
+                }, () -> {
+                    throw new ResponseStatusException(HttpStatus.NOT_FOUND,
+                            "Declaration not found with id: " + id);
+                });
     }
 }

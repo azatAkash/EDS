@@ -1,10 +1,13 @@
 package com.student.edsbackend.configs;
 
+import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.JwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.lang.NonNull;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -31,34 +34,56 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             @NonNull HttpServletResponse response,
             @NonNull FilterChain filterChain) throws ServletException, IOException {
 
-
-        String authHeader = request.getHeader("Authorization");
-        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-            filterChain.doFilter(request, response);
-            return;
-        }
-
-        String jwt = authHeader.substring(7);
-        String userEmail = jwtService.extractUsername(jwt);
-        System.out.println("Extracted username: " + userEmail);
-
-        if (userEmail != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-            UserDetails userDetails = userDetailsService.loadUserByUsername(userEmail);
-
-            // Debug logging: Check extracted values and token validity
-
-            System.out.println("Extracted role: " + jwtService.extractRole(jwt));
-            System.out.println("Token validity: " + jwtService.isTokenValid(jwt, userDetails));
-
-            if (jwtService.isTokenValid(jwt, userDetails)) {
-                String role = jwtService.extractRole(jwt);
-                List<SimpleGrantedAuthority> authorities = List.of(new SimpleGrantedAuthority(role));
-                UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(userDetails,
-                        null, authorities);
-                authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-                SecurityContextHolder.getContext().setAuthentication(authToken);
+        try {
+            String authHeader = request.getHeader("Authorization");
+            if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+                filterChain.doFilter(request, response);
+                return;
             }
+
+            String jwt = authHeader.substring(7);
+            String userEmail;
+
+            try {
+                userEmail = jwtService.extractUsername(jwt);
+                System.out.println("Extracted username: " + userEmail);
+
+                if (userEmail != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+                    UserDetails userDetails = userDetailsService.loadUserByUsername(userEmail);
+
+                    // Debug logging: Check extracted values and token validity
+                    System.out.println("Extracted role: " + jwtService.extractRole(jwt));
+                    System.out.println("Token validity: " + jwtService.isTokenValid(jwt, userDetails));
+
+                    if (jwtService.isTokenValid(jwt, userDetails)) {
+                        String role = jwtService.extractRole(jwt);
+                        List<SimpleGrantedAuthority> authorities = List.of(new SimpleGrantedAuthority(role));
+                        UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(userDetails,
+                                null, authorities);
+                        authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                        SecurityContextHolder.getContext().setAuthentication(authToken);
+                    }
+                }
+            } catch (ExpiredJwtException ex) {
+                // Handle expired JWT token specifically
+                response.setStatus(HttpStatus.UNAUTHORIZED.value());
+                response.getWriter().write("JWT token has expired");
+                response.setContentType("application/json");
+                return; // Stop filter chain for expired tokens
+            } catch (JwtException ex) {
+                // Handle other JWT exceptions
+                response.setStatus(HttpStatus.UNAUTHORIZED.value());
+                response.getWriter().write("Invalid JWT token");
+                response.setContentType("application/json");
+                return; // Stop filter chain for invalid tokens
+            }
+
+            filterChain.doFilter(request, response);
+        } catch (Exception ex) {
+            // Catch any other exceptions to prevent 500 errors
+            response.setStatus(HttpStatus.UNAUTHORIZED.value());
+            response.getWriter().write("Authentication error: " + ex.getMessage());
+            response.setContentType("application/json");
         }
-        filterChain.doFilter(request, response);
     }
 }
