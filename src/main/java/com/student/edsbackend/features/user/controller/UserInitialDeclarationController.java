@@ -2,6 +2,7 @@ package com.student.edsbackend.features.user.controller;
 
 import com.student.edsbackend.features.user.dal.UserInitialDeclarationDTO;
 import com.student.edsbackend.features.user.dal.UserInitialDeclarationRequestDTO;
+import com.student.edsbackend.features.user.dal.UserInitialDeclarationStatusDTO;
 import com.student.edsbackend.features.user.dal.UserInitialDeclarationUpdateDTO;
 import com.student.edsbackend.features.user.service.UserInitialDeclarationService;
 
@@ -26,11 +27,20 @@ public class UserInitialDeclarationController {
 
     // GET /{id} endpoint removed as per requirements
     @PatchMapping("/{id}/send-for-approval")
-    @Operation(summary = "Send a user initial declaration for approval",
-            description = "Sets the declaration status to SENT_FOR_APPROVAL. Accessible by USER and SUPER_ADMIN only")
-    @PreAuthorize("hasAnyAuthority('USER', 'SUPER_ADMIN')")
-    public ResponseEntity<UserInitialDeclarationDTO> sendForApproval(@PathVariable Integer id) {
+    @Operation(summary = "Send a user initial declaration for approval by ID",
+            description = "Sets the declaration status to SENT_FOR_APPROVAL. Accessible by SUPER_ADMIN only")
+    @PreAuthorize("hasAnyAuthority('SUPER_ADMIN')")
+    public ResponseEntity<UserInitialDeclarationDTO> sendForApprovalById(@PathVariable Integer id) {
         UserInitialDeclarationDTO updatedDeclaration = userInitialDeclarationService.sendForApproval(id);
+        return ResponseEntity.ok(updatedDeclaration);
+    }
+    
+    @PatchMapping("/send-for-approval")
+    @Operation(summary = "Send current user's initial declaration for approval",
+            description = "Finds the current user's CREATED declaration and sets its status to SENT_FOR_APPROVAL. Accessible by USER and SUPER_ADMIN only")
+    @PreAuthorize("hasAnyAuthority('USER', 'SUPER_ADMIN')")
+    public ResponseEntity<UserInitialDeclarationDTO> sendForApproval() {
+        UserInitialDeclarationDTO updatedDeclaration = userInitialDeclarationService.sendCurrentUserDeclarationForApproval();
         return ResponseEntity.ok(updatedDeclaration);
     }
 
@@ -65,17 +75,6 @@ public class UserInitialDeclarationController {
         return new ResponseEntity<>(createdDeclaration, HttpStatus.CREATED);
     }
 
-    @PutMapping("/{id}")
-    @Operation(summary = "Update a user initial declaration",
-            description = "Can update status, responsible, and isDeleted fields. Accessible by super_admin, admin, and manager")
-    @PreAuthorize("hasAnyAuthority('SUPER_ADMIN', 'ADMIN', 'MANAGER')")
-    public ResponseEntity<UserInitialDeclarationDTO> updateUserInitialDeclaration(
-            @PathVariable Integer id,
-            @RequestBody UserInitialDeclarationUpdateDTO updateDTO) {
-        UserInitialDeclarationDTO updatedDeclaration
-                = userInitialDeclarationService.updateUserInitialDeclaration(id, updateDTO);
-        return ResponseEntity.ok(updatedDeclaration);
-    }
 
     @DeleteMapping("/{id}")
     @Operation(summary = "Delete a user initial declaration (soft delete)",

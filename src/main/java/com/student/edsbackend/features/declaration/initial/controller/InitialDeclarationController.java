@@ -3,6 +3,7 @@ package com.student.edsbackend.features.declaration.initial.controller;
 
 import lombok.RequiredArgsConstructor;
 
+import com.student.edsbackend.features.user.dal.InitialDeclarationDetailedDTO;
 import com.student.edsbackend.features.user.dal.User;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -42,8 +43,8 @@ public class InitialDeclarationController {
         return ResponseEntity.ok(dtos);
     }
     @GetMapping("/{id}")
-    public ResponseEntity<InitialDeclarationDTO> getDeclarationById(@PathVariable Integer id) {
-        InitialDeclarationDTO declarationDTO = declarationService.getDeclarationById(id)
+    public ResponseEntity<InitialDeclarationDetailedDTO> getDeclarationById(@PathVariable Integer id) {
+        InitialDeclarationDetailedDTO declarationDTO = declarationService.getDeclarationById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
                         "Declaration not found with id: " + id));
         return ResponseEntity.ok(declarationDTO);

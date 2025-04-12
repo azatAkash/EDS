@@ -17,7 +17,7 @@ public enum UserDeclarationStatus {
     /**
      * Declaration contains an actual conflict of interest
      */
-    ACTUAL_CONFILICT,
+    ACTUAL_CONFLICT,
     
     /**
      * Declaration contains a perceived conflict of interest

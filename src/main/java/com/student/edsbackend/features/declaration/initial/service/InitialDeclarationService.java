@@ -6,12 +6,13 @@ import java.util.Optional;
 import com.student.edsbackend.features.declaration.initial.dal.declaration_metadata.InitialDeclaration;
 import com.student.edsbackend.features.declaration.initial.dal.declaration_metadata.InitialDeclarationDTO;
 import com.student.edsbackend.features.declaration.initial.dal.declaration_metadata.InitialDeclarationRequestDTO;
+import com.student.edsbackend.features.user.dal.InitialDeclarationDetailedDTO;
 
 public interface InitialDeclarationService {
 
     List<InitialDeclarationDTO> getAllDeclarations();
 
-    Optional<InitialDeclarationDTO> getDeclarationById(Integer id);
+    Optional<InitialDeclarationDetailedDTO> getDeclarationById(Integer id);
 
     InitialDeclarationDTO createDeclaration(InitialDeclarationRequestDTO declaration);
 

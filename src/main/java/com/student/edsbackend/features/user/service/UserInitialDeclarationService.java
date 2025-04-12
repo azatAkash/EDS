@@ -37,15 +37,6 @@ public interface UserInitialDeclarationService {
     UserInitialDeclarationDTO createUserInitialDeclaration(UserInitialDeclarationRequestDTO requestDTO);
 
     /**
-     * Update a user initial declaration
-     *
-     * @param id The ID of the user initial declaration to update
-     * @param updateDTO The update DTO containing the data to update
-     * @return The updated user initial declaration
-     */
-    UserInitialDeclarationDTO updateUserInitialDeclaration(Integer id, UserInitialDeclarationUpdateDTO updateDTO);
-
-    /**
      * Send a user initial declaration for approval
      *
      * @param id The ID of the user initial declaration to send for approval
@@ -53,6 +44,15 @@ public interface UserInitialDeclarationService {
      * SENT_FOR_APPROVAL
      */
     UserInitialDeclarationDTO sendForApproval(Integer id);
+    
+    /**
+     * Send the current user's initial declaration for approval
+     * Finds the user from the security context, validates that they have a declaration with CREATED status
+     * and updates its status to SENT_FOR_APPROVAL
+     *
+     * @return The updated user initial declaration with status set to SENT_FOR_APPROVAL
+     */
+    UserInitialDeclarationDTO sendCurrentUserDeclarationForApproval();
 
     /**
      * Verify a user initial declaration

@@ -14,12 +14,18 @@ import com.student.edsbackend.features.declaration.initial.dal.declaration_metad
 import com.student.edsbackend.features.declaration.initial.dal.declaration_metadata.InitialDeclarationDTO;
 import com.student.edsbackend.features.declaration.initial.dal.declaration_metadata.InitialDeclarationRepository;
 import com.student.edsbackend.features.declaration.initial.dal.declaration_metadata.InitialDeclarationRequestDTO;
+import com.student.edsbackend.features.declaration.initial.dal.option.AdditionalAnswerOption;
+import com.student.edsbackend.features.declaration.initial.dal.option.AdditionalAnswerOptionRepository;
+import com.student.edsbackend.features.declaration.initial.dal.option.InitialDeclarationOption;
+import com.student.edsbackend.features.declaration.initial.dal.option.InitialDeclarationOptionRepository;
+import com.student.edsbackend.features.declaration.initial.dal.questions.InitialDeclarationQuestion;
+import com.student.edsbackend.features.declaration.initial.dal.questions.InitialDeclarationQuestionRepository;
 import com.student.edsbackend.features.declaration.initial.service.InitialDeclarationService;
+import com.student.edsbackend.features.user.dal.InitialDeclarationDetailedDTO;
 import com.student.edsbackend.features.user.dal.User;
 import com.student.edsbackend.features.user.dal.UserDTO;
 import com.student.edsbackend.features.user.dal.UserRepository;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -30,6 +36,9 @@ public class InitialDeclarationServiceImpl implements InitialDeclarationService 
 
     private final InitialDeclarationRepository repository;
     private final UserRepository userRepository;
+    private final InitialDeclarationQuestionRepository questionRepository;
+    private final InitialDeclarationOptionRepository optionRepository;
+    private final AdditionalAnswerOptionRepository additionalAnswerOptionRepository;
 
     @Override
     public List<InitialDeclarationDTO> getAllDeclarations() {
@@ -66,7 +75,7 @@ public class InitialDeclarationServiceImpl implements InitialDeclarationService 
     }
 
     @Override
-    public Optional<InitialDeclarationDTO> getDeclarationById(Integer id) {
+    public Optional<InitialDeclarationDetailedDTO> getDeclarationById(Integer id) {
         return repository.findById(id)
                 .filter(declaration -> !declaration.getIsDeleted()) // Only include non-deleted declarations
                 .map(declaration -> {
@@ -85,7 +94,54 @@ public class InitialDeclarationServiceImpl implements InitialDeclarationService 
                             .registrationDate(declaration.getCreatedBy().getRegistrationDate())
                             .build();
 
-                    return InitialDeclarationDTO.builder()
+                    // Fetch questions for this declaration
+                    List<InitialDeclarationDetailedDTO.QuestionDTO> questionDTOs = questionRepository.findByDeclarationIdAndIsDeletedFalse(declaration.getId())
+                            .stream()
+                            .map(question -> {
+                                // Fetch options for this question
+                                List<InitialDeclarationDetailedDTO.OptionDTO> optionDTOs = optionRepository.findAll().stream()
+                                        .filter(option -> option.getQuestion().getId().equals(question.getId()) && !option.getIsDeleted())
+                                        .map(option -> {
+                                            // Fetch additional options for this option
+                                            List<InitialDeclarationDetailedDTO.AdditionalOptionDTO> additionalOptionDTOs = additionalAnswerOptionRepository.findAll().stream()
+                                                    .filter(additionalOption -> additionalOption.getOption().getId().equals(option.getId()) && !additionalOption.getIsDeleted())
+                                                    .map(additionalOption -> InitialDeclarationDetailedDTO.AdditionalOptionDTO.builder()
+                                                            .id(additionalOption.getId())
+                                                            .optionId(additionalOption.getOption().getId())
+                                                            .description(additionalOption.getDescription())
+                                                            .isRequired(additionalOption.getIsRequired())
+                                                            .isDeleted(additionalOption.getIsDeleted())
+                                                            .build())
+                                                    .toList();
+
+                                            return InitialDeclarationDetailedDTO.OptionDTO.builder()
+                                                    .id(option.getId())
+                                                    .questionId(option.getQuestion().getId())
+                                                    .description(option.getDescription())
+                                                    .additionalAnswerDescription(option.getAdditionalAnswerDescription())
+                                                    .multipleAdditionalAnswers(option.getMultipleAdditionalAnswers())
+                                                    .isConflict(option.getIsConflict())
+                                                    .isDeleted(option.getIsDeleted())
+                                                    .additionalOption(additionalOptionDTOs)
+                                                    .build();
+                                        })
+                                        .toList();
+
+                                return InitialDeclarationDetailedDTO.QuestionDTO.builder()
+                                        .id(question.getId())
+                                        .orderNumber(question.getOrderNumber().intValue())
+                                        .declarationId(question.getDeclaration().getId())
+                                        .description(question.getDescription())
+                                        .questionType(question.getQuestionType().toString())
+                                        .note(question.getNote())
+                                        .isRequired(question.getIsRequired())
+                                        .isDeleted(question.getIsDeleted())
+                                        .options(optionDTOs)
+                                        .build();
+                            })
+                            .toList();
+
+                    return InitialDeclarationDetailedDTO.builder()
                             .id(declaration.getId())
                             .name(declaration.getName())
                             .creationDate(declaration.getCreationDate())
@@ -93,6 +149,7 @@ public class InitialDeclarationServiceImpl implements InitialDeclarationService 
                             .isActive(declaration.getIsActive())
                             .isDeleted(declaration.getIsDeleted())
                             .createdBy(createdByDto)
+                            .questions(questionDTOs)
                             .build();
                 });
     }

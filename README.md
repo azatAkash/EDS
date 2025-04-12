@@ -6,22 +6,12 @@ to do in future:
 
 - [] implement fully functional unit tests
 - [] implement fully functional integration tests
-- [] implement fully functional swagger documentation
+- [] // Update responsible using round robind algoritm on tasks per manager role on patch initial-declaration/answers/send-for-approval
+- [] use userRegisterDto for user/register endpoint
+- [] add field is conflict for user initial declaration and marl as true on conflict answer for question 
 
-to do tomorrow:
-
-- [x] implement fully functional initial declaration endpoints:
-
-1. create new declaration
-2. update existing declaration
-3. delete existing declaration
-4. get existing declaration
    ACTIVATE ROUTE FOR DECLARATION IT SHOULD GET CURRENTLY ACTIVE DECLARATION DEACTIVATE IT AND ACTIVATE BY ID
 
-ON TYPE AGREE
-
-1. is conflict always false.
-   2)multipleAdditionalAnswers always FALSE
 
 1. on change of role auto logout
 

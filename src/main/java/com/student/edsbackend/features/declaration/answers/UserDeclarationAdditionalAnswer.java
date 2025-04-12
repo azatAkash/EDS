@@ -6,16 +6,18 @@ import com.student.edsbackend.features.declaration.initial.dal.option.Additional
 import jakarta.persistence.*;
 import lombok.*;
 
-/**
- * Entity representing the user_declaration_additional_answers table.
- */
 @Entity
 @Getter
 @Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "user_declaration_additional_answers")
+@Table(
+    name = "user_declaration_additional_answers",
+    uniqueConstraints = @UniqueConstraint(
+        columnNames = {"answer_option_id", "user_declaration_answer_id", "order_index"}
+    )
+)
 public class UserDeclarationAdditionalAnswer {
 
     @Id
@@ -36,4 +38,7 @@ public class UserDeclarationAdditionalAnswer {
 
     @Column(name = "is_deleted")
     private Boolean isDeleted;
+
+    @Column(name = "order_index", columnDefinition = "smallint", nullable = false)
+    private Short orderIndex; // Use Short for smallint in Java
 }
