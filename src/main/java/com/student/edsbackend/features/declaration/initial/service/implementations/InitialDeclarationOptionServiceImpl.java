@@ -37,11 +37,11 @@ public class InitialDeclarationOptionServiceImpl implements InitialDeclarationOp
         // Ensure the question exists
         questionRepository.findById(questionId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
-                        "Question not found with id: " + questionId));
+                "Question not found with id: " + questionId));
 
         return optionRepository.findAll().stream()
-                .filter(option -> !option.getIsDeleted() &&
-                        option.getQuestion().getId().equals(questionId))
+                .filter(option -> !option.getIsDeleted()
+                && option.getQuestion().getId().equals(questionId))
                 .map(this::mapToDTO)
                 .collect(Collectors.toList());
     }
@@ -80,7 +80,7 @@ public class InitialDeclarationOptionServiceImpl implements InitialDeclarationOp
         // Find the option
         InitialDeclarationOption option = optionRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
-                        "Option not found with id: " + id));
+                "Option not found with id: " + id));
 
         // Soft delete by setting isDeleted to true
         option.setIsDeleted(true);
@@ -105,13 +105,12 @@ public class InitialDeclarationOptionServiceImpl implements InitialDeclarationOp
     private InitialDeclarationQuestion ValidateYesNo(InitialDeclarationOptionRequestDTO request) {
         InitialDeclarationQuestion question = questionRepository.findById(request.getQuestionId())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
-                        "Question not found with id: " + request.getQuestionId()));
+                "Question not found with id: " + request.getQuestionId()));
 
         List<InitialDeclarationOption> existingOptions = optionRepository.findAll().stream()
-                .filter(opt -> !opt.getIsDeleted() &&
-                        opt.getQuestion().getId().equals(question.getId()))
+                .filter(opt -> !opt.getIsDeleted()
+                && opt.getQuestion().getId().equals(question.getId()))
                 .collect(Collectors.toList());
-
 
         if (question.getQuestionType() == QuestionType.YES_NO) {
 
@@ -121,8 +120,8 @@ public class InitialDeclarationOptionServiceImpl implements InitialDeclarationOp
                         "YES_NO question type can only have two options");
             }
 
-            if (existingOptions.size() == 1 &&
-                    existingOptions.get(0).getDescription().equalsIgnoreCase(request.getDescription())) {
+            if (existingOptions.size() == 1
+                    && existingOptions.get(0).getDescription().equalsIgnoreCase(request.getDescription())) {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
                         "YES_NO options must have different descriptions");
             }
@@ -134,9 +133,16 @@ public class InitialDeclarationOptionServiceImpl implements InitialDeclarationOp
                         "Only one of the options can be marked as conflict");
             }
         } else if (question.getQuestionType() == QuestionType.AGREE) {
-            if (existingOptions.size() > 0) {
+            if (!existingOptions.isEmpty()) {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
                         "Agree question type cannot have more than 1 option");
+            }
+            if (request.getIsConflict() != false) {
+                request.setIsConflict(false);
+            }
+
+            if (request.getMultipleAdditionalAnswers() != false) {
+                request.setMultipleAdditionalAnswers(false);
             }
         }
 
