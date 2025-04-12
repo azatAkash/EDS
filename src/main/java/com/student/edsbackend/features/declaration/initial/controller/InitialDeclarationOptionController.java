@@ -15,7 +15,7 @@ import org.springframework.web.server.ResponseStatusException;
  */
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/v1/declarations/options")
+@RequestMapping("/api/v1/initial-declarations/options")
 public class InitialDeclarationOptionController {
 
     private final InitialDeclarationOptionService optionService;

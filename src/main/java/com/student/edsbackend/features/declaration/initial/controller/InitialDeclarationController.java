@@ -30,7 +30,7 @@ import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/v1/declarations")
+@RequestMapping("/api/v1/initial-declarations")
 public class InitialDeclarationController {
 
     private final InitialDeclarationService declarationService;

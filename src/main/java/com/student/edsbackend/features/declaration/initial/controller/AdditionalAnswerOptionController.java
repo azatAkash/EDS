@@ -16,7 +16,7 @@ import org.springframework.web.server.ResponseStatusException;
  */
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/v1/declarations/additional-options")
+@RequestMapping("/api/v1/initial-declarations/additional-options")
 public class AdditionalAnswerOptionController {
 
     private final AdditionalAnswerOptionService additionalAnswerOptionService;

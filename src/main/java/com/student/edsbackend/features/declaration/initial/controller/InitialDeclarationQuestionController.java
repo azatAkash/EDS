@@ -17,7 +17,7 @@ import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/v1/declarations/questions")
+@RequestMapping("/api/v1/initial-declarations/questions")
 public class InitialDeclarationQuestionController {
 
     private final InitialDeclarationQuestionService questionService;

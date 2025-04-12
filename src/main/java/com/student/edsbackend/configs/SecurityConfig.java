@@ -49,11 +49,11 @@ public class SecurityConfig {
                 .requestMatchers(PUT, "/api/v1/management/**").hasAnyAuthority(Role.MANAGER.name(), Role.ADMIN.name(), Role.SUPER_ADMIN.name())
                 .requestMatchers(DELETE, "/api/v1/management/**").hasAnyAuthority(Role.ADMIN.name(), Role.SUPER_ADMIN.name())
 
-                .requestMatchers("/api/v1/declarations/**").hasAnyRole(Role.ADMIN.name(), Role.SUPER_ADMIN.name())
-                .requestMatchers(GET, "/api/v1/declarations/**").hasAnyAuthority(Role.SUPER_ADMIN.name(), Role.ADMIN.name())
-                .requestMatchers(POST, "/api/v1/declarations/**").hasAuthority(Role.SUPER_ADMIN.name())
-                .requestMatchers(PUT, "/api/v1/declarations/**").hasAuthority(Role.SUPER_ADMIN.name())
-                .requestMatchers(DELETE, "/api/v1/declarations/**").hasAuthority(Role.SUPER_ADMIN.name())
+                .requestMatchers("/api/v1/initial-declarations/**").hasAnyRole(Role.ADMIN.name(), Role.SUPER_ADMIN.name())
+                .requestMatchers(GET, "/api/v1/initial-declarations/**").hasAnyAuthority(Role.SUPER_ADMIN.name(), Role.ADMIN.name())
+                .requestMatchers(POST, "/api/v1/initial-declarations/**").hasAuthority(Role.SUPER_ADMIN.name())
+                .requestMatchers(PUT, "/api/v1/initial-declarations/**").hasAuthority(Role.SUPER_ADMIN.name())
+                .requestMatchers(DELETE, "/api/v1/initial-declarations/**").hasAuthority(Role.SUPER_ADMIN.name())
 
                 .anyRequest().authenticated()
             )
