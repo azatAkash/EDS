@@ -8,7 +8,7 @@ import java.time.LocalDateTime;
 import com.student.edsbackend.features.declaration.adhoc.UserAdHocDeclare;
 import com.student.edsbackend.features.enums.ManagementPlanStatus;
 import com.student.edsbackend.features.user.dal.User;
-import com.student.edsbackend.features.user.dal.UserInitialDeclaration;
+import com.student.edsbackend.features.user.dal.UserDeclaration.UserInitialDeclaration;
 
 /**
  * Entity representing the user_management_plans table.

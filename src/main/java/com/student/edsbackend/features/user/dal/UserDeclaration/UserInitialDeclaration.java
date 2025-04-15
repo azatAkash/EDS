@@ -1,4 +1,4 @@
-package com.student.edsbackend.features.user.dal;
+package com.student.edsbackend.features.user.dal.UserDeclaration;
 
 import jakarta.persistence.*;
 import lombok.*;
@@ -11,6 +11,7 @@ import com.student.edsbackend.features.declaration.answers.UserDeclarationAnswer
 import com.student.edsbackend.features.declaration.initial.dal.declaration_metadata.InitialDeclaration;
 import com.student.edsbackend.features.enums.UserDeclarationStatus;
 import com.student.edsbackend.features.management.UserManagementPlan;
+import com.student.edsbackend.features.user.dal.User;
 
 /**
  * Entity representing the user_initial_declarations table.

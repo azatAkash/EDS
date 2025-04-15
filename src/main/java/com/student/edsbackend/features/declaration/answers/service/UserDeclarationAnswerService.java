@@ -2,6 +2,7 @@ package com.student.edsbackend.features.declaration.answers.service;
 
 import com.student.edsbackend.features.declaration.answers.dto.UserDeclarationAnswerRequestDTO;
 import com.student.edsbackend.features.declaration.answers.dto.UserDeclarationAnswerResponseDTO;
+import com.student.edsbackend.features.declaration.answers.dto.UserDeclarationDetailedResponseDTO;
 
 /**
  * Service interface for managing user declaration answers
@@ -21,5 +22,5 @@ public interface UserDeclarationAnswerService {
      * 
      * @return A response DTO with information about the user's answers
      */
-    UserDeclarationAnswerResponseDTO getCurrentUserDeclarationAnswers();
+    UserDeclarationDetailedResponseDTO getCurrentUserDeclarationAnswers();
 }

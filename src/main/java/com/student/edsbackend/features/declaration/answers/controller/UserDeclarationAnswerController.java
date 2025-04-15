@@ -2,6 +2,7 @@ package com.student.edsbackend.features.declaration.answers.controller;
 
 import com.student.edsbackend.features.declaration.answers.dto.UserDeclarationAnswerRequestDTO;
 import com.student.edsbackend.features.declaration.answers.dto.UserDeclarationAnswerResponseDTO;
+import com.student.edsbackend.features.declaration.answers.dto.UserDeclarationDetailedResponseDTO;
 import com.student.edsbackend.features.declaration.answers.service.UserDeclarationAnswerService;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -26,7 +27,7 @@ public class UserDeclarationAnswerController {
     @PreAuthorize("hasAnyAuthority('USER', 'SUPER_ADMIN')")
     public ResponseEntity<UserDeclarationAnswerResponseDTO> saveUserDeclarationAnswers(
             @RequestBody UserDeclarationAnswerRequestDTO requestDTO) {
-        UserDeclarationAnswerResponseDTO responseDTO = userDeclarationAnswerService.saveUserDeclarationAnswers(requestDTO);
+                UserDeclarationAnswerResponseDTO responseDTO = userDeclarationAnswerService.saveUserDeclarationAnswers(requestDTO);
         return new ResponseEntity<>(responseDTO, HttpStatus.CREATED);
     }
 
@@ -34,8 +35,8 @@ public class UserDeclarationAnswerController {
     @Operation(summary = "Get current user's declaration answers",
             description = "Retrieves the current user's answers to the initial declaration questions. User is identified from the security context.")
     @PreAuthorize("hasAnyAuthority('USER', 'SUPER_ADMIN', 'ADMIN', 'MANAGER')")
-    public ResponseEntity<UserDeclarationAnswerResponseDTO> getCurrentUserDeclarationAnswers() {
-        UserDeclarationAnswerResponseDTO responseDTO = userDeclarationAnswerService.getCurrentUserDeclarationAnswers();
+    public ResponseEntity<UserDeclarationDetailedResponseDTO> getCurrentUserDeclarationAnswers() {
+        UserDeclarationDetailedResponseDTO responseDTO = userDeclarationAnswerService.getCurrentUserDeclarationAnswers();
         return ResponseEntity.ok(responseDTO);
     }
 }

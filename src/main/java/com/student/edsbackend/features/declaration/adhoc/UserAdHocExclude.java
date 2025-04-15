@@ -7,7 +7,7 @@ import java.time.LocalDateTime;
 
 import com.student.edsbackend.features.enums.UserDeclarationStatus;
 import com.student.edsbackend.features.user.dal.User;
-import com.student.edsbackend.features.user.dal.UserInitialDeclaration;
+import com.student.edsbackend.features.user.dal.UserDeclaration.UserInitialDeclaration;
 
 /**
  * Entity representing the user_ad_hoc_excludes table.

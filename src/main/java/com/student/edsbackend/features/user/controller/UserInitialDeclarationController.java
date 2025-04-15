@@ -1,9 +1,9 @@
 package com.student.edsbackend.features.user.controller;
 
-import com.student.edsbackend.features.user.dal.UserInitialDeclarationDTO;
-import com.student.edsbackend.features.user.dal.UserInitialDeclarationRequestDTO;
-import com.student.edsbackend.features.user.dal.UserInitialDeclarationStatusDTO;
-import com.student.edsbackend.features.user.dal.UserInitialDeclarationUpdateDTO;
+import com.student.edsbackend.features.user.dal.UserDeclaration.UserInitialDeclarationDTO;
+import com.student.edsbackend.features.user.dal.UserDeclaration.UserInitialDeclarationRequestDTO;
+import com.student.edsbackend.features.user.dal.UserDeclaration.UserInitialDeclarationStatusDTO;
+import com.student.edsbackend.features.user.dal.UserDeclaration.UserInitialDeclarationUpdateDTO;
 import com.student.edsbackend.features.user.service.UserInitialDeclarationService;
 
 import io.swagger.v3.oas.annotations.Operation;

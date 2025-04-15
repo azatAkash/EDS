@@ -11,6 +11,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import com.student.edsbackend.features.ApiResponse;
 import com.student.edsbackend.features.user.dal.UserDTO;
+import com.student.edsbackend.features.user.dal.UserRegistrationRequestDTO;
 
 import java.io.IOException;
 
@@ -32,8 +33,8 @@ public class AuthenticationController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<?> register(@RequestBody UserDTO userDTO) {
-            AuthenticationResponse authResponse = service.register(userDTO);
+    public ResponseEntity<?> register(@RequestBody UserRegistrationRequestDTO registrationDTO) {
+            AuthenticationResponse authResponse = service.register(registrationDTO);
             return ResponseEntity.ok(authResponse);
     }
 

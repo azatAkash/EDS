@@ -8,7 +8,7 @@ import java.util.List;
 
 import com.student.edsbackend.features.declaration.initial.dal.questions.InitialDeclarationQuestion;
 import com.student.edsbackend.features.user.dal.User;
-import com.student.edsbackend.features.user.dal.UserInitialDeclaration;
+import com.student.edsbackend.features.user.dal.UserDeclaration.UserInitialDeclaration;
 /**
  * Entity representing the initial_declarations table.
  */

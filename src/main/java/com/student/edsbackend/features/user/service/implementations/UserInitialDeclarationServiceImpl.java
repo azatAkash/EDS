@@ -4,12 +4,12 @@ import com.student.edsbackend.features.declaration.initial.dal.declaration_metad
 import com.student.edsbackend.features.declaration.initial.dal.declaration_metadata.InitialDeclarationRepository;
 import com.student.edsbackend.features.enums.UserDeclarationStatus;
 import com.student.edsbackend.features.user.dal.User;
-import com.student.edsbackend.features.user.dal.UserInitialDeclaration;
-import com.student.edsbackend.features.user.dal.UserInitialDeclarationDTO;
-import com.student.edsbackend.features.user.dal.UserInitialDeclarationRepository;
-import com.student.edsbackend.features.user.dal.UserInitialDeclarationRequestDTO;
-import com.student.edsbackend.features.user.dal.UserInitialDeclarationUpdateDTO;
 import com.student.edsbackend.features.user.dal.UserRepository;
+import com.student.edsbackend.features.user.dal.UserDeclaration.UserInitialDeclaration;
+import com.student.edsbackend.features.user.dal.UserDeclaration.UserInitialDeclarationDTO;
+import com.student.edsbackend.features.user.dal.UserDeclaration.UserInitialDeclarationRepository;
+import com.student.edsbackend.features.user.dal.UserDeclaration.UserInitialDeclarationRequestDTO;
+import com.student.edsbackend.features.user.dal.UserDeclaration.UserInitialDeclarationUpdateDTO;
 import com.student.edsbackend.features.user.service.UserInitialDeclarationService;
 
 import lombok.RequiredArgsConstructor;

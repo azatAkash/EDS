@@ -6,7 +6,7 @@ import lombok.*;
 import java.util.List;
 
 import com.student.edsbackend.features.declaration.initial.dal.option.InitialDeclarationOption;
-import com.student.edsbackend.features.user.dal.UserInitialDeclaration;
+import com.student.edsbackend.features.user.dal.UserDeclaration.UserInitialDeclaration;
 
 /**
  * Entity representing the user_declaration_answers table.

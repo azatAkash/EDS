@@ -1,4 +1,4 @@
-package com.student.edsbackend.features.user.dal;
+package com.student.edsbackend.features.user.dal.UserDeclaration;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

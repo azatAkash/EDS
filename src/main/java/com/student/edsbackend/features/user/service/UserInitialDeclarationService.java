@@ -1,11 +1,11 @@
 package com.student.edsbackend.features.user.service;
 
-import com.student.edsbackend.features.user.dal.UserInitialDeclarationDTO;
-import com.student.edsbackend.features.user.dal.UserInitialDeclarationRequestDTO;
-import com.student.edsbackend.features.user.dal.UserInitialDeclarationUpdateDTO;
-
 import java.util.List;
 import java.util.Optional;
+
+import com.student.edsbackend.features.user.dal.UserDeclaration.UserInitialDeclarationDTO;
+import com.student.edsbackend.features.user.dal.UserDeclaration.UserInitialDeclarationRequestDTO;
+import com.student.edsbackend.features.user.dal.UserDeclaration.UserInitialDeclarationUpdateDTO;
 
 /**
  * Service interface for managing user initial declarations

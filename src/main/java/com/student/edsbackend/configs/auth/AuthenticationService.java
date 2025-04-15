@@ -7,6 +7,7 @@ import com.student.edsbackend.features.token.TokenRepository;
 import com.student.edsbackend.features.token.TokenType;
 import com.student.edsbackend.features.user.dal.User;
 import com.student.edsbackend.features.user.dal.UserDTO;
+import com.student.edsbackend.features.user.dal.UserRegistrationRequestDTO;
 import com.student.edsbackend.features.user.dal.UserRepository;
 import com.student.edsbackend.features.user.service.UserValidationService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -40,33 +41,45 @@ public class AuthenticationService {
     private final UserValidationService validationService;
 
     /**
-     * Registers a new user based on the provided UserDTO.
+     * Registers a new user based on the provided UserRegistrationRequestDTO.
      * Validates the user data using the UserValidationService.
      *
-     * @param userDTO the user data transfer object to register
+     * @param registrationDTO the user registration data transfer object
      * @return an AuthenticationResponse containing the access and refresh tokens
      */
-    public AuthenticationResponse register(UserDTO userDTO) {
+    public AuthenticationResponse register(UserRegistrationRequestDTO registrationDTO) {
+        // Convert UserRegistrationRequestDTO to UserDTO for validation
+        UserDTO userDTO = UserDTO.builder()
+                .email(registrationDTO.getEmail())
+                .password(registrationDTO.getPassword())
+                .firstname(registrationDTO.getFirstname())
+                .lastname(registrationDTO.getLastname())
+                .middlename(registrationDTO.getMiddlename())
+                .role(registrationDTO.getRole())
+                .position(registrationDTO.getPosition())
+                .department(registrationDTO.getDepartment())
+                .build();
+                
         // Validate the incoming UserDTO
         List<String> errors = validationService.validateRegistrationRequest(userDTO);
         if (!errors.isEmpty()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, String.join(", ", errors));
         }
         // Add duplicate email check here
-        if (repository.findByEmail(userDTO.getEmail()).isPresent()) {
+        if (repository.findByEmail(registrationDTO.getEmail()).isPresent()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Email already in use");
         }
 
-        // Map UserDTO to the User entity
+        // Map UserRegistrationRequestDTO to the User entity
         User user = User.builder()
-                .firstname(userDTO.getFirstname())
-                .lastname(userDTO.getLastname())
-                .middlename(userDTO.getMiddlename())
-                .email(userDTO.getEmail())
-                .password(passwordEncoder.encode(userDTO.getPassword()))
-                .role(userDTO.getRole())
-                .position(userDTO.getPosition())
-                .department(userDTO.getDepartment())
+                .firstname(registrationDTO.getFirstname())
+                .lastname(registrationDTO.getLastname())
+                .middlename(registrationDTO.getMiddlename())
+                .email(registrationDTO.getEmail())
+                .password(passwordEncoder.encode(registrationDTO.getPassword()))
+                .role(registrationDTO.getRole())
+                .position(registrationDTO.getPosition())
+                .department(registrationDTO.getDepartment())
                 .isActive(true)
                 .registrationDate(java.time.LocalDateTime.now())
                 .build();
