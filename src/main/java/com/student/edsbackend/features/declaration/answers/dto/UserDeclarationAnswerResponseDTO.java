@@ -37,6 +37,7 @@ public class UserDeclarationAnswerResponseDTO {
         private Integer optionId; // initial_declaration_options.id
         private Boolean isAnswered; // user_declaration_answers.is_answered
         private String answer; // user_declaration_answers.answer
+        private Boolean hasConflict; // user_declaration_answers.has_conflict
         private List<AdditionalAnswerGroupDTO> additionalAnswers;
     }
 

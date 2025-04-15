@@ -41,6 +41,9 @@ public class UserDeclarationAnswer {
 
     @Column(name = "is_deleted")
     private Boolean isDeleted;
+    
+    @Column(name = "has_conflict")
+    private Boolean hasConflict;
 
     @OneToMany(mappedBy = "userDeclarationAnswer")
     private List<UserDeclarationAdditionalAnswer> additionalAnswers;

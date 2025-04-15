@@ -62,6 +62,7 @@ public class UserDeclarationDetailedResponseDTO {
         // User's answer data
         private Boolean isAnswered;
         private String answer;
+        private Boolean hasConflict;
         private List<AdditionalAnswerGroupDTO> additionalAnswers;
     }
     

@@ -190,6 +190,7 @@ public class UserDeclarationAnswerServiceImpl implements UserDeclarationAnswerSe
                                         .optionId(answer.getOption().getId())
                                         .isAnswered(Boolean.TRUE.equals(answer.getIsAnswered()))
                                         .answer(answer.getAnswer())
+                                        .hasConflict(answer.getHasConflict())
                                         .build();
 
                         // Process additional answers if present
@@ -367,6 +368,7 @@ public class UserDeclarationAnswerServiceImpl implements UserDeclarationAnswerSe
                                                                 .isAnswered(userAnswer != null && Boolean.TRUE.equals(userAnswer.getIsAnswered()))
                                                                 .answer(userAnswer != null ? userAnswer.getAnswer()
                                                                                 : null)
+                                                                .hasConflict(userAnswer != null ? userAnswer.getHasConflict() : null)
                                                                 .build();
 
                                                 // If user has answered this option, get additional answers
@@ -490,12 +492,17 @@ public class UserDeclarationAnswerServiceImpl implements UserDeclarationAnswerSe
                                         "Answer already exists for this option in the current declaration version");
                 } else {
                         // Create new answer for this declaration version
+                        // Check if this option has conflict flag and if answer is provided
+                        boolean hasConflict = option.getIsConflict() != null && option.getIsConflict() && 
+                                        (answerDTO.getAnswer() != null || Boolean.TRUE.equals(answerDTO.getIsAnswered()));
+                        
                         UserDeclarationAnswer answer = UserDeclarationAnswer.builder()
                                         .userDeclaration(userDeclaration)
                                         .option(option)
                                         .isAnswered(answerDTO.getIsAnswered())
                                         .answer(answerDTO.getAnswer())
                                         .isDeleted(false)
+                                        .hasConflict(hasConflict)
                                         .build();
                         return userDeclarationAnswerRepository.save(answer);
                 }
@@ -520,9 +527,19 @@ public class UserDeclarationAnswerServiceImpl implements UserDeclarationAnswerSe
                                                                                              // answers and re-enable
                                                                                              // this erro
                 }
+                
+                // Check if the option allows multiple additional answers
+                Boolean allowsMultipleAnswers = answer.getOption().getMultipleAdditionalAnswers();
+                
                 Short orderIndex = 1;
                 // Process each group of additional answers
                 for (UserDeclarationAnswerRequestDTO.AdditionalAnswerGroupDTO groupDTO : additionalAnswerGroups) {
+                        // Validate that when multipleAdditionalAnswers is false, only one additional answer is provided per group
+                        if (Boolean.FALSE.equals(allowsMultipleAnswers) && groupDTO.getAnswers().size() > 1) {
+                            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                                "This option does not allow multiple additional answers per group. Only one answer is allowed.");
+                        }
+                        
                         // Process each additional answer in the group
                         for (UserDeclarationAnswerRequestDTO.AdditionalAnswerDTO additionalAnswerDTO : groupDTO
                                         .getAnswers()) {
