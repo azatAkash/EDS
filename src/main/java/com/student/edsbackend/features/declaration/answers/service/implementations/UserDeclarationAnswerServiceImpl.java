@@ -30,6 +30,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -70,14 +71,42 @@ public class UserDeclarationAnswerServiceImpl implements UserDeclarationAnswerSe
                                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
                                                 "No active declaration found. Please ask Administrator to activate a declaration first."));
 
-                // Find or create user's declaration
-                UserInitialDeclaration userDeclaration = findUserDeclaration(currentUser, activeDeclaration);
+                // Find user's declaration
+                Optional<UserInitialDeclaration> existingDeclarationOpt = userInitialDeclarationRepository
+                                .findByUserIdAndDeclarationIdAndIsDeletedFalse(currentUser.getId(), activeDeclaration.getId());
                 
-                // Validate declaration status - can only save when status is CREATED or SENT_FOR_APPROVAL
-                if (userDeclaration.getStatus() != UserDeclarationStatus.CREATED && 
-                    userDeclaration.getStatus() != UserDeclarationStatus.SENT_FOR_APPROVAL) {
-                    throw new ResponseStatusException(HttpStatus.BAD_REQUEST, 
-                        "Declaration can only be updated when status is CREATED or SENT_FOR_APPROVAL");
+                UserInitialDeclaration userDeclaration;
+                boolean isNewVersion = false;
+                
+                if (existingDeclarationOpt.isPresent()) {
+                    UserInitialDeclaration existingDeclaration = existingDeclarationOpt.get();
+                    
+                    // Validate declaration status - can only save when status is CREATED or SENT_FOR_APPROVAL
+                    if (existingDeclaration.getStatus() != UserDeclarationStatus.CREATED && 
+                        existingDeclaration.getStatus() != UserDeclarationStatus.SENT_FOR_APPROVAL) {
+                        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, 
+                            "Declaration can only be updated when status is CREATED or SENT_FOR_APPROVAL");
+                    }
+                    
+                    // Mark existing declaration as deleted (soft delete)
+                    existingDeclaration.setIsDeleted(true);
+                    userInitialDeclarationRepository.save(existingDeclaration);
+                    
+                    // Create a new version of the declaration
+                    userDeclaration = UserInitialDeclaration.builder()
+                            .user(currentUser)
+                            .declaration(activeDeclaration)
+                            .creationDate(LocalDateTime.now())
+                            .status(existingDeclaration.getStatus())
+                            .responsible(existingDeclaration.getResponsible())
+                            .isDeleted(false)
+                            .build();
+                    
+                    userDeclaration = userInitialDeclarationRepository.save(userDeclaration);
+                    isNewVersion = true;
+                } else {
+                    throw new ResponseStatusException(HttpStatus.NOT_FOUND,
+                                    "No declaration found for current user");
                 }
 
                 // Validate request
@@ -138,7 +167,7 @@ public class UserDeclarationAnswerServiceImpl implements UserDeclarationAnswerSe
                             // For multiple choice questions, isAnswered should be null and answer string should be provided
                             if (answerDTO.getIsAnswered() != null) {
                                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                                    "For multiple choice questions, isAnswered should be null");
+                                    "For open ended questions, isAnswered should be null");
                             }
                             if (answerDTO.getAnswer() == null || answerDTO.getAnswer().trim().isEmpty()) {
                                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
@@ -443,12 +472,12 @@ public class UserDeclarationAnswerServiceImpl implements UserDeclarationAnswerSe
         }
 
         /**
-         * Create a new answer or update an existing one
+         * Create a new answer for a declaration
          */
         private UserDeclarationAnswer createAnswer(UserInitialDeclaration userDeclaration,
                         InitialDeclarationOption option,
                         UserDeclarationAnswerRequestDTO.AnswerDTO answerDTO) {
-                // Check if answer already exists
+                // Check if answer already exists for this declaration version
                 Optional<UserDeclarationAnswer> existingAnswer = userDeclarationAnswerRepository.findAll().stream()
                                 .filter(a -> a.getUserDeclaration().getId().equals(userDeclaration.getId()) &&
                                                 a.getOption().getId().equals(option.getId()) &&
@@ -456,10 +485,11 @@ public class UserDeclarationAnswerServiceImpl implements UserDeclarationAnswerSe
                                 .findFirst();
 
                 if (existingAnswer.isPresent()) {
+                        // This should not happen with our versioning approach, but handle it just in case
                         throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                                        "Answer already exists for this option");
+                                        "Answer already exists for this option in the current declaration version");
                 } else {
-                        // Create new answer
+                        // Create new answer for this declaration version
                         UserDeclarationAnswer answer = UserDeclarationAnswer.builder()
                                         .userDeclaration(userDeclaration)
                                         .option(option)

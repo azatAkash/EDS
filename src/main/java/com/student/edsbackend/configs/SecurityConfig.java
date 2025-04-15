@@ -35,6 +35,7 @@ public class SecurityConfig {
                 .securityMatcher("/api/**") // 🔒 эта цепочка только для API
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
+                .requestMatchers(OPTIONS, "/**").permitAll() // Allow preflight requests
                 .requestMatchers("/api/v1/auth/**").permitAll()
                 .requestMatchers("/api/v1/user/**").hasAnyRole(Role.ADMIN.name(), Role.SUPER_ADMIN.name(), Role.MANAGER.name(), Role.USER.name())
                 .requestMatchers("/api/v1/users/**").hasAnyRole(Role.ADMIN.name(), Role.SUPER_ADMIN.name())
