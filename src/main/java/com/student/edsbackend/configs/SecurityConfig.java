@@ -38,24 +38,29 @@ public class SecurityConfig {
                 .requestMatchers(OPTIONS, "/**").permitAll() // Allow preflight requests
                 .requestMatchers("/api/v1/auth/**").permitAll()
                 .requestMatchers("/api/v1/user/**").hasAnyRole(Role.ADMIN.name(), Role.SUPER_ADMIN.name(), Role.MANAGER.name(), Role.USER.name())
+                
                 .requestMatchers("/api/v1/users/**").hasAnyRole(Role.ADMIN.name(), Role.SUPER_ADMIN.name())
                 .requestMatchers(GET, "/api/v1/users/**").hasAnyAuthority(Role.ADMIN.name(), Role.SUPER_ADMIN.name())
                 .requestMatchers(POST, "/api/v1/users/**").hasAnyAuthority(Role.ADMIN.name(), Role.SUPER_ADMIN.name())
                 .requestMatchers(PUT, "/api/v1/users/**").hasAnyAuthority(Role.ADMIN.name(), Role.SUPER_ADMIN.name())
                 .requestMatchers(DELETE, "/api/v1/users/**").hasAnyAuthority(Role.ADMIN.name(), Role.SUPER_ADMIN.name())
-                
+                .requestMatchers(PATCH, "/api/v1/users/**").hasAnyAuthority(Role.ADMIN.name(), Role.SUPER_ADMIN.name())
+
                 .requestMatchers("/api/v1/management-plans/**").hasAnyRole(Role.MANAGER.name(), Role.ADMIN.name(), Role.SUPER_ADMIN.name(), Role.USER.name())
                 .requestMatchers(GET, "/api/v1/management-plans/**").hasAnyAuthority(Role.MANAGER.name(), Role.ADMIN.name(), Role.SUPER_ADMIN.name(), Role.USER.name())
                 .requestMatchers(POST, "/api/v1/management-plans/**").hasAnyAuthority(Role.MANAGER.name(), Role.ADMIN.name(), Role.SUPER_ADMIN.name())
                 .requestMatchers(PUT, "/api/v1/management-plans/**").hasAnyAuthority(Role.MANAGER.name(), Role.ADMIN.name(), Role.SUPER_ADMIN.name())
                 .requestMatchers(DELETE, "/api/v1/management-plans/**").hasAnyAuthority(Role.ADMIN.name(), Role.SUPER_ADMIN.name())
-                
+                .requestMatchers(PATCH, "/api/v1/management-plans/**").hasAnyAuthority(Role.ADMIN.name(), Role.SUPER_ADMIN.name(), Role.MANAGER.name())
+
+
                 .requestMatchers("/api/v1/initial-declarations/**").hasAnyRole(Role.ADMIN.name(), Role.SUPER_ADMIN.name())
                 .requestMatchers(GET, "/api/v1/initial-declarations/**").hasAnyAuthority(Role.SUPER_ADMIN.name(), Role.ADMIN.name())
                 .requestMatchers(POST, "/api/v1/initial-declarations/**").hasAuthority(Role.SUPER_ADMIN.name())
                 .requestMatchers(PUT, "/api/v1/initial-declarations/**").hasAuthority(Role.SUPER_ADMIN.name())
                 .requestMatchers(DELETE, "/api/v1/initial-declarations/**").hasAuthority(Role.SUPER_ADMIN.name())
-                
+                .requestMatchers(PATCH, "/api/v1/initial-declarations/**").hasAnyAuthority(Role.SUPER_ADMIN.name())
+
                 .requestMatchers(POST, "/api/v1/initial-declarations/answers/**").hasAnyAuthority(Role.ADMIN.name(), Role.SUPER_ADMIN.name(), Role.MANAGER.name(), Role.USER.name())
                 .requestMatchers(GET, "/api/v1/initial-declarations/answers/**").hasAnyAuthority(Role.ADMIN.name(), Role.SUPER_ADMIN.name(), Role.MANAGER.name(), Role.USER.name())
                 .anyRequest().authenticated()

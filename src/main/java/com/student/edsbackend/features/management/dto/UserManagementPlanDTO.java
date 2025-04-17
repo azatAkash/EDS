@@ -32,4 +32,5 @@ public class UserManagementPlanDTO {
     private Boolean acknowledgedByUser;
     private Boolean ensuredByManager;
     private String userDisagreementReason;
+    
 }
