@@ -16,7 +16,7 @@ public interface InitialDeclarationService {
 
     InitialDeclarationDTO createDeclaration(InitialDeclarationRequestDTO declaration);
 
-    InitialDeclarationDTO updateDeclaration(Integer id, InitialDeclarationRequestDTO declaration);
+    InitialDeclarationDTO activateDeclaration(Integer id);
 
     void deleteDeclaration(Integer id);
 }

@@ -231,33 +231,23 @@ public class InitialDeclarationServiceImpl implements InitialDeclarationService 
     }
 
     @Override
-    public InitialDeclarationDTO updateDeclaration(Integer id, InitialDeclarationRequestDTO requestDTO) {
+    public InitialDeclarationDTO activateDeclaration(Integer id) {
         return repository.findById(id)
                 .filter(declaration -> !declaration.getIsDeleted()) // Only update non-deleted declarations
                 .map(existing -> {
-                    // Update fields from the request DTO
-                    if (requestDTO.getName() != null && !requestDTO.getName().isEmpty()) {
-                        existing.setName(requestDTO.getName());
-                    }
+                
+                    repository.findAll().stream()
+                    .filter(d -> d.getIsActive() && !d.getIsDeleted())
+                    .forEach(d -> {
+                        d.setIsActive(false);
+                        d.setActivationDate(null);
+                        repository.save(d);
+                    });
 
-                    // Configure activation flags and dates based on isActive
-                    if (requestDTO.getIsActive() != null) {
-                        existing.setIsActive(requestDTO.getIsActive());
-
-                        // If activating, set activation date to now if not provided
-                        if (requestDTO.getIsActive()) {
-
-                            existing.setActivationDate(LocalDateTime.now());
-
-                        } else {
-                            // If deactivating, clear activation date
-                            existing.setActivationDate(null);
-                        }
-                    } else {
-                        // If only activation date is provided, update it
-                        existing.setActivationDate(null);
-                    }
-
+                    // Update the fields
+                    existing.setIsActive(true);
+                    existing.setActivationDate(LocalDateTime.now());
+                    existing.setIsActive(true);
                     // Save the updated entity
                     InitialDeclaration savedDeclaration = repository.save(existing);
 

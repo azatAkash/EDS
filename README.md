@@ -12,6 +12,10 @@ to do in future:
 
    ACTIVATE ROUTE FOR DECLARATION IT SHOULD GET CURRENTLY ACTIVE DECLARATION DEACTIVATE IT AND ACTIVATE BY ID
 
+management plan
+round robin for task distribution
+notification service
+
 1. on change of role auto logout
 
 localhost:8080/swagger-ui/index.html

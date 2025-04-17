@@ -57,13 +57,12 @@ public class InitialDeclarationController {
     }
     
 
-    // // Update an existing declaration by its ID
-    // @PutMapping("/{id}")
-    // public ResponseEntity<InitialDeclaration> updateDeclaration(@PathVariable Integer id,
-    //                                                               @RequestBody InitialDeclaration declaration) {
-    //     InitialDeclaration updated = declarationService.updateDeclaration(id, declaration);
-    //     return ResponseEntity.ok(updated);
-    // }
+    // Update an existing declaration by its ID
+    @PatchMapping("/{id}/activate")
+    public ResponseEntity<InitialDeclarationDTO> updateDeclaration(@PathVariable Integer id) {
+        InitialDeclarationDTO updated = declarationService.activateDeclaration(id);
+        return ResponseEntity.ok(updated);
+    }
 
     // Delete a declaration by its ID
     @DeleteMapping("/{id}")
