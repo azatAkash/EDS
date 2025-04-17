@@ -3,6 +3,7 @@ package com.student.edsbackend.features.management;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 /**
@@ -24,6 +25,15 @@ public class ManagementPlanAction {
 
     @Column(name = "description", columnDefinition = "json")
     private String description; // JSON structure for multilingual text {en, ru, kz}
+    
+    @Column(name = "is_deleted")
+    private Boolean isDeleted;
+    
+    @Column(name = "created_at")
+    private LocalDateTime createdAt;
+    
+    @Column(name = "updated_at")
+    private LocalDateTime updatedAt;
 
     @OneToMany(mappedBy = "action")
     private List<UserManagementPlan> managementPlans;

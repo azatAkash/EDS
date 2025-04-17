@@ -42,6 +42,10 @@ public class UserManagementPlan {
     @JoinColumn(name = "created_by", nullable = false)
     private User createdBy;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "responsible", nullable = false)
+    private User responsible;
+
     @Enumerated(EnumType.STRING)
     @Column(name = "status")
     private ManagementPlanStatus status;
@@ -59,8 +63,8 @@ public class UserManagementPlan {
     @JoinColumn(name = "action_id")
     private ManagementPlanAction action;
 
-    @Column(name = "other_action", columnDefinition = "text")
-    private String otherAction;
+    @Column(name = "action_details", columnDefinition = "text")
+    private String actionDetails;
 
     @Column(name = "execution_date")
     private LocalDateTime executionDate;
