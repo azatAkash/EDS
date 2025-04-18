@@ -4,7 +4,9 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.util.List;
+import java.util.Map;
 
+import com.student.edsbackend.configs.JsonConverter;
 import com.student.edsbackend.features.declaration.answers.UserDeclarationAnswer;
 import com.student.edsbackend.features.declaration.initial.dal.questions.InitialDeclarationQuestion;
 
@@ -30,8 +32,8 @@ public class InitialDeclarationOption {
     private InitialDeclarationQuestion question;
 
     @Column(name = "description", nullable = false, columnDefinition = "json")
-@Convert(converter = JsonConverter.class)
-private Map<String, String> description;
+    @Convert(converter = JsonConverter.class)
+    private Map<String, String> description;
 
     @Column(name = "additional_answer_description", columnDefinition = "text")
     private String additionalAnswerDescription;
