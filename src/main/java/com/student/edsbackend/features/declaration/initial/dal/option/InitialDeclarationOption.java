@@ -6,6 +6,9 @@ import lombok.*;
 import java.util.List;
 import java.util.Map;
 
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
+
 import com.student.edsbackend.configs.JsonConverter;
 import com.student.edsbackend.features.declaration.answers.UserDeclarationAnswer;
 import com.student.edsbackend.features.declaration.initial.dal.questions.InitialDeclarationQuestion;
@@ -31,8 +34,9 @@ public class InitialDeclarationOption {
     @JoinColumn(name = "question_id", nullable = false)
     private InitialDeclarationQuestion question;
 
-    @Column(name = "description", nullable = false, columnDefinition = "json")
+    @JdbcTypeCode(SqlTypes.JSON)
     @Convert(converter = JsonConverter.class)
+    @Column(name = "description", nullable = false, columnDefinition = "json")
     private Map<String, String> description;
 
     @Column(name = "additional_answer_description", columnDefinition = "text")

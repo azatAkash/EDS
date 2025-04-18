@@ -6,6 +6,9 @@ import lombok.*;
 import java.util.List;
 import java.util.Map;
 
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
+
 import com.student.edsbackend.configs.JsonConverter;
 import com.student.edsbackend.features.declaration.answers.UserDeclarationAdditionalAnswer;
 
@@ -30,8 +33,9 @@ public class AdditionalAnswerOption {
     @JoinColumn(name = "option_id", nullable = false)
     private InitialDeclarationOption option;
 
-    @Column(name = "description", nullable = false, columnDefinition = "json")
+    @JdbcTypeCode(SqlTypes.JSON)
     @Convert(converter = JsonConverter.class)
+    @Column(name = "description", nullable = false, columnDefinition = "json")
     private Map<String, String> description;
 
     @Column(name = "is_required")

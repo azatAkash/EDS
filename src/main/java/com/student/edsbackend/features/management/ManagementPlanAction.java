@@ -7,6 +7,9 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
+
 import com.student.edsbackend.configs.JsonConverter;
 
 /**
@@ -26,8 +29,9 @@ public class ManagementPlanAction {
     @Column(name = "id")
     private Integer id;
 
+    @JdbcTypeCode(SqlTypes.JSON)
+@Convert(converter = JsonConverter.class)
     @Column(name = "description", columnDefinition = "json")
-    @Convert(converter = JsonConverter.class)
     private Map<String, String> description; // JSON structure for multilingual text {en, ru, kz}
 
     @Column(name = "is_deleted")

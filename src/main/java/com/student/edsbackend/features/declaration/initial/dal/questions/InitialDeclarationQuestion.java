@@ -6,6 +6,9 @@ import lombok.*;
 import java.util.List;
 import java.util.Map;
 
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
+
 import com.student.edsbackend.configs.JsonConverter;
 import com.student.edsbackend.features.declaration.initial.dal.declaration_metadata.InitialDeclaration;
 import com.student.edsbackend.features.declaration.initial.dal.option.InitialDeclarationOption;
@@ -35,16 +38,18 @@ public class InitialDeclarationQuestion {
     @JoinColumn(name = "declaration_id", nullable = false)
     private InitialDeclaration declaration;
 
-    @Column(name = "description", columnDefinition = "json", nullable = false)
+    @JdbcTypeCode(SqlTypes.JSON)
     @Convert(converter = JsonConverter.class)
+    @Column(name = "description", columnDefinition = "json", nullable = false)
     private Map<String, String> description;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "question_type", nullable = false)
     private QuestionType questionType;
 
+    @JdbcTypeCode(SqlTypes.JSON)
+@Convert(converter = JsonConverter.class)
     @Column(name = "note", columnDefinition = "json")
-    @Convert(converter = JsonConverter.class)
     private Map<String, String> note;
 
     @Column(name = "is_required", nullable = false)
