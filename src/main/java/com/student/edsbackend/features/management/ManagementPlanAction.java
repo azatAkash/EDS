@@ -5,6 +5,9 @@ import lombok.*;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
+
+import com.student.edsbackend.configs.JsonConverter;
 
 /**
  * Entity representing the management_plan_actions table.
@@ -24,7 +27,8 @@ public class ManagementPlanAction {
     private Integer id;
 
     @Column(name = "description", columnDefinition = "json")
-    private String description; // JSON structure for multilingual text {en, ru, kz}
+@Convert(converter = JsonConverter.class)
+private Map<String, String> description; // JSON structure for multilingual text {en, ru, kz}
     
     @Column(name = "is_deleted")
     private Boolean isDeleted;

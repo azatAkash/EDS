@@ -9,6 +9,7 @@ import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Detailed DTO for transferring UserInitialDeclaration data with nested questions, options, and additional options
@@ -36,9 +37,9 @@ public class InitialDeclarationDetailedDTO {
         private Integer id;
         private Integer orderNumber;
         private Integer declarationId;
-        private String description;
+        private Map<String, String> description;
         private String questionType;
-        private String note;
+        private Map<String, String> note;
         private Boolean isRequired;
         private Boolean isDeleted;
         private List<OptionDTO> options;
@@ -51,7 +52,7 @@ public class InitialDeclarationDetailedDTO {
     public static class OptionDTO {
         private Integer id;
         private Integer questionId;
-        private String description;
+        private Map<String, String> description;
         private String additionalAnswerDescription;
         private Boolean multipleAdditionalAnswers;
         private Boolean isConflict;
@@ -66,7 +67,7 @@ public class InitialDeclarationDetailedDTO {
     public static class AdditionalOptionDTO {
         private Integer id;
         private Integer optionId;
-        private String description;
+        private Map<String, String> description;
         private Boolean isRequired;
         private Boolean isDeleted;
     }

@@ -4,7 +4,9 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.util.List;
+import java.util.Map;
 
+import com.student.edsbackend.configs.JsonConverter;
 import com.student.edsbackend.features.declaration.initial.dal.declaration_metadata.InitialDeclaration;
 import com.student.edsbackend.features.declaration.initial.dal.option.InitialDeclarationOption;
 import com.student.edsbackend.features.enums.QuestionType;
@@ -33,15 +35,17 @@ public class InitialDeclarationQuestion {
     @JoinColumn(name = "declaration_id", nullable = false)
     private InitialDeclaration declaration;
 
-    @Column(name = "description", nullable = false, columnDefinition = "text")
-    private String description;
+    @Column(name = "description", columnDefinition = "json", nullable = false)
+    @Convert(converter = JsonConverter.class)
+    private Map<String, String> description;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "question_type", nullable = false)
     private QuestionType questionType;
 
-    @Column(name = "note", columnDefinition = "text")
-    private String note;
+    @Column(name = "note", columnDefinition = "json")
+    @Convert(converter = JsonConverter.class)
+    private Map<String, String> note;
 
     @Column(name = "is_required", nullable = false)
     private Boolean isRequired;

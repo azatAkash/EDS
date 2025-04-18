@@ -1,6 +1,7 @@
 package com.student.edsbackend.features.declaration.initial.dal.questions;
 
 import java.util.List;
+import java.util.Map;
 
 import com.student.edsbackend.features.declaration.initial.dal.option.InitialDeclarationOptionDTO;
 import com.student.edsbackend.features.enums.QuestionType;
@@ -22,9 +23,9 @@ public class InitialDeclarationQuestionDTO {
     private Integer id;
     private Short orderNumber;
     private Integer declarationId;
-    private String description;
+    private Map<String, String> description;
     private QuestionType questionType;
-    private String note;
+    private Map<String, String> note;
     private Boolean isRequired;
     private Boolean isDeleted;
 }

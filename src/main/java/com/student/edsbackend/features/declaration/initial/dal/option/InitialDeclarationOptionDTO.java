@@ -16,7 +16,7 @@ import lombok.NoArgsConstructor;
 public class InitialDeclarationOptionDTO {
     private Integer id;
     private Integer questionId;
-    private String description;
+    private Map<String, String> description;
     private String additionalAnswerDescription;
     private Boolean multipleAdditionalAnswers;
     private Boolean isConflict;

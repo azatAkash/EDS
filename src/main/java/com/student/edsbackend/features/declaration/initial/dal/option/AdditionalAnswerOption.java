@@ -4,7 +4,9 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.util.List;
+import java.util.Map;
 
+import com.student.edsbackend.configs.JsonConverter;
 import com.student.edsbackend.features.declaration.answers.UserDeclarationAdditionalAnswer;
 
 /**
@@ -28,8 +30,9 @@ public class AdditionalAnswerOption {
     @JoinColumn(name = "option_id", nullable = false)
     private InitialDeclarationOption option;
 
-    @Column(name = "description", nullable = false, columnDefinition = "text")
-    private String description;
+    @Column(name = "description", nullable = false, columnDefinition = "json")
+    @Convert(converter = JsonConverter.class)
+    private Map<String, String> description;
 
     @Column(name = "is_required")
     private Boolean isRequired;

@@ -29,8 +29,9 @@ public class InitialDeclarationOption {
     @JoinColumn(name = "question_id", nullable = false)
     private InitialDeclarationQuestion question;
 
-    @Column(name = "description", nullable = false, columnDefinition = "text")
-    private String description;
+    @Column(name = "description", nullable = false, columnDefinition = "json")
+@Convert(converter = JsonConverter.class)
+private Map<String, String> description;
 
     @Column(name = "additional_answer_description", columnDefinition = "text")
     private String additionalAnswerDescription;

@@ -1,6 +1,7 @@
 package com.student.edsbackend.features.declaration.initial.dal.questions;
 
 import java.util.List;
+import java.util.Map;
 
 import com.student.edsbackend.features.declaration.initial.dal.option.InitialDeclarationOptionDTO;
 import com.student.edsbackend.features.enums.QuestionType;
@@ -26,13 +27,13 @@ public class InitialDeclarationQuestionRequestDTO {
     private Integer declarationId;
     
     @Schema(description = "Question description", example = "Do you have any conflicts of interest?")
-    private String description;
+    private Map<String, String> description;
     
     @Schema(description = "Type of question", example = "YES_NO")
     private QuestionType questionType;
     
     @Schema(description = "Additional note for the question", example = "Please select all that apply")
-    private String note;
+    private Map<String, String> note;
     
     @Schema(description = "Whether the question is required", example = "true")
     private Boolean isRequired;

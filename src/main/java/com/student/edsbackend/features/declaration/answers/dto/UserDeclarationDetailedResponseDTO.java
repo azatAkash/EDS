@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Comprehensive DTO that combines declaration questions with user answers
@@ -38,9 +39,9 @@ public class UserDeclarationDetailedResponseDTO {
     public static class QuestionWithAnswerDTO {
         private Integer id;
         private Integer orderNumber;
-        private String description;
+        private Map<String, String> description;
         private String questionType;
-        private String note;
+        private Map<String, String> note;
         private Boolean isRequired;
         private List<OptionWithAnswerDTO> optionsWithAnswers;
     }
@@ -54,7 +55,7 @@ public class UserDeclarationDetailedResponseDTO {
     @AllArgsConstructor
     public static class OptionWithAnswerDTO {
         private Integer id;
-        private String description;
+        private Map<String, String> description;
         private String additionalAnswerDescription;
         private Boolean multipleAdditionalAnswers;
         private Boolean isConflict;
@@ -86,7 +87,7 @@ public class UserDeclarationDetailedResponseDTO {
     @AllArgsConstructor
     public static class AdditionalAnswerDTO {
         private Integer additionalAnswerId;
-        private String description;
+        private Map<String, String> description;
         private Boolean isRequired;
         private String answer;
     }

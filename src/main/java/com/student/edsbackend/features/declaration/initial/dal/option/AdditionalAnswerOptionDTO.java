@@ -1,5 +1,7 @@
 package com.student.edsbackend.features.declaration.initial.dal.option;
 
+import java.util.Map;
+
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -16,7 +18,8 @@ import lombok.NoArgsConstructor;
 public class AdditionalAnswerOptionDTO {
     private Integer id;
     private Integer optionId;
-    private String description;
+    private Map<String, String> description;
+
     private Boolean isRequired;
     private Boolean isDeleted;
 }

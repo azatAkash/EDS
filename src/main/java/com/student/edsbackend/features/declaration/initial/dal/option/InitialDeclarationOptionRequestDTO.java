@@ -1,5 +1,7 @@
 package com.student.edsbackend.features.declaration.initial.dal.option;
 
+import java.util.Map;
+
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -18,7 +20,7 @@ public class InitialDeclarationOptionRequestDTO {
     private Integer questionId;
     
     @Schema(description = "Option description", example = "Yes")
-    private String description;
+    private Map<String, String> description;
     
     @Schema(description = "Description for additional answer if required", example = "Please provide details")
     private String additionalAnswerDescription;
