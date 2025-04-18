@@ -7,6 +7,7 @@ import com.student.edsbackend.features.management.ManagementPlanAction;
 import com.student.edsbackend.features.management.UserManagementPlan;
 import com.student.edsbackend.features.management.dto.UserManagementPlanDTO;
 import com.student.edsbackend.features.management.dto.UserManagementPlanRequestDTO;
+import com.student.edsbackend.features.management.dto.UserManagementPlanUpdateDTO;
 import com.student.edsbackend.features.management.repository.ManagementPlanActionRepository;
 import com.student.edsbackend.features.management.repository.UserManagementPlanRepository;
 import com.student.edsbackend.features.management.service.UserManagementPlanService;
@@ -85,6 +86,33 @@ public class UserManagementPlanServiceImpl implements UserManagementPlanService 
                 (requestDTO.getUserDeclarationId() != null && requestDTO.getAdHocId() != null)) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
                     "Either userDeclarationId or adHocId must be provided, but not both");
+        }
+        
+        // Validate that there is no existing active management plan for the same declaration or adhoc
+        if (requestDTO.getUserDeclarationId() != null) {
+            List<UserManagementPlan> existingPlans = managementPlanRepository
+                .findByUserDeclarationIdAndIsDeletedFalse(requestDTO.getUserDeclarationId());
+            
+            boolean hasActiveManagementPlan = existingPlans.stream()
+                .anyMatch(plan -> !plan.getIsAmended());
+                
+            if (hasActiveManagementPlan) {
+                throw new ResponseStatusException(HttpStatus.CONFLICT,
+                    "An active management plan already exists for this user declaration");
+            }
+        }
+        
+        if (requestDTO.getAdHocId() != null) {
+            List<UserManagementPlan> existingPlans = managementPlanRepository
+                .findByAdHocIdAndIsDeletedFalse(requestDTO.getAdHocId());
+                
+            boolean hasActiveManagementPlan = existingPlans.stream()
+                .anyMatch(plan -> !plan.getIsAmended());
+                
+            if (hasActiveManagementPlan) {
+                throw new ResponseStatusException(HttpStatus.CONFLICT,
+                    "An active management plan already exists for this ad hoc declaration");
+            }
         }
 
         User currentUser = getCurrentUser();
@@ -228,6 +256,44 @@ public class UserManagementPlanServiceImpl implements UserManagementPlanService 
         }
 
         return false;
+    }
+    
+    @Override
+    public UserManagementPlanDTO updateManagementPlanStatus(Integer id, UserManagementPlanUpdateDTO updateDTO) {
+        // Find the management plan by ID
+        UserManagementPlan managementPlan = managementPlanRepository.findByIdAndIsDeletedFalse(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, 
+                        "Management plan with id " + id + " not found"));
+        
+        // Check if the user has access to this management plan
+        if (!hasAccessToManagementPlan(managementPlan)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, 
+                    "You don't have access to this management plan");
+        }
+        
+        // Update fields based on the DTO
+        if (updateDTO.getReasonNonExecution() != null) {
+            managementPlan.setReasonNonExecution(updateDTO.getReasonNonExecution());
+        }
+        
+        if (updateDTO.getAcknowledgedByUser() != null) {
+            managementPlan.setAcknowledgedByUser(updateDTO.getAcknowledgedByUser());
+            
+            // If user acknowledges the plan, set confirmation date to now
+            if (updateDTO.getAcknowledgedByUser()) {
+                managementPlan.setConfirmationDate(LocalDateTime.now());
+                managementPlan.setStatus(ManagementPlanStatus.AGREED);
+            } else {
+                // If user does not acknowledge, set status to REFUSED
+                managementPlan.setStatus(ManagementPlanStatus.REFUSED);
+            }
+        }
+        
+        // Save the updated management plan
+        UserManagementPlan updatedPlan = managementPlanRepository.save(managementPlan);
+        
+        // Return the updated plan as DTO
+        return mapToDTO(updatedPlan);
     }
 
     /**

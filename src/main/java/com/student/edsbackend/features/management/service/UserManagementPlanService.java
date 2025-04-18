@@ -3,6 +3,7 @@ package com.student.edsbackend.features.management.service;
 import com.student.edsbackend.features.management.UserManagementPlan;
 import com.student.edsbackend.features.management.dto.UserManagementPlanDTO;
 import com.student.edsbackend.features.management.dto.UserManagementPlanRequestDTO;
+import com.student.edsbackend.features.management.dto.UserManagementPlanUpdateDTO;
 
 import java.util.List;
 import java.util.Optional;
@@ -53,4 +54,12 @@ public interface UserManagementPlanService {
      * @return true if the user has access, false otherwise
      */
     boolean hasAccessToManagementPlan(UserManagementPlan managementPlan);
+    
+    /**
+     * Update the status of a management plan
+     * @param id the ID of the management plan to update
+     * @param updateDTO the DTO containing the update data
+     * @return the updated management plan
+     */
+    UserManagementPlanDTO updateManagementPlanStatus(Integer id, UserManagementPlanUpdateDTO updateDTO);
 }

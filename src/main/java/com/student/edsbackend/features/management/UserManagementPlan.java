@@ -43,7 +43,7 @@ public class UserManagementPlan {
     private User createdBy;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "responsible", nullable = false)
+    @JoinColumn(name = "responsible")
     private User responsible;
 
     @Enumerated(EnumType.STRING)

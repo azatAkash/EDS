@@ -61,7 +61,7 @@ public interface UserInitialDeclarationService {
      * @param status The new status to set for the declaration
      * @return The updated user initial declaration with the new status
      */
-    UserInitialDeclarationDTO verifyDeclaration(Integer id, UserInitialDeclarationUpdateDTO updateDTO);
+    UserInitialDeclarationDTO updateResponsible(Integer id, UserInitialDeclarationRequestDTO updateDTO);
 
     /**
      * Delete a user initial declaration (soft delete)

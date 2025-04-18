@@ -10,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.lang.NonNull;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -51,17 +52,33 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 if (userEmail != null && SecurityContextHolder.getContext().getAuthentication() == null) {
                     UserDetails userDetails = userDetailsService.loadUserByUsername(userEmail);
 
-                    // Debug logging: Check extracted values and token validity
-                    System.out.println("Extracted role: " + jwtService.extractRole(jwt));
+                    // Extract role from token
+                    String tokenRole = jwtService.extractRole(jwt);
+                    
+                    // Get current user role from database
+                    String currentRole = userDetails.getAuthorities().stream()
+                            .findFirst()
+                            .map(GrantedAuthority::getAuthority)
+                            .orElse(null);
+                    
+                    // Debug logging
+                    System.out.println("Token role: " + tokenRole);
+                    System.out.println("Current DB role: " + currentRole);
                     System.out.println("Token validity: " + jwtService.isTokenValid(jwt, userDetails));
 
-                    if (jwtService.isTokenValid(jwt, userDetails)) {
-                        String role = jwtService.extractRole(jwt);
-                        List<SimpleGrantedAuthority> authorities = List.of(new SimpleGrantedAuthority(role));
+                    // Validate token and check if roles match
+                    if (jwtService.isTokenValid(jwt, userDetails) && tokenRole != null && tokenRole.equals(currentRole)) {
+                        List<SimpleGrantedAuthority> authorities = List.of(new SimpleGrantedAuthority(currentRole));
                         UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(userDetails,
                                 null, authorities);
                         authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                         SecurityContextHolder.getContext().setAuthentication(authToken);
+                    } else if (!tokenRole.equals(currentRole)) {
+                        // Role mismatch - token role doesn't match current user role
+                        response.setStatus(HttpStatus.FORBIDDEN.value());
+                        response.getWriter().write("Role mismatch: Your permissions have changed since this token was issued");
+                        response.setContentType("application/json");
+                        return; // Stop filter chain for role mismatch
                     }
                 }
             } catch (ExpiredJwtException ex) {

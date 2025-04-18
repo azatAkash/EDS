@@ -44,14 +44,14 @@ public class UserInitialDeclarationController {
         return ResponseEntity.ok(updatedDeclaration);
     }
 
-    @PatchMapping("/{id}/verify")
+    @PatchMapping("/{id}/responsible")
     @Operation(summary = "Verify a user initial declaration",
             description = "Changes the declaration status. Accessible by SUPER_ADMIN, ADMIN, and MANAGER")
-    @PreAuthorize("hasAnyAuthority('SUPER_ADMIN', 'ADMIN', 'MANAGER')")
+    @PreAuthorize("hasAnyAuthority('SUPER_ADMIN', 'ADMIN')")
     public ResponseEntity<UserInitialDeclarationDTO> verifyDeclaration(
             @PathVariable Integer id,
-            @RequestBody UserInitialDeclarationUpdateDTO updateDTO) {
-        UserInitialDeclarationDTO verifiedDeclaration = userInitialDeclarationService.verifyDeclaration(id, updateDTO);
+            @RequestBody UserInitialDeclarationRequestDTO updateDTO) {
+        UserInitialDeclarationDTO verifiedDeclaration = userInitialDeclarationService.updateResponsible(id, updateDTO);
         return ResponseEntity.ok(verifiedDeclaration);
     }
 

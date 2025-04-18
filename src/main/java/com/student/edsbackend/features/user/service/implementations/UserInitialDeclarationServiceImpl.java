@@ -3,6 +3,7 @@ package com.student.edsbackend.features.user.service.implementations;
 import com.student.edsbackend.features.declaration.initial.dal.declaration_metadata.InitialDeclaration;
 import com.student.edsbackend.features.declaration.initial.dal.declaration_metadata.InitialDeclarationRepository;
 import com.student.edsbackend.features.enums.UserDeclarationStatus;
+import com.student.edsbackend.features.user.dal.Role;
 import com.student.edsbackend.features.user.dal.User;
 import com.student.edsbackend.features.user.dal.UserRepository;
 import com.student.edsbackend.features.user.dal.UserDeclaration.UserInitialDeclaration;
@@ -59,7 +60,7 @@ public class UserInitialDeclarationServiceImpl implements UserInitialDeclaration
                 .filter(d -> d.getIsActive() && !d.getIsDeleted())
                 .findFirst()
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
-                "No active declaration found. Please ask Adminisrator to activate a declaration first."));
+                "No active declaration found. Please ask Administrator to activate a declaration first."));
 
         // Check if a record already exists for this user and declaration
         Optional<UserInitialDeclaration> existingDeclaration
@@ -71,13 +72,22 @@ public class UserInitialDeclarationServiceImpl implements UserInitialDeclaration
                     "A declaration already exists for this user and declaration");
         }
 
+        // Get current user from security context to set as responsible
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String currentUserEmail = authentication.getName();
+        
+        // Find the current user by email
+        User currentUser = userRepository.findByEmail(currentUserEmail)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+                "Current user not found"));
+                
         // Create new user declaration
         UserInitialDeclaration userInitialDeclaration = UserInitialDeclaration.builder()
                 .user(user)
                 .declaration(declaration)
                 .creationDate(LocalDateTime.now())
                 .status(UserDeclarationStatus.CREATED)
-                .responsible(null)
+                .responsible(currentUser)
                 .isDeleted(false)
                 .build();
 
@@ -109,9 +119,8 @@ public class UserInitialDeclarationServiceImpl implements UserInitialDeclaration
                 "User declaration not found with id: " + id));
 
         // Check if the declaration is already sent for approval
-        if (declaration.getStatus() == UserDeclarationStatus.SENT_FOR_APPROVAL) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                    "Declaration is already sent for approval");
+        if (declaration.getStatus() != UserDeclarationStatus.CREATED) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Declaration should have status created to be sent for approval cuurent status: " + declaration.getStatus());
         }
 
         // Update status to SENT_FOR_APPROVAL
@@ -123,7 +132,7 @@ public class UserInitialDeclarationServiceImpl implements UserInitialDeclaration
     }
 
     @Override
-    public UserInitialDeclarationDTO verifyDeclaration(Integer id, UserInitialDeclarationUpdateDTO updateDTO) {
+    public UserInitialDeclarationDTO updateResponsible(Integer id, UserInitialDeclarationRequestDTO updateDTO) {
         // Find the declaration
         UserInitialDeclaration declaration = userInitialDeclarationRepository.findById(id)
                 .filter(d -> !d.getIsDeleted())
@@ -136,32 +145,27 @@ public class UserInitialDeclarationServiceImpl implements UserInitialDeclaration
                     "Only declarations in SENT_FOR_APPROVAL status can be verified");
         }
 
-        // Validate the new status
-        if (updateDTO.getStatus() == null) {
+
+
+        // Update responsible if provided
+        if (updateDTO.getUserId() != null) {
+            User responsible = userRepository.findById(updateDTO.getUserId())
+                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+                    "Responsible user not found with id: " + updateDTO.getUserId()));
+
+            // Check if the responsible user is a manager or admin
+            if (responsible.getRole() != Role.MANAGER && responsible.getRole() != Role.ADMIN && responsible.getRole() != Role.SUPER_ADMIN) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                        "Only managers and admins can be responsible for a declaration");
+            }
+            declaration.setResponsible(responsible);
+        } else {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                    "Status must be provided for verification");
+                    "Responsible user is required");
         }
 
-        // Update status
-        declaration.setStatus(updateDTO.getStatus());
-
-        // // Update responsible if provided
-        // if (updateDTO.getResponsibleId() != null) {
-        //     User responsible = userRepository.findById(updateDTO.getResponsibleId())
-        //             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
-        //             "Responsible user not found with id: " + updateDTO.getResponsibleId()));
-        //     declaration.setResponsible(responsible);
-        // } else {
-        //     // Set the current user as responsible if not provided
-        //     Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        //     String currentUserEmail = authentication.getName();
-        //     User currentUser = userRepository.findByEmail(currentUserEmail)
-        //             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
-        //             "Current user not found"));
-        //     declaration.setResponsible(currentUser);
-        // }
-
         // Save and return
+
         UserInitialDeclaration updatedDeclaration = userInitialDeclarationRepository.save(declaration);
         return mapToDTO(updatedDeclaration);
     }

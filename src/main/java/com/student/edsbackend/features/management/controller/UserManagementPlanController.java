@@ -3,6 +3,7 @@ package com.student.edsbackend.features.management.controller;
 import com.student.edsbackend.features.ApiResponse;
 import com.student.edsbackend.features.management.dto.UserManagementPlanDTO;
 import com.student.edsbackend.features.management.dto.UserManagementPlanRequestDTO;
+import com.student.edsbackend.features.management.dto.UserManagementPlanUpdateDTO;
 import com.student.edsbackend.features.management.service.UserManagementPlanService;
 
 import jakarta.validation.Valid;
@@ -96,5 +97,14 @@ public class UserManagementPlanController {
                     HttpStatus.NOT_FOUND, "Management plan with id " + id + " not found");
         }
         return ResponseEntity.ok(new ApiResponse("Management plan ammended successfully"));
+    }
+
+    @PatchMapping("/{id}/status")
+    @PreAuthorize("hasAnyAuthority('SUPER_ADMIN', 'ADMIN', 'MANAGER', 'USER')")
+    public ResponseEntity<UserManagementPlanDTO> updateManagementPlanStatus(
+            @PathVariable Integer id,
+            @Valid @RequestBody UserManagementPlanUpdateDTO updateDTO) {
+        UserManagementPlanDTO updatedPlan = managementPlanService.updateManagementPlanStatus(id, updateDTO);
+        return ResponseEntity.ok(updatedPlan);
     }
 }

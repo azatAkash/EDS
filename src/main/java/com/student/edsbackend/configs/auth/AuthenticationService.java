@@ -391,5 +391,41 @@ public class AuthenticationService {
             response.setStatus(HttpServletResponse.SC_NOT_FOUND);
         }
     }
+    
+    /**
+     * Changes the password for a user after verifying their current password.
+     * This method ensures that only authenticated users can change their own password
+     * and that the current password is valid before allowing the change.
+     *
+     * @param userEmail the email of the authenticated user
+     * @param passwordChangeRequest contains the current password and new password
+     * @throws ResponseStatusException if the user is not found or the current password is invalid
+     */
+    public void changePassword(String userEmail, ChangePasswordRequestDTO passwordChangeRequest) {
+        // Find the user by email
+        User user = repository.findByEmail(userEmail)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+        
+        // Verify the current password
+        if (!passwordEncoder.matches(passwordChangeRequest.getCurrentPassword(), user.getPassword())) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Current password is incorrect");
+        }
+        
+        // Validate the new password (you can add more validation rules here)
+        if (passwordChangeRequest.getNewPassword() == null || passwordChangeRequest.getNewPassword().length() < 8) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "New password must be at least 8 characters long");
+        }
+        
+        if (!passwordChangeRequest.getNewPassword().equals(passwordChangeRequest.getConfirmationPassword())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "New password is different from the confirmation password");
+        }
+        // Encode and set the new password
+        user.setPassword(passwordEncoder.encode(passwordChangeRequest.getNewPassword()));
+        
+        // Save the updated user
+        repository.save(user);
+        
+        revokeAllUserTokens(user);
+    }
 }
 

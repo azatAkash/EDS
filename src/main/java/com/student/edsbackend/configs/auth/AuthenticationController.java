@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -83,6 +84,35 @@ public class AuthenticationController {
             return ResponseEntity.status(HttpServletResponse.SC_NOT_FOUND).body(new ApiResponse("Refresh token not found"));
         } else {
             return ResponseEntity.status(status).body(new ApiResponse("Logout failed"));
+        }
+    }
+    
+    /**
+     * Endpoint for changing a user's password.
+     * Requires authentication. The current password must be provided for verification.
+     * 
+     * @param passwordChangeRequest contains the current password and new password
+     * @return success message or error details
+     */
+    @PostMapping("/change-password")
+    public ResponseEntity<?> changePassword(@RequestBody ChangePasswordRequestDTO passwordChangeRequest) {
+        try {
+            // Get current authenticated user
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            String currentUserEmail = authentication.getName();
+            
+            // Call service to change password
+            service.changePassword(currentUserEmail, passwordChangeRequest);
+            
+            return ResponseEntity.ok(new ApiResponse("Password changed successfully"));
+        } catch (ResponseStatusException e) {
+            // Return the appropriate status code and error message
+            return ResponseEntity.status(e.getStatusCode())
+                    .body(new ApiResponse(e.getReason()));
+        } catch (Exception e) {
+            // If an unexpected exception occurs, return an internal server error
+            return ResponseEntity.status(HttpServletResponse.SC_INTERNAL_SERVER_ERROR)
+                    .body(new ApiResponse("Error changing password: " + e.getMessage()));
         }
     }
 }
