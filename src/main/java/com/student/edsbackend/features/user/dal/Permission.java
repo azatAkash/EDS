@@ -6,10 +6,10 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public enum Permission {
 
-    SUPER_ADMIN("super_admin:max"),
-    ADMIN("admin:pro"),
-    MANAGER("manager:plus"),
-    USER("user:basic");
+    SUPER_ADMIN("SUPER_ADMIN"),
+    ADMIN("ADMIN"),
+    MANAGER("MANAGER"),
+    USER("USER");
 
     @Getter
     private final String permission;

@@ -424,8 +424,6 @@ public class AuthenticationService {
         
         // Save the updated user
         repository.save(user);
-        
-        revokeAllUserTokens(user);
     }
 }
 
