@@ -36,7 +36,7 @@ public class InitialDeclarationOption {
     private Map<String, String> description;
 
     @Column(name = "additional_answer_description", columnDefinition = "text")
-    private String additionalAnswerDescription;
+    private Map<String, String> additionalAnswerDescription;
 
     @Column(name = "multiple_additional_answers")
     private Boolean multipleAdditionalAnswers;

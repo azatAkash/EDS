@@ -23,7 +23,7 @@ public class InitialDeclarationOptionRequestDTO {
     private Map<String, String> description;
     
     @Schema(description = "Description for additional answer if required", example = "Please provide details")
-    private String additionalAnswerDescription;
+    private Map<String, String> additionalAnswerDescription;
     
     @Schema(description = "Whether multiple additional answers are allowed", example = "false")
     private Boolean multipleAdditionalAnswers;

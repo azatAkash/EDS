@@ -56,7 +56,7 @@ public class UserDeclarationDetailedResponseDTO {
     public static class OptionWithAnswerDTO {
         private Integer id;
         private Map<String, String> description;
-        private String additionalAnswerDescription;
+        private Map<String, String> additionalAnswerDescription;
         private Boolean multipleAdditionalAnswers;
         private Boolean isConflict;
         
