@@ -23,14 +23,18 @@ public class InitialDeclarationQuestionUpdateDTO {
     @Schema(description = "Question order number", example = "1")
     private Short orderNumber;
     
-    @Schema(description = "Question description", example = "Do you have any conflicts of interest?")
-    private Map<String, String> description;
+    @Schema(
+        description = "Question description in multiple languages",
+        example = "{\"en\": \"Do you have any conflicts of interest?\", \"ru\": \"Есть ли у вас конфликт интересов?\", \"kz\": \"Сізде мүдделер қақтығысы бар ма?\"}"
+    )    private Map<String, String> description;
     
     @Schema(description = "Type of question", example = "MULTIPLE_CHOICE")
     private QuestionType questionType;
     
-    @Schema(description = "Additional note for the question", example = "Please select all that apply")
-    private Map<String, String> note;
+    @Schema(
+        description = "Question description in multiple languages",
+        example = "{\"en\": \"Do you have any conflicts of interest?\", \"ru\": \"Есть ли у вас конфликт интересов?\", \"kz\": \"Сізде мүдделер қақтығысы бар ма?\"}"
+    )    private Map<String, String> note;
     
     @Schema(description = "Whether the question is required", example = "true")
     private Boolean isRequired;

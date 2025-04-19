@@ -48,7 +48,7 @@ public class InitialDeclarationQuestion {
     private QuestionType questionType;
 
     @JdbcTypeCode(SqlTypes.JSON)
-@Convert(converter = JsonConverter.class)
+    @Convert(converter = JsonConverter.class)
     @Column(name = "note", columnDefinition = "json")
     private Map<String, String> note;
 

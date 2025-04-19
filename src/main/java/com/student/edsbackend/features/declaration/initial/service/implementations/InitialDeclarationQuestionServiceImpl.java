@@ -1,5 +1,6 @@
 package com.student.edsbackend.features.declaration.initial.service.implementations;
 
+import com.student.edsbackend.configs.JsonConverter;
 import com.student.edsbackend.features.ApiResponse;
 import com.student.edsbackend.features.declaration.answers.UserDeclarationAnswerRepository;
 import com.student.edsbackend.features.declaration.initial.dal.declaration_metadata.InitialDeclarationDTO;
@@ -62,9 +63,9 @@ public class InitialDeclarationQuestionServiceImpl implements InitialDeclaration
         InitialDeclarationQuestion question = InitialDeclarationQuestion.builder()
                 .orderNumber(questionDTO.getOrderNumber())
                 .declaration(declaration)
-                .description(questionDTO.getDescription())
+                .description(JsonConverter.ensureLangs(questionDTO.getDescription()))
                 .questionType(questionDTO.getQuestionType())
-                .note(questionDTO.getNote())
+                .note(JsonConverter.ensureLangs(questionDTO.getNote()))
                 .isRequired(questionDTO.getIsRequired())
                 .isDeleted(false) // Set default value
                 .build();
@@ -138,9 +139,9 @@ public class InitialDeclarationQuestionServiceImpl implements InitialDeclaration
                 .id(question.getId())
                 .orderNumber(question.getOrderNumber())
                 .declarationId(question.getDeclaration().getId())
-                .description(question.getDescription())
+                .description(JsonConverter.ensureLangs(question.getDescription()))
                 .questionType(question.getQuestionType())
-                .note(question.getNote())
+                .note(JsonConverter.ensureLangs(question.getNote()))
                 .isRequired(question.getIsRequired())
                 .isDeleted(question.getIsDeleted())
                 .build();

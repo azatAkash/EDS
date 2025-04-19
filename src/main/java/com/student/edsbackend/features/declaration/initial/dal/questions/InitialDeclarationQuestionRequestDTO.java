@@ -26,13 +26,17 @@ public class InitialDeclarationQuestionRequestDTO {
     @Schema(description = "Declaration ID this question belongs to", example = "1")
     private Integer declarationId;
     
-    @Schema(description = "Question description", example = "Do you have any conflicts of interest?")
+    @Schema(
+    description = "Question description in multiple languages",
+    example = "{\"en\": \"Do you have any conflicts of interest?\", \"ru\": \"Есть ли у вас конфликт интересов?\", \"kz\": \"Сізде мүдделер қақтығысы бар ма?\"}")
     private Map<String, String> description;
     
     @Schema(description = "Type of question", example = "YES_NO")
     private QuestionType questionType;
     
-    @Schema(description = "Additional note for the question", example = "Please select all that apply")
+    @Schema(
+    description = "Question description in multiple languages",
+    example = "{\"en\": \"Do you have any conflicts of interest?\", \"ru\": \"Есть ли у вас конфликт интересов?\", \"kz\": \"Сізде мүдделер қақтығысы бар ма?\"}")
     private Map<String, String> note;
     
     @Schema(description = "Whether the question is required", example = "true")

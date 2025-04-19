@@ -18,8 +18,10 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class AdditionalAnswerOptionUpdateDTO {
 
-    @Schema(description = "Additional answer option description", example = "Please provide details")
-    private Map<String, String> description;
+    @Schema(
+        description = "Question description in multiple languages",
+        example = "{\"en\": \"Do you have any conflicts of interest?\", \"ru\": \"Есть ли у вас конфликт интересов?\", \"kz\": \"Сізде мүдделер қақтығысы бар ма?\"}"
+    )    private Map<String, String> description;
 
 
     @Schema(description = "Whether this additional answer is required", example = "true")

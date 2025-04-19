@@ -30,7 +30,7 @@ public class ManagementPlanAction {
     private Integer id;
 
     @JdbcTypeCode(SqlTypes.JSON)
-@Convert(converter = JsonConverter.class)
+    @Convert(converter = JsonConverter.class)
     @Column(name = "description", columnDefinition = "json")
     private Map<String, String> description; // JSON structure for multilingual text {en, ru, kz}
 

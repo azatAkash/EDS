@@ -4,7 +4,12 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.util.List;
+import java.util.Map;
 
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
+
+import com.student.edsbackend.configs.JsonConverter;
 import com.student.edsbackend.features.declaration.answers.UserAdHocDeclareAnswer;
 
 /**
@@ -24,8 +29,10 @@ public class AdHocCategory {
     @Column(name = "id")
     private Integer id;
 
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Convert(converter = JsonConverter.class)
     @Column(name = "description", columnDefinition = "json")
-    private String description; // JSON structure for multilingual text {en, ru, kz}
+    private Map<String, String> description; // JSON structure for multilingual text {en, ru, kz}
 
     @OneToMany(mappedBy = "category")
     private List<UserAdHocDeclareAnswer> userAdHocDeclareAnswers;

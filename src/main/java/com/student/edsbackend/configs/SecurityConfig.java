@@ -66,7 +66,14 @@ public class SecurityConfig {
                 .requestMatchers(PATCH, "/api/v1/initial-declarations/**").hasAnyAuthority(Role.SUPER_ADMIN.name())
 
 
-                
+                .requestMatchers("/api/v1/ad-hoc/**").hasAnyRole(Role.ADMIN.name(), Role.SUPER_ADMIN.name())
+                .requestMatchers(GET, "/api/v1/ad-hoc/**").hasAnyAuthority(Role.SUPER_ADMIN.name(), Role.ADMIN.name())
+                .requestMatchers(POST, "/api/v1/ad-hoc/**").hasAnyAuthority(Role.SUPER_ADMIN.name(), Role.ADMIN.name())
+                .requestMatchers(PUT, "/api/v1/ad-hoc/**").hasAuthority(Role.SUPER_ADMIN.name())
+                .requestMatchers(DELETE, "/api/v1/ad-hoc/**").hasAuthority(Role.SUPER_ADMIN.name())
+                .requestMatchers(PATCH, "/api/v1/ad-hoc/**").hasAnyAuthority(Role.SUPER_ADMIN.name(), Role.ADMIN.name(), Role.MANAGER.name())
+
+            
                 .anyRequest().authenticated()
                 )
                 .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))

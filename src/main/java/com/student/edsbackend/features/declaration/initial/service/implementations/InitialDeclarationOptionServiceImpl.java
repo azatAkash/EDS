@@ -1,5 +1,6 @@
 package com.student.edsbackend.features.declaration.initial.service.implementations;
 
+import com.student.edsbackend.configs.JsonConverter;
 import com.student.edsbackend.features.declaration.initial.dal.option.InitialDeclarationOption;
 import com.student.edsbackend.features.declaration.initial.dal.option.InitialDeclarationOptionDTO;
 import com.student.edsbackend.features.declaration.initial.dal.option.InitialDeclarationOptionRepository;
@@ -62,8 +63,8 @@ public class InitialDeclarationOptionServiceImpl implements InitialDeclarationOp
         // Convert DTO to entity
         InitialDeclarationOption option = InitialDeclarationOption.builder()
                 .question(question)
-                .description(request.getDescription())
-                .additionalAnswerDescription(request.getAdditionalAnswerDescription())
+                .description(JsonConverter.ensureLangs(request.getDescription()))
+                .additionalAnswerDescription(JsonConverter.ensureLangs(request.getAdditionalAnswerDescription()))
                 .multipleAdditionalAnswers(request.getMultipleAdditionalAnswers())
                 .isConflict(request.getIsConflict())
                 .isDeleted(false) // Set default value
@@ -94,8 +95,8 @@ public class InitialDeclarationOptionServiceImpl implements InitialDeclarationOp
         return InitialDeclarationOptionDTO.builder()
                 .id(option.getId())
                 .questionId(option.getQuestion().getId())
-                .description(option.getDescription())
-                .additionalAnswerDescription(option.getAdditionalAnswerDescription())
+                .description(JsonConverter.ensureLangs(option.getDescription()))
+                .additionalAnswerDescription(JsonConverter.ensureLangs(option.getAdditionalAnswerDescription()))
                 .multipleAdditionalAnswers(option.getMultipleAdditionalAnswers())
                 .isConflict(option.getIsConflict())
                 .isDeleted(option.getIsDeleted())

@@ -1,5 +1,6 @@
 package com.student.edsbackend.configs;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -34,4 +35,13 @@ public class JsonConverter implements AttributeConverter<Map<String, String>, St
             throw new IllegalArgumentException("Error reading JSON to map", e);
         }
     }
+
+    public static Map<String, String> ensureLangs(Map<String, String> input) {
+        Map<String, String> result = new HashMap<>();
+        result.put("en", input != null ? input.getOrDefault("en", "") : "");
+        result.put("ru", input != null ? input.getOrDefault("ru", "") : "");
+        result.put("kz", input != null ? input.getOrDefault("kz", "") : "");
+        return result;
+    }
+    
 }

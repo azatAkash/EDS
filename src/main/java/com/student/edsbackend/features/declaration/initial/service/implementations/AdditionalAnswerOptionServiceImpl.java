@@ -1,5 +1,6 @@
 package com.student.edsbackend.features.declaration.initial.service.implementations;
 
+import com.student.edsbackend.configs.JsonConverter;
 import com.student.edsbackend.features.declaration.initial.dal.option.AdditionalAnswerOption;
 import com.student.edsbackend.features.declaration.initial.dal.option.AdditionalAnswerOptionDTO;
 import com.student.edsbackend.features.declaration.initial.dal.option.AdditionalAnswerOptionRepository;
@@ -46,7 +47,7 @@ public class AdditionalAnswerOptionServiceImpl implements AdditionalAnswerOption
         // Convert DTO to entity
         AdditionalAnswerOption additionalAnswerOption = AdditionalAnswerOption.builder()
                 .option(option)
-                .description(request.getDescription())
+                .description(JsonConverter.ensureLangs(request.getDescription()))
                 .isRequired(request.getIsRequired())
                 .isDeleted(false) // Set default value
                 .build();
@@ -66,7 +67,7 @@ public class AdditionalAnswerOptionServiceImpl implements AdditionalAnswerOption
                 "Additional answer option not found with id: " + id));
 
         // Update fields - optionId is not allowed to be changed
-        additionalAnswerOption.setDescription(request.getDescription());
+        additionalAnswerOption.setDescription(JsonConverter.ensureLangs(request.getDescription()));
         additionalAnswerOption.setIsRequired(request.getIsRequired());
 
         // Save the updated additional answer option
