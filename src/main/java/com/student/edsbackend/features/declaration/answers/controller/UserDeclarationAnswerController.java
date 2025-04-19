@@ -1,5 +1,6 @@
 package com.student.edsbackend.features.declaration.answers.controller;
 
+import com.student.edsbackend.features.ApiResponse;
 import com.student.edsbackend.features.declaration.answers.dto.UserDeclarationAnswerRequestDTO;
 import com.student.edsbackend.features.declaration.answers.dto.UserDeclarationAnswerResponseDTO;
 import com.student.edsbackend.features.declaration.answers.dto.UserDeclarationDetailedResponseDTO;
@@ -40,12 +41,32 @@ public class UserDeclarationAnswerController {
         return ResponseEntity.ok(responseDTO);
     }
 
+    @DeleteMapping("/{id}")
+    @Operation(summary = "Delete a declaration answer by ID",
+            description = "Deletes a declaration answer by its ID. Only the owner, creator, or admin/super admin can delete.")
+    @PreAuthorize("hasAnyAuthority('USER', 'ADMIN', 'SUPER_ADMIN')")
+    public ResponseEntity<ApiResponse> deleteAnswerById(@PathVariable Integer id) {
+        userDeclarationAnswerService.deleteUserDeclarationAnswerById(id);
+        return ResponseEntity.ok(new ApiResponse("Answer deleted successfully"));
+    }
+    
+    // @GetMapping("/{id}")
+    // @Operation(summary = "Get declaration answer by ID", 
+    //         description = "Retrieves a declaration answer by its ID. Only admin and super admin can access.")
+    // @PreAuthorize("hasAnyAuthority('ADMIN', 'SUPER_ADMIN')")
+    // public ResponseEntity<UserDeclarationDetailedResponseDTO> getUserDeclarationAnswerById(@PathVariable Integer id) {
+    //     UserDeclarationDetailedResponseDTO responseDTO = userDeclarationAnswerService
+    //             .getUserDeclarationAnswerById(id);
+    //     return ResponseEntity.ok(responseDTO);
+    // }
+    
     @DeleteMapping
-    @Operation(summary = "Delete current user's declaration answers", description = "Soft-deletes all answers given by the current user for the active initial declaration.")
-    @PreAuthorize("hasAnyAuthority('MANAGER', 'ADMIN', 'SUPER_ADMIN')")
-    public ResponseEntity<Void> deleteCurrentUserDeclarationAnswers() {
+    @Operation(summary = "Delete all current user's declaration answers", 
+            description = "Deletes all answers for the current user's declaration.")
+    @PreAuthorize("hasAnyAuthority('USER', 'SUPER_ADMIN')")
+    public ResponseEntity<ApiResponse> deleteCurrentUserDeclarationAnswers() {
         userDeclarationAnswerService.deleteCurrentUserDeclarationAnswers();
-        return ResponseEntity.noContent().build();
+        return ResponseEntity.ok(new ApiResponse("All answers deleted successfully"));
     }
 
 }

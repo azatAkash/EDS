@@ -24,6 +24,20 @@ public interface UserDeclarationAnswerService {
      */
     UserDeclarationDetailedResponseDTO getCurrentUserDeclarationAnswers();
 
+    /**
+     * Get user's declaration answer by ID (for admin and super admin only)
+     * 
+     * @param id The ID of the answer to retrieve
+     * @return A response DTO with information about the user's answer
+     */
+    // UserDeclarationDetailedResponseDTO getUserDeclarationAnswerById(Integer id);
+
+    /**
+     * Delete a specific user declaration answer by ID
+     * 
+     * @param id The ID of the answer to delete
+     */
+    void deleteUserDeclarationAnswerById(Integer id);
 
     /**
      * Delete all user answers for the current declaration and current user

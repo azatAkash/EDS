@@ -65,7 +65,32 @@ public class UserDeclarationDetailedResponseDTO {
         private Boolean isAnswered;
         private String answer;
         private Boolean hasConflict;
-        private List<AdditionalAnswerGroupDTO> additionalAnswers;
+        private AdditionalAnswersContainerDTO additionalAnswers;
+    }
+    
+    /**
+     * DTO representing a container for additional answers with questions and answers
+     */
+    @Data
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class AdditionalAnswersContainerDTO {
+        private List<AdditionalQuestionDTO> questions;
+        private List<AdditionalAnswersGroupDTO> answers;
+    }
+    
+    /**
+     * DTO representing an additional question
+     */
+    @Data
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class AdditionalQuestionDTO {
+        private Integer id;
+        private Map<String, String> description;
+        private Boolean isRequired;
     }
     
     /**
@@ -75,7 +100,8 @@ public class UserDeclarationDetailedResponseDTO {
     @Builder
     @NoArgsConstructor
     @AllArgsConstructor
-    public static class AdditionalAnswerGroupDTO {
+    public static class AdditionalAnswersGroupDTO {
+        private Short orderIndex;
         private List<AdditionalAnswerDTO> answers;
     }
     
@@ -87,9 +113,8 @@ public class UserDeclarationDetailedResponseDTO {
     @NoArgsConstructor
     @AllArgsConstructor
     public static class AdditionalAnswerDTO {
+        private Integer id;
         private Integer additionalAnswerId;
-        private Map<String, String> description;
-        private Boolean isRequired;
         private String answer;
     }
 }

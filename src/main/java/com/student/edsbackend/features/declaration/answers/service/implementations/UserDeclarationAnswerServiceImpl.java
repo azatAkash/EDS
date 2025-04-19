@@ -102,6 +102,7 @@ public class UserDeclarationAnswerServiceImpl implements UserDeclarationAnswerSe
                                         .creationDate(LocalDateTime.now())
                                         .status(existingDeclaration.getStatus())
                                         .responsible(existingDeclaration.getResponsible())
+                                        .createdBy(currentUser) // Set the current user as the creator
                                         .isDeleted(false)
                                         .build();
 
@@ -325,7 +326,7 @@ public class UserDeclarationAnswerServiceImpl implements UserDeclarationAnswerSe
                 }
 
                 UserInitialDeclaration userDeclaration = userDeclarationOpt.get();
-
+                
                 // Get all declaration questions and options
                 List<InitialDeclarationOption> allOptions = initialDeclarationOptionRepository.findAll().stream()
                                 .filter(o -> !o.getIsDeleted())
@@ -401,12 +402,29 @@ public class UserDeclarationAnswerServiceImpl implements UserDeclarationAnswerSe
                                                                                 .collect(Collectors.groupingBy(
                                                                                                 UserDeclarationAdditionalAnswer::getOrderIndex));
 
-                                                                List<UserDeclarationDetailedResponseDTO.AdditionalAnswerGroupDTO> additionalAnswerGroups = new ArrayList<>();
+                                                                // Create questions list for additional answers
+                                                                List<UserDeclarationDetailedResponseDTO.AdditionalQuestionDTO> additionalQuestions = new ArrayList<>();
+                                                                List<UserDeclarationDetailedResponseDTO.AdditionalAnswersGroupDTO> additionalAnswerGroups = new ArrayList<>();
 
-                                                                // Process each group
+                                                                // Get all additional answer options for this option
+                                                                List<AdditionalAnswerOption> allAdditionalOptions = additionalAnswerOptionRepository.findByOptionIdAndIsDeletedFalse(option.getId());
+                                                                
+                                                                // Create questions list
+                                                                for (AdditionalAnswerOption answerOption : allAdditionalOptions) {
+                                                                    UserDeclarationDetailedResponseDTO.AdditionalQuestionDTO questionDTO = UserDeclarationDetailedResponseDTO.AdditionalQuestionDTO
+                                                                            .builder()
+                                                                            .id(answerOption.getId())
+                                                                            .description(answerOption.getDescription())
+                                                                            .isRequired(answerOption.getIsRequired())
+                                                                            .build();
+                                                                    additionalQuestions.add(questionDTO);
+                                                                }
+
+                                                                // Process each group of answers
                                                                 for (Map.Entry<Short, List<UserDeclarationAdditionalAnswer>> entry : answersByOrderIndex
                                                                                 .entrySet()) {
                                                                         List<UserDeclarationDetailedResponseDTO.AdditionalAnswerDTO> additionalAnswerDTOs = new ArrayList<>();
+                                                                        Short orderIndex = entry.getKey();
 
                                                                         // Convert each additional answer to DTO
                                                                         for (UserDeclarationAdditionalAnswer additionalAnswer : entry
@@ -416,12 +434,9 @@ public class UserDeclarationAnswerServiceImpl implements UserDeclarationAnswerSe
 
                                                                                 UserDeclarationDetailedResponseDTO.AdditionalAnswerDTO additionalAnswerDTO = UserDeclarationDetailedResponseDTO.AdditionalAnswerDTO
                                                                                                 .builder()
+                                                                                                .id(additionalAnswer.getId())
                                                                                                 .additionalAnswerId(
                                                                                                                 answerOption.getId())
-                                                                                                .description(answerOption
-                                                                                                                .getDescription())
-                                                                                                .isRequired(answerOption
-                                                                                                                .getIsRequired())
                                                                                                 .answer(additionalAnswer
                                                                                                                 .getAnswer())
                                                                                                 .build();
@@ -429,18 +444,25 @@ public class UserDeclarationAnswerServiceImpl implements UserDeclarationAnswerSe
                                                                                                 additionalAnswerDTO);
                                                                         }
 
-                                                                        // Create group DTO
-                                                                        UserDeclarationDetailedResponseDTO.AdditionalAnswerGroupDTO groupDTO = UserDeclarationDetailedResponseDTO.AdditionalAnswerGroupDTO
+                                                                        // Create group DTO with order index
+                                                                        UserDeclarationDetailedResponseDTO.AdditionalAnswersGroupDTO groupDTO = UserDeclarationDetailedResponseDTO.AdditionalAnswersGroupDTO
                                                                                         .builder()
+                                                                                        .orderIndex(orderIndex)
                                                                                         .answers(additionalAnswerDTOs)
                                                                                         .build();
 
                                                                         additionalAnswerGroups.add(groupDTO);
                                                                 }
 
-                                                                // Set additional answers to option
-                                                                optionWithAnswer.setAdditionalAnswers(
-                                                                                additionalAnswerGroups);
+                                                                // Create container with questions and answers
+                                                                UserDeclarationDetailedResponseDTO.AdditionalAnswersContainerDTO containerDTO = 
+                                                                    UserDeclarationDetailedResponseDTO.AdditionalAnswersContainerDTO.builder()
+                                                                        .questions(additionalQuestions)
+                                                                        .answers(additionalAnswerGroups)
+                                                                        .build();
+
+                                                                // Set additional answers container to option
+                                                                optionWithAnswer.setAdditionalAnswers(containerDTO);
                                                         }
                                                 }
 
@@ -590,6 +612,58 @@ public class UserDeclarationAnswerServiceImpl implements UserDeclarationAnswerSe
                 return null;
         }
 
+        @Override
+        @Transactional
+        public void deleteUserDeclarationAnswerById(Integer id) {
+                // Get current user from security context
+                Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+                String currentUserEmail = authentication.getName();
+
+                // Find the user by email
+                User currentUser = userRepository.findByEmail(currentUserEmail)
+                                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+                                                "Current user not found"));
+
+                // Find the answer by ID
+                UserDeclarationAnswer answer = userDeclarationAnswerRepository.findById(id)
+                                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+                                                "Answer not found with id: " + id));
+                
+                // Check if answer is already deleted
+                if (Boolean.TRUE.equals(answer.getIsDeleted())) {
+                        throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                                        "Answer is already deleted");
+                }
+
+                // Get the user declaration
+                UserInitialDeclaration userDeclaration = answer.getUserDeclaration();
+                
+                // Check if current user is authorized to delete this answer
+                // Only the owner, creator of the declaration, or admin/super admin can delete
+                boolean isOwner = userDeclaration.getUser().getId().equals(currentUser.getId());
+                boolean isCreator = userDeclaration.getDeclaration().getCreatedBy().getId().equals(currentUser.getId());
+                boolean isAdmin = currentUser.getRole().name().equals("ADMIN") || currentUser.getRole().name().equals("SUPER_ADMIN");
+                
+                if (!isOwner && !isCreator && !isAdmin) {
+                        throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+                                        "You are not authorized to delete this answer");
+                }
+
+                // Soft-delete additional answers first
+                List<UserDeclarationAdditionalAnswer> additionalAnswers = userDeclarationAdditionalAnswerRepository
+                                .findByUserDeclarationAnswerIdAndIsDeletedFalse(answer.getId());
+
+                for (UserDeclarationAdditionalAnswer additionalAnswer : additionalAnswers) {
+                        additionalAnswer.setIsDeleted(true);
+                }
+                userDeclarationAdditionalAnswerRepository.saveAll(additionalAnswers);
+
+                // Soft-delete the answer
+                answer.setIsDeleted(true);
+                userDeclarationAnswerRepository.save(answer);
+        }
+        
+        
         @Override
         @Transactional
         public void deleteCurrentUserDeclarationAnswers() {
