@@ -23,4 +23,10 @@ public interface UserDeclarationAnswerService {
      * @return A response DTO with information about the user's answers
      */
     UserDeclarationDetailedResponseDTO getCurrentUserDeclarationAnswers();
+
+
+    /**
+     * Delete all user answers for the current declaration and current user
+     */
+    void deleteCurrentUserDeclarationAnswers();
 }

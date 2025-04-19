@@ -22,21 +22,30 @@ public class UserDeclarationAnswerController {
     private final UserDeclarationAnswerService userDeclarationAnswerService;
 
     @PostMapping
-    @Operation(summary = "Save user declaration answers",
-            description = "Saves the user's answers to the initial declaration questions. User is identified from the security context.")
+    @Operation(summary = "Save user declaration answers", description = "Saves the user's answers to the initial declaration questions. User is identified from the security context.")
     @PreAuthorize("hasAnyAuthority('USER', 'SUPER_ADMIN')")
     public ResponseEntity<UserDeclarationAnswerResponseDTO> saveUserDeclarationAnswers(
             @RequestBody UserDeclarationAnswerRequestDTO requestDTO) {
-                UserDeclarationAnswerResponseDTO responseDTO = userDeclarationAnswerService.saveUserDeclarationAnswers(requestDTO);
+        UserDeclarationAnswerResponseDTO responseDTO = userDeclarationAnswerService
+                .saveUserDeclarationAnswers(requestDTO);
         return new ResponseEntity<>(responseDTO, HttpStatus.CREATED);
     }
 
     @GetMapping
-    @Operation(summary = "Get current user's declaration answers",
-            description = "Retrieves the current user's answers to the initial declaration questions. User is identified from the security context.")
+    @Operation(summary = "Get current user's declaration answers", description = "Retrieves the current user's answers to the initial declaration questions. User is identified from the security context.")
     @PreAuthorize("hasAnyAuthority('USER', 'SUPER_ADMIN', 'ADMIN', 'MANAGER')")
     public ResponseEntity<UserDeclarationDetailedResponseDTO> getCurrentUserDeclarationAnswers() {
-        UserDeclarationDetailedResponseDTO responseDTO = userDeclarationAnswerService.getCurrentUserDeclarationAnswers();
+        UserDeclarationDetailedResponseDTO responseDTO = userDeclarationAnswerService
+                .getCurrentUserDeclarationAnswers();
         return ResponseEntity.ok(responseDTO);
     }
+
+    @DeleteMapping
+    @Operation(summary = "Delete current user's declaration answers", description = "Soft-deletes all answers given by the current user for the active initial declaration.")
+    @PreAuthorize("hasAnyAuthority('MANAGER', 'ADMIN', 'SUPER_ADMIN')")
+    public ResponseEntity<Void> deleteCurrentUserDeclarationAnswers() {
+        userDeclarationAnswerService.deleteCurrentUserDeclarationAnswers();
+        return ResponseEntity.noContent().build();
+    }
+
 }

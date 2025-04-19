@@ -589,4 +589,61 @@ public class UserDeclarationAnswerServiceImpl implements UserDeclarationAnswerSe
                 }
                 return null;
         }
+
+        @Override
+        @Transactional
+        public void deleteCurrentUserDeclarationAnswers() {
+                // Get current user from security context
+                Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+                String currentUserEmail = authentication.getName();
+
+                // Find the user by email
+                User currentUser = userRepository.findByEmail(currentUserEmail)
+                                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+                                                "Current user not found"));
+
+                // Find the active declaration
+                InitialDeclaration activeDeclaration = initialDeclarationRepository.findAll().stream()
+                                .filter(d -> d.getIsActive() && !d.getIsDeleted())
+                                .findFirst()
+                                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+                                                "No active declaration found"));
+
+                // Make sure current user is the creator of the declaration
+                if (!activeDeclaration.getCreatedBy().getId().equals(currentUser.getId()) && !currentUser.getRole().name().equals("SUPER_ADMIN")) {
+                        throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+                                        "You are not allowed to delete answers for a declaration you didn't create");
+                }
+
+                // Find user's declaration
+                UserInitialDeclaration userDeclaration = userInitialDeclarationRepository
+                                .findByUserIdAndDeclarationIdAndIsDeletedFalse(currentUser.getId(),
+                                                activeDeclaration.getId())
+                                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+                                                "No declaration found for current user"));
+
+                // Get user answers
+                List<UserDeclarationAnswer> userAnswers = userDeclarationAnswerRepository.findAll().stream()
+                                .filter(a -> a.getUserDeclaration().getId().equals(userDeclaration.getId())
+                                                && !a.getIsDeleted())
+                                .toList();
+
+                // Soft-delete additional answers first
+                for (UserDeclarationAnswer answer : userAnswers) {
+                        List<UserDeclarationAdditionalAnswer> additionalAnswers = userDeclarationAdditionalAnswerRepository
+                                        .findByUserDeclarationAnswerIdAndIsDeletedFalse(answer.getId());
+
+                        for (UserDeclarationAdditionalAnswer additionalAnswer : additionalAnswers) {
+                                additionalAnswer.setIsDeleted(true);
+                        }
+                        userDeclarationAdditionalAnswerRepository.saveAll(additionalAnswers);
+                }
+
+                // Soft-delete user answers
+                for (UserDeclarationAnswer answer : userAnswers) {
+                        answer.setIsDeleted(true);
+                }
+                userDeclarationAnswerRepository.saveAll(userAnswers);
+        }
+
 }
