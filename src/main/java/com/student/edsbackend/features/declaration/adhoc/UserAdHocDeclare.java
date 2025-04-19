@@ -48,6 +48,14 @@ public class UserAdHocDeclare {
     @OneToMany(mappedBy = "adHoc")
     private List<UserManagementPlan> managementPlans;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "responsible")
+    private User responsible;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "created_by", nullable = false)
+    private User createdBy;
+
     @OneToMany(mappedBy = "userAdHocDeclare")
     private List<UserAdHocExclude> adHocExcludes;
 }

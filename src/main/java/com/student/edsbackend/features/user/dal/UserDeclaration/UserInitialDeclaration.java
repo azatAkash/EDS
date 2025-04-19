@@ -49,6 +49,10 @@ public class UserInitialDeclaration {
     @JoinColumn(name = "responsible")
     private User responsible;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "created_by", nullable = false)
+    private User createdBy;
+
     @Column(name = "is_deleted")
     private Boolean isDeleted;
 

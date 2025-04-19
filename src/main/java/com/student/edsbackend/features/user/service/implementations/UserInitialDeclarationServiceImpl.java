@@ -91,6 +91,7 @@ public class UserInitialDeclarationServiceImpl implements UserInitialDeclaration
                 .creationDate(LocalDateTime.now())
                 .status(UserDeclarationStatus.CREATED)
                 .responsible(currentUser)
+                .createdBy(currentUser)
                 .isDeleted(false)
                 .build();
 
@@ -226,6 +227,7 @@ public class UserInitialDeclarationServiceImpl implements UserInitialDeclaration
                 .userName(declaration.getUser().getFirstname() + " " + declaration.getUser().getLastname())
                 .declarationId(declaration.getDeclaration().getId())
                 .creationDate(declaration.getCreationDate())
+                .createdById(declaration.getCreatedBy().getId())
                 .status(declaration.getStatus())
                 .responsibleId(declaration.getResponsible() != null ? declaration.getResponsible().getId() : null)
                 .responsibleName(declaration.getResponsible() != null

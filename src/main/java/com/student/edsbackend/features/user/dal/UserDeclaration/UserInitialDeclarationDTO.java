@@ -25,6 +25,7 @@ public class UserInitialDeclarationDTO {
     private LocalDateTime creationDate;
     private UserDeclarationStatus status;
     private Integer responsibleId;
+    private Integer createdById;
     private String responsibleName; // Responsible person's name for display purposes
     private Boolean isDeleted;
 }

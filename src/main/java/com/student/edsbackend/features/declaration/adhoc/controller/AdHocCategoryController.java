@@ -21,7 +21,7 @@ import lombok.RequiredArgsConstructor;
  */
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/v1/ad-hoc-categories")
+@RequestMapping("/api/v1/adhoc-declarations/categories")
 @Tag(name = "Ad-Hoc Categories", description = "Endpoints for managing ad-hoc categories")
 public class AdHocCategoryController {
 
@@ -30,7 +30,7 @@ public class AdHocCategoryController {
     @GetMapping
     @Operation(summary = "Get all ad-hoc categories", 
             description = "Retrieves all ad-hoc categories")
-    @PreAuthorize("hasAnyAuthority('ADMIN', 'SUPER_ADMIN', 'MANAGER')")
+    @PreAuthorize("hasAnyAuthority('ADMIN', 'SUPER_ADMIN', 'MANAGER', 'USER')")
     public ResponseEntity<List<AdHocCategoryDTO>> getAllCategories() {
         List<AdHocCategoryDTO> categories = adHocCategoryService.getAllCategories();
         return ResponseEntity.ok(categories);
