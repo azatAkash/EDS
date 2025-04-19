@@ -60,18 +60,13 @@ public InitialDeclarationQuestionDTO createQuestion(InitialDeclarationQuestionRe
 
     Short finalOrderNumber = questionDTO.getOrderNumber();
 
-    if (finalOrderNumber == null) {
-        // Get max order from DB and add 1
-        short maxOrder = questionRepository.findMaxOrderNumberByDeclarationId(declaration.getId());
-        finalOrderNumber = (short) (maxOrder + 1);
-    } else {
-        // Check if the orderNumber is already taken
+    
         boolean exists = questionRepository.existsByDeclarationIdAndOrderNumberAndIsDeletedFalse(declaration.getId(), finalOrderNumber);
         if (exists) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
                     "Question order number already used for this declaration.");
         }
-    }
+    
 
     InitialDeclarationQuestion question = InitialDeclarationQuestion.builder()
             .orderNumber(finalOrderNumber)

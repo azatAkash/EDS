@@ -17,8 +17,5 @@ public interface InitialDeclarationQuestionRepository extends JpaRepository<Init
 
     List<InitialDeclarationQuestion> findByDeclarationIdAndIsDeletedFalseOrderByOrderNumberAsc(Integer declarationId);
 
-    @Query("SELECT COALESCE(MAX(q.orderNumber), 0) FROM InitialDeclarationQuestion q WHERE q.declaration.id = :declarationId AND q.isDeleted = false")
-    short findMaxOrderNumberByDeclarationId(@Param("declarationId") Integer declarationId);
-
     boolean existsByDeclarationIdAndOrderNumberAndIsDeletedFalse(Integer declarationId, Short orderNumber);
 }
