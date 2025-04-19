@@ -38,6 +38,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
 @Service
@@ -322,7 +323,7 @@ public class UserDeclarationAnswerServiceImpl implements UserDeclarationAnswerSe
                         throw new ResponseStatusException(HttpStatus.NOT_FOUND,
                                         "No declaration found for current user");
                 }
-                boolean globalHasConflict = false;
+
                 UserInitialDeclaration userDeclaration = userDeclarationOpt.get();
 
                 // Get all declaration questions and options
@@ -348,7 +349,7 @@ public class UserDeclarationAnswerServiceImpl implements UserDeclarationAnswerSe
 
                 // Get all questions for this declaration
                 List<UserDeclarationDetailedResponseDTO.QuestionWithAnswerDTO> questionsWithAnswers = new ArrayList<>();
-
+                AtomicBoolean globalHasConflict = new AtomicBoolean(false);
                 // For each question, build the question with options and answers
                 activeDeclaration.getQuestions().stream()
                                 .filter(q -> !q.getIsDeleted())
@@ -366,7 +367,7 @@ public class UserDeclarationAnswerServiceImpl implements UserDeclarationAnswerSe
                                                                 Boolean.TRUE.equals(option.getIsConflict()) &&
                                                                 (Boolean.TRUE.equals(userAnswer.getIsAnswered())
                                                                                 || userAnswer.getAnswer() != null)) {
-                                                        globalHasConflict = true;
+                                                        globalHasConflict.set(true);
                                                 }
                                                 // Build option with answer
                                                 UserDeclarationDetailedResponseDTO.OptionWithAnswerDTO optionWithAnswer = UserDeclarationDetailedResponseDTO.OptionWithAnswerDTO
@@ -464,7 +465,7 @@ public class UserDeclarationAnswerServiceImpl implements UserDeclarationAnswerSe
                 return UserDeclarationDetailedResponseDTO.builder()
                                 .userDeclarationId(userDeclaration.getId())
                                 .userId(currentUser.getId())
-                                .hasConflict(globalHasConflict)
+                                .hasConflict(globalHasConflict.get())
                                 .userName(currentUser.getFirstname() + " " + currentUser.getLastname())
                                 .declarationId(activeDeclaration.getId())
                                 .declarationName(activeDeclaration.getName())
