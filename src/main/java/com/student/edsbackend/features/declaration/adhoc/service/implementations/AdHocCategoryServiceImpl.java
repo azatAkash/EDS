@@ -1,6 +1,7 @@
 package com.student.edsbackend.features.declaration.adhoc.service.implementations;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -8,6 +9,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+import com.student.edsbackend.configs.JsonConverter;
 import com.student.edsbackend.features.declaration.adhoc.AdHocCategory;
 import com.student.edsbackend.features.declaration.adhoc.dto.AdHocCategoryDTO;
 import com.student.edsbackend.features.declaration.adhoc.repository.AdHocCategoryRepository;
@@ -40,6 +42,28 @@ public class AdHocCategoryServiceImpl implements AdHocCategoryService {
     @Override
     public AdHocCategoryDTO createCategory(AdHocCategoryDTO categoryDTO) {
         AdHocCategory category = mapToEntity(categoryDTO);
+        if (categoryDTO.getDescription() == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "Description is required");
+        }
+        Map<String, String> newDesc = JsonConverter.ensureLangs(categoryDTO.getDescription());
+
+        
+        List<AdHocCategory> existingCategories = adHocCategoryRepository.findAll();
+        for (AdHocCategory existing : existingCategories) {
+            Map<String, String> existingDesc = JsonConverter.ensureLangs(existing.getDescription());
+
+
+            for (String lang : List.of("en", "ru", "kz")) {
+                String newVal = newDesc.get(lang);
+                String existingVal = existingDesc.get(lang);
+                if (newVal != null && existingVal != null && newVal.trim().equalsIgnoreCase(existingVal.trim())) {
+                    throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                            "A category with the same " + lang + " description already exists");
+                }
+            }
+        }
+
         AdHocCategory savedCategory = adHocCategoryRepository.save(category);
         return mapToDTO(savedCategory);
     }
@@ -47,14 +71,39 @@ public class AdHocCategoryServiceImpl implements AdHocCategoryService {
     @Override
     public AdHocCategoryDTO updateCategory(Integer id, AdHocCategoryDTO categoryDTO) {
         AdHocCategory category = adHocCategoryRepository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, 
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
                         "Ad-hoc category not found with id: " + id));
-        
+
         // Update the category fields
-        if (categoryDTO.getDescription() != null) {
-            category.setDescription(categoryDTO.getDescription());
+        if (categoryDTO.getDescription() == null) {
+
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "Description is required");
+
         }
+
+
+        Map<String, String> newDesc = JsonConverter.ensureLangs(categoryDTO.getDescription());
+
         
+        List<AdHocCategory> existingCategories = adHocCategoryRepository.findAll();
+        for (AdHocCategory existing : existingCategories) {
+            Map<String, String> existingDesc = JsonConverter.ensureLangs(existing.getDescription());
+
+
+            for (String lang : List.of("en", "ru", "kz")) {
+                String newVal = newDesc.get(lang);
+                String existingVal = existingDesc.get(lang);
+                if (newVal != null && existingVal != null && newVal.trim().equalsIgnoreCase(existingVal.trim())) {
+                    throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                            "A category with the same " + lang + " description already exists");
+                }
+            }
+        }
+
+            category.setDescription(categoryDTO.getDescription());
+        
+
         AdHocCategory updatedCategory = adHocCategoryRepository.save(category);
         return mapToDTO(updatedCategory);
     }
@@ -62,12 +111,12 @@ public class AdHocCategoryServiceImpl implements AdHocCategoryService {
     @Override
     public void deleteCategory(Integer id) {
         AdHocCategory category = adHocCategoryRepository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, 
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
                         "Ad-hoc category not found with id: " + id));
-        
+
         adHocCategoryRepository.delete(category);
     }
-    
+
     /**
      * Maps an AdHocCategory entity to a DTO
      * 
@@ -80,7 +129,7 @@ public class AdHocCategoryServiceImpl implements AdHocCategoryService {
                 .description(category.getDescription())
                 .build();
     }
-    
+
     /**
      * Maps an AdHocCategoryDTO to an entity
      * 
@@ -90,7 +139,7 @@ public class AdHocCategoryServiceImpl implements AdHocCategoryService {
     private AdHocCategory mapToEntity(AdHocCategoryDTO categoryDTO) {
         return AdHocCategory.builder()
                 .id(categoryDTO.getId())
-                .description(categoryDTO.getDescription())
+                .description(JsonConverter.ensureLangs(categoryDTO.getDescription()))
                 .build();
     }
 }
