@@ -53,28 +53,39 @@ public class InitialDeclarationQuestionServiceImpl implements InitialDeclaration
     }
 
     @Override
-    public InitialDeclarationQuestionDTO createQuestion(InitialDeclarationQuestionRequestDTO questionDTO) {
-        // Ensure the declaration exists
-        InitialDeclaration declaration = declarationRepository.findById(questionDTO.getDeclarationId())
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
-                        "Declaration not found with id: " + questionDTO.getDeclarationId()));
-        
-        // Convert DTO to entity
-        InitialDeclarationQuestion question = InitialDeclarationQuestion.builder()
-                .orderNumber(questionDTO.getOrderNumber())
-                .declaration(declaration)
-                .description(JsonConverter.ensureLangs(questionDTO.getDescription()))
-                .questionType(questionDTO.getQuestionType())
-                .note(JsonConverter.ensureLangs(questionDTO.getNote()))
-                .isRequired(questionDTO.getIsRequired())
-                .isDeleted(false) // Set default value
-                .build();
-        
-        // Save the question
-        InitialDeclarationQuestion savedQuestion = questionRepository.save(question);
-        
-        return mapToDTO(savedQuestion);
+public InitialDeclarationQuestionDTO createQuestion(InitialDeclarationQuestionRequestDTO questionDTO) {
+    InitialDeclaration declaration = declarationRepository.findById(questionDTO.getDeclarationId())
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+                    "Declaration not found with id: " + questionDTO.getDeclarationId()));
+
+    Short finalOrderNumber = questionDTO.getOrderNumber();
+
+    if (finalOrderNumber == null) {
+        // Get max order from DB and add 1
+        short maxOrder = questionRepository.findMaxOrderNumberByDeclarationId(declaration.getId());
+        finalOrderNumber = (short) (maxOrder + 1);
+    } else {
+        // Check if the orderNumber is already taken
+        boolean exists = questionRepository.existsByDeclarationIdAndOrderNumberAndIsDeletedFalse(declaration.getId(), finalOrderNumber);
+        if (exists) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "Question order number already used for this declaration.");
+        }
     }
+
+    InitialDeclarationQuestion question = InitialDeclarationQuestion.builder()
+            .orderNumber(finalOrderNumber)
+            .declaration(declaration)
+            .description(JsonConverter.ensureLangs(questionDTO.getDescription()))
+            .questionType(questionDTO.getQuestionType())
+            .note(JsonConverter.ensureLangs(questionDTO.getNote()))
+            .isRequired(questionDTO.getIsRequired())
+            .isDeleted(false)
+            .build();
+
+    return mapToDTO(questionRepository.save(question));
+}
+
 
     @Override
     public InitialDeclarationQuestionDTO updateQuestion(Integer id, InitialDeclarationQuestionUpdateDTO questionDTO) {

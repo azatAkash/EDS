@@ -95,7 +95,7 @@ public class InitialDeclarationServiceImpl implements InitialDeclarationService 
                             .build();
 
                     // Fetch questions for this declaration
-                    List<InitialDeclarationDetailedDTO.QuestionDTO> questionDTOs = questionRepository.findByDeclarationIdAndIsDeletedFalse(declaration.getId())
+                    List<InitialDeclarationDetailedDTO.QuestionDTO> questionDTOs = questionRepository.findByDeclarationIdAndIsDeletedFalseOrderByOrderNumberAsc(declaration.getId())
                             .stream()
                             .map(question -> {
                                 // Fetch options for this question
