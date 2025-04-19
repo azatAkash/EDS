@@ -24,6 +24,7 @@ public class UserDeclarationDetailedResponseDTO {
     private String userName;
     private Integer declarationId;
     private String declarationName;
+    private Boolean hasConflict;
     private LocalDateTime creationDate;
     private UserDeclarationStatus status;
     private String message;

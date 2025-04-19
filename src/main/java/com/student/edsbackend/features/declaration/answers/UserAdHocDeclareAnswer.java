@@ -34,6 +34,6 @@ public class UserAdHocDeclareAnswer {
     @Column(name = "other_category", columnDefinition = "text")
     private String otherCategory;
 
-    @Column(name = "conflict_description", columnDefinition = "text")
+    @Column(name = "conflict_description", columnDefinition = "text", nullable = false)
     private String conflictDescription;
 }

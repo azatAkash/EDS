@@ -121,7 +121,6 @@ public class InitialDeclarationOptionServiceImpl implements InitialDeclarationOp
                         "YES_NO question type can only have two options");
             }
 
-
             // If we have 2 options, make sure only one of them is marked as conflict
             if (existingOptions.size() == 2 && existingOptions.get(0).getIsConflict()
                     && existingOptions.get(1).getIsConflict()) {

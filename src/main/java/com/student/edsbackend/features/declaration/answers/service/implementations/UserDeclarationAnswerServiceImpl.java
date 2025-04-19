@@ -73,67 +73,70 @@ public class UserDeclarationAnswerServiceImpl implements UserDeclarationAnswerSe
 
                 // Find user's declaration
                 Optional<UserInitialDeclaration> existingDeclarationOpt = userInitialDeclarationRepository
-                                .findByUserIdAndDeclarationIdAndIsDeletedFalse(currentUser.getId(), activeDeclaration.getId());
-                
+                                .findByUserIdAndDeclarationIdAndIsDeletedFalse(currentUser.getId(),
+                                                activeDeclaration.getId());
+
                 UserInitialDeclaration userDeclaration;
                 boolean isNewVersion = false;
-                
+
                 if (existingDeclarationOpt.isPresent()) {
-                    UserInitialDeclaration existingDeclaration = existingDeclarationOpt.get();
-                    
-                    // Validate declaration status - can only save when status is CREATED or SENT_FOR_APPROVAL
-                    if (existingDeclaration.getStatus() != UserDeclarationStatus.CREATED && 
-                        existingDeclaration.getStatus() != UserDeclarationStatus.SENT_FOR_APPROVAL) {
-                        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, 
-                            "Declaration can only be updated when status is CREATED or SENT_FOR_APPROVAL");
-                    }
-                    
-                    // Mark existing declaration as deleted (soft delete)
-                    existingDeclaration.setIsDeleted(true);
-                    userInitialDeclarationRepository.save(existingDeclaration);
-                    
-                    // Create a new version of the declaration
-                    userDeclaration = UserInitialDeclaration.builder()
-                            .user(currentUser)
-                            .declaration(activeDeclaration)
-                            .creationDate(LocalDateTime.now())
-                            .status(existingDeclaration.getStatus())
-                            .responsible(existingDeclaration.getResponsible())
-                            .isDeleted(false)
-                            .build();
-                    
-                    userDeclaration = userInitialDeclarationRepository.save(userDeclaration);
-                    isNewVersion = true;
+                        UserInitialDeclaration existingDeclaration = existingDeclarationOpt.get();
+
+                        // Validate declaration status - can only save when status is CREATED or
+                        // SENT_FOR_APPROVAL
+                        if (existingDeclaration.getStatus() != UserDeclarationStatus.CREATED &&
+                                        existingDeclaration.getStatus() != UserDeclarationStatus.SENT_FOR_APPROVAL) {
+                                throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                                                "Declaration can only be updated when status is CREATED or SENT_FOR_APPROVAL");
+                        }
+
+                        // Mark existing declaration as deleted (soft delete)
+                        existingDeclaration.setIsDeleted(true);
+                        userInitialDeclarationRepository.save(existingDeclaration);
+
+                        // Create a new version of the declaration
+                        userDeclaration = UserInitialDeclaration.builder()
+                                        .user(currentUser)
+                                        .declaration(activeDeclaration)
+                                        .creationDate(LocalDateTime.now())
+                                        .status(existingDeclaration.getStatus())
+                                        .responsible(existingDeclaration.getResponsible())
+                                        .isDeleted(false)
+                                        .build();
+
+                        userDeclaration = userInitialDeclarationRepository.save(userDeclaration);
+                        isNewVersion = true;
                 } else {
-                    throw new ResponseStatusException(HttpStatus.NOT_FOUND,
-                                    "No declaration found for current user");
+                        throw new ResponseStatusException(HttpStatus.NOT_FOUND,
+                                        "No declaration found for current user");
                 }
 
                 // Validate request
                 if (requestDTO.getAnswers() == null || requestDTO.getAnswers().isEmpty()) {
                         throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "No answers provided");
                 }
-                
+
                 // Get all questions for validation
                 List<InitialDeclarationQuestion> allQuestions = activeDeclaration.getQuestions().stream()
-                        .filter(q -> !q.getIsDeleted())
-                        .toList();
-                
+                                .filter(q -> !q.getIsDeleted())
+                                .toList();
+
                 // Create a map of optionId -> question for validation
                 Map<Integer, InitialDeclarationQuestion> optionQuestionMap = new HashMap<>();
                 for (InitialDeclarationQuestion question : allQuestions) {
-                    List<InitialDeclarationOption> options = initialDeclarationOptionRepository.findAll().stream()
-                            .filter(o -> o.getQuestion().getId().equals(question.getId()) && !o.getIsDeleted())
-                            .toList();
-                    
-                    for (InitialDeclarationOption option : options) {
-                        optionQuestionMap.put(option.getId(), question);
-                    }
+                        List<InitialDeclarationOption> options = initialDeclarationOptionRepository.findAll().stream()
+                                        .filter(o -> o.getQuestion().getId().equals(question.getId())
+                                                        && !o.getIsDeleted())
+                                        .toList();
+
+                        for (InitialDeclarationOption option : options) {
+                                optionQuestionMap.put(option.getId(), question);
+                        }
                 }
-                
+
                 // Track answered questions to validate required questions
                 Set<Integer> answeredQuestionIds = new HashSet<>();
-                
+
                 // Track YES/NO question answers to validate only one option is selected
                 Map<Integer, List<UserDeclarationAnswerRequestDTO.AnswerDTO>> answersByQuestionId = new HashMap<>();
 
@@ -147,39 +150,42 @@ public class UserDeclarationAnswerServiceImpl implements UserDeclarationAnswerSe
                                         .findById(answerDTO.getOptionId())
                                         .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
                                                         "Option not found with id: " + answerDTO.getOptionId()));
-                        
+
                         // Get the question for this option
                         InitialDeclarationQuestion question = optionQuestionMap.get(option.getId());
                         if (question == null) {
-                            throw new ResponseStatusException(HttpStatus.NOT_FOUND,
-                                "Question not found for option id: " + option.getId());
+                                throw new ResponseStatusException(HttpStatus.NOT_FOUND,
+                                                "Question not found for option id: " + option.getId());
                         }
-                        
+
                         // Add to answered questions set
                         answeredQuestionIds.add(question.getId());
-                        
+
                         // Group answers by question ID for YES/NO validation
                         answersByQuestionId.computeIfAbsent(question.getId(), k -> new ArrayList<>())
-                            .add(answerDTO);
-                        
+                                        .add(answerDTO);
+
                         // Validate based on question type
                         if (question.getQuestionType() == QuestionType.OPEN_ENDED) {
-                            // For multiple choice questions, isAnswered should be null and answer string should be provided
-                            if (answerDTO.getIsAnswered() != null) {
-                                throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                                    "For open ended questions, isAnswered should be null");
-                            }
-                            if (answerDTO.getAnswer() == null || answerDTO.getAnswer().trim().isEmpty()) {
-                                throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                                    "For multiple choice questions, answer string must be provided");
-                            }
+                                // For multiple choice questions, isAnswered should be null and answer string
+                                // should be provided
+                                if (answerDTO.getIsAnswered() != null) {
+                                        throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                                                        "For open ended questions, isAnswered should be null");
+                                }
+                                if (answerDTO.getAnswer() == null || answerDTO.getAnswer().trim().isEmpty()) {
+                                        throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                                                        "For multiple choice questions, answer string must be provided");
+                                }
                         } else if (question.getQuestionType() == QuestionType.YES_NO) {
-                            // For YES/NO questions, if answered, isAnswered should be true and answer should be empty
-                            if (Boolean.TRUE.equals(answerDTO.getIsAnswered()) && 
-                                (answerDTO.getAnswer() != null && !answerDTO.getAnswer().trim().isEmpty())) {
-                                throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                                    "For YES/NO questions, when isAnswered is true, answer field should be empty");
-                            }
+                                // For YES/NO questions, if answered, isAnswered should be true and answer
+                                // should be empty
+                                if (Boolean.TRUE.equals(answerDTO.getIsAnswered()) &&
+                                                (answerDTO.getAnswer() != null
+                                                                && !answerDTO.getAnswer().trim().isEmpty())) {
+                                        throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                                                        "For YES/NO questions, when isAnswered is true, answer field should be empty");
+                                }
                         }
 
                         // Create or update answer
@@ -243,37 +249,39 @@ public class UserDeclarationAnswerServiceImpl implements UserDeclarationAnswerSe
                 }
 
                 // Validate YES/NO questions - only one option can be selected
-                for (Map.Entry<Integer, List<UserDeclarationAnswerRequestDTO.AnswerDTO>> entry : answersByQuestionId.entrySet()) {
-                    Integer questionId = entry.getKey();
-                    List<UserDeclarationAnswerRequestDTO.AnswerDTO> answers = entry.getValue();
-                    
-                    // Find the question
-                    InitialDeclarationQuestion question = allQuestions.stream()
-                        .filter(q -> q.getId().equals(questionId))
-                        .findFirst()
-                        .orElse(null);
-                    
-                    if (question != null && question.getQuestionType() == QuestionType.YES_NO) {
-                        // Count how many options are answered with isAnswered=true
-                        long answeredCount = answers.stream()
-                            .filter(a -> Boolean.TRUE.equals(a.getIsAnswered()))
-                            .count();
-                        
-                        if (answeredCount > 1) {
-                            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                                "For YES/NO questions, only one option can be selected");
+                for (Map.Entry<Integer, List<UserDeclarationAnswerRequestDTO.AnswerDTO>> entry : answersByQuestionId
+                                .entrySet()) {
+                        Integer questionId = entry.getKey();
+                        List<UserDeclarationAnswerRequestDTO.AnswerDTO> answers = entry.getValue();
+
+                        // Find the question
+                        InitialDeclarationQuestion question = allQuestions.stream()
+                                        .filter(q -> q.getId().equals(questionId))
+                                        .findFirst()
+                                        .orElse(null);
+
+                        if (question != null && question.getQuestionType() == QuestionType.YES_NO) {
+                                // Count how many options are answered with isAnswered=true
+                                long answeredCount = answers.stream()
+                                                .filter(a -> Boolean.TRUE.equals(a.getIsAnswered()))
+                                                .count();
+
+                                if (answeredCount > 1) {
+                                        throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                                                        "For YES/NO questions, only one option can be selected");
+                                }
                         }
-                    }
                 }
-                
+
                 // Validate that all required questions are answered
                 for (InitialDeclarationQuestion question : allQuestions) {
-                    if (Boolean.TRUE.equals(question.getIsRequired()) && !answeredQuestionIds.contains(question.getId())) {
-                        throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                            "Required question not answered: " + question.getDescription());
-                    }
+                        if (Boolean.TRUE.equals(question.getIsRequired())
+                                        && !answeredQuestionIds.contains(question.getId())) {
+                                throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                                                "Required question not answered: " + question.getDescription());
+                        }
                 }
-                
+
                 // Build and return response with processed answers
                 return UserDeclarationAnswerResponseDTO.builder()
                                 .userDeclarationId(userDeclaration.getId())
@@ -314,7 +322,7 @@ public class UserDeclarationAnswerServiceImpl implements UserDeclarationAnswerSe
                         throw new ResponseStatusException(HttpStatus.NOT_FOUND,
                                         "No declaration found for current user");
                 }
-
+                boolean globalHasConflict = false;
                 UserInitialDeclaration userDeclaration = userDeclarationOpt.get();
 
                 // Get all declaration questions and options
@@ -354,7 +362,12 @@ public class UserDeclarationAnswerServiceImpl implements UserDeclarationAnswerSe
                                         // For each option, build the option with answer
                                         for (InitialDeclarationOption option : questionOptions) {
                                                 UserDeclarationAnswer userAnswer = optionAnswerMap.get(option.getId());
-
+                                                if (userAnswer != null &&
+                                                                Boolean.TRUE.equals(option.getIsConflict()) &&
+                                                                (Boolean.TRUE.equals(userAnswer.getIsAnswered())
+                                                                                || userAnswer.getAnswer() != null)) {
+                                                        globalHasConflict = true;
+                                                }
                                                 // Build option with answer
                                                 UserDeclarationDetailedResponseDTO.OptionWithAnswerDTO optionWithAnswer = UserDeclarationDetailedResponseDTO.OptionWithAnswerDTO
                                                                 .builder()
@@ -365,10 +378,13 @@ public class UserDeclarationAnswerServiceImpl implements UserDeclarationAnswerSe
                                                                 .multipleAdditionalAnswers(
                                                                                 option.getMultipleAdditionalAnswers())
                                                                 .isConflict(option.getIsConflict())
-                                                                .isAnswered(userAnswer != null && Boolean.TRUE.equals(userAnswer.getIsAnswered()))
+                                                                .isAnswered(userAnswer != null && Boolean.TRUE
+                                                                                .equals(userAnswer.getIsAnswered()))
                                                                 .answer(userAnswer != null ? userAnswer.getAnswer()
                                                                                 : null)
-                                                                .hasConflict(userAnswer != null ? userAnswer.getHasConflict() : null)
+                                                                .hasConflict(userAnswer != null
+                                                                                ? userAnswer.getHasConflict()
+                                                                                : null)
                                                                 .build();
 
                                                 // If user has answered this option, get additional answers
@@ -448,6 +464,7 @@ public class UserDeclarationAnswerServiceImpl implements UserDeclarationAnswerSe
                 return UserDeclarationDetailedResponseDTO.builder()
                                 .userDeclarationId(userDeclaration.getId())
                                 .userId(currentUser.getId())
+                                .hasConflict(globalHasConflict)
                                 .userName(currentUser.getFirstname() + " " + currentUser.getLastname())
                                 .declarationId(activeDeclaration.getId())
                                 .declarationName(activeDeclaration.getName())
@@ -487,15 +504,17 @@ public class UserDeclarationAnswerServiceImpl implements UserDeclarationAnswerSe
                                 .findFirst();
 
                 if (existingAnswer.isPresent()) {
-                        // This should not happen with our versioning approach, but handle it just in case
+                        // This should not happen with our versioning approach, but handle it just in
+                        // case
                         throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
                                         "Answer already exists for this option in the current declaration version");
                 } else {
                         // Create new answer for this declaration version
                         // Check if this option has conflict flag and if answer is provided
-                        boolean hasConflict = option.getIsConflict() != null && option.getIsConflict() && 
-                                        (answerDTO.getAnswer() != null || Boolean.TRUE.equals(answerDTO.getIsAnswered()));
-                        
+                        boolean hasConflict = option.getIsConflict() != null && option.getIsConflict() &&
+                                        (answerDTO.getAnswer() != null
+                                                        || Boolean.TRUE.equals(answerDTO.getIsAnswered()));
+
                         UserDeclarationAnswer answer = UserDeclarationAnswer.builder()
                                         .userDeclaration(userDeclaration)
                                         .option(option)
@@ -527,19 +546,20 @@ public class UserDeclarationAnswerServiceImpl implements UserDeclarationAnswerSe
                                                                                              // answers and re-enable
                                                                                              // this erro
                 }
-                
+
                 // Check if the option allows multiple additional answers
                 Boolean allowsMultipleAnswers = answer.getOption().getMultipleAdditionalAnswers();
-                
+
                 Short orderIndex = 1;
                 // Process each group of additional answers
                 for (UserDeclarationAnswerRequestDTO.AdditionalAnswerGroupDTO groupDTO : additionalAnswerGroups) {
-                        // Validate that when multipleAdditionalAnswers is false, only one additional answer is provided per group
+                        // Validate that when multipleAdditionalAnswers is false, only one additional
+                        // answer is provided per group
                         if (Boolean.FALSE.equals(allowsMultipleAnswers) && groupDTO.getAnswers().size() > 1) {
-                            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                                "This option does not allow multiple additional answers per group. Only one answer is allowed.");
+                                throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                                                "This option does not allow multiple additional answers per group. Only one answer is allowed.");
                         }
-                        
+
                         // Process each additional answer in the group
                         for (UserDeclarationAnswerRequestDTO.AdditionalAnswerDTO additionalAnswerDTO : groupDTO
                                         .getAnswers()) {
