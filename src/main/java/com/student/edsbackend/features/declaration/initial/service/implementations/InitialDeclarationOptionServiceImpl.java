@@ -121,16 +121,6 @@ public class InitialDeclarationOptionServiceImpl implements InitialDeclarationOp
                         "YES_NO question type can only have two options");
             }
 
-            String existingEn = existingOptions.get(0).getDescription().get("en");
-            String newEn = request.getDescription().get("en");
-            
-            if (existingOptions.size() == 1
-                    && existingEn != null
-                    && newEn != null
-                    && existingEn.equalsIgnoreCase(newEn)) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                        "YES_NO options must have different descriptions");
-            }
 
             // If we have 2 options, make sure only one of them is marked as conflict
             if (existingOptions.size() == 2 && existingOptions.get(0).getIsConflict()
