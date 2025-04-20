@@ -35,9 +35,9 @@ public class UserDeclarationAnswerController {
     @GetMapping("/{id}")
     @Operation(summary = "Get declaration answers by user id", description = "Retrieves the answers to the initial declaration questions by user id. User is identified from the security context.")
     @PreAuthorize("hasAnyAuthority('USER', 'SUPER_ADMIN', 'ADMIN', 'MANAGER')")
-    public ResponseEntity<UserDeclarationDetailedResponseDTO> getCurrentUserDeclarationAnswers(@PathVariable Integer userId) {
+    public ResponseEntity<UserDeclarationDetailedResponseDTO> getCurrentUserDeclarationAnswers(@PathVariable Integer id) {
         UserDeclarationDetailedResponseDTO responseDTO = userDeclarationAnswerService
-                .getDeclarationAnswersByUserId(userId);
+                .getDeclarationAnswersByUserId(id);
         return ResponseEntity.ok(responseDTO);
     }
 
