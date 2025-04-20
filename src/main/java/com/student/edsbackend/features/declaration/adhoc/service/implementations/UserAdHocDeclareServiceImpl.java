@@ -149,6 +149,9 @@ public class UserAdHocDeclareServiceImpl implements UserAdHocDeclareService {
                                         .email(user.getEmail())
                                         .firstname(user.getFirstname())
                                         .lastname(user.getLastname())
+                                        .department(user.getDepartment())
+                                        .position(user.getPosition())
+                                        .role(user.getRole())
                                         .build();
                 }
 
@@ -161,6 +164,9 @@ public class UserAdHocDeclareServiceImpl implements UserAdHocDeclareService {
                                         .email(responsible.getEmail())
                                         .firstname(responsible.getFirstname())
                                         .lastname(responsible.getLastname())
+                                        .department(responsible.getDepartment())
+                                        .position(responsible.getPosition())
+                                        .role(responsible.getRole())
                                         .build();
                 }
 
@@ -173,6 +179,9 @@ public class UserAdHocDeclareServiceImpl implements UserAdHocDeclareService {
                                         .email(createdBy.getEmail())
                                         .firstname(createdBy.getFirstname())
                                         .lastname(createdBy.getLastname())
+                                        .department(createdBy.getDepartment())
+                                        .position(createdBy.getPosition())
+                                        .role(createdBy.getRole())
                                         .build();
                 }
 

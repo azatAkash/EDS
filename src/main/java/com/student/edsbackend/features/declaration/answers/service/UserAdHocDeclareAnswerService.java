@@ -34,14 +34,7 @@ public interface UserAdHocDeclareAnswerService {
      */
     List<UserAdHocDeclareAnswerDTO> getAnswersByUserAdHocDeclareId(Integer userAdHocDeclareId);
     
-    /**
-     * Update an existing answer
-     * 
-     * @param id The ID of the answer to update
-     * @param answerDTO The DTO containing the updated data
-     * @return The updated answer as a DTO
-     */
-    UserAdHocDeclareAnswerDTO updateAnswer(Integer id, UserAdHocDeclareAnswerDTO answerDTO);
+  
     
     /**
      * Delete an answer by its ID

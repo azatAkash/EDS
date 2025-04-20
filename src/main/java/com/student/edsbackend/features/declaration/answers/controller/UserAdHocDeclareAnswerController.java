@@ -62,17 +62,6 @@ public class UserAdHocDeclareAnswerController {
         return ResponseEntity.ok(answers);
     }
 
-    @PutMapping("/{id}")
-    @Operation(summary = "Update an ad hoc declaration answer",
-            description = "Updates an existing ad hoc declaration answer by its ID.")
-    @PreAuthorize("hasAnyAuthority('USER', 'SUPER_ADMIN')")
-    public ResponseEntity<UserAdHocDeclareAnswerDTO> updateAnswer(
-            @PathVariable Integer id,
-            @RequestBody UserAdHocDeclareAnswerDTO answerDTO) {
-        UserAdHocDeclareAnswerDTO updatedAnswer = userAdHocDeclareAnswerService.updateAnswer(id, answerDTO);
-        return ResponseEntity.ok(updatedAnswer);
-    }
-
     @DeleteMapping("/{id}")
     @Operation(summary = "Delete an ad hoc declaration answer",
             description = "Deletes an ad hoc declaration answer by its ID.")

@@ -6,6 +6,7 @@ import com.student.edsbackend.features.declaration.answers.UserAdHocDeclareAnswe
 import com.student.edsbackend.features.declaration.answers.UserAdHocDeclareAnswerRepository;
 import com.student.edsbackend.features.declaration.answers.dto.UserAdHocDeclareAnswerDTO;
 import com.student.edsbackend.features.declaration.answers.service.UserAdHocDeclareAnswerService;
+import com.student.edsbackend.features.enums.UserDeclarationStatus;
 import com.student.edsbackend.features.user.dal.User;
 import com.student.edsbackend.features.user.dal.UserRepository;
 
@@ -52,7 +53,9 @@ public class UserAdHocDeclareAnswerServiceImpl implements UserAdHocDeclareAnswer
             !currentUser.getRole().name().equals("SUPER_ADMIN")) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You don't have permission to save answers for this declaration");
         }
-
+        if (userAdHocDeclare.getStatus()!= null && userAdHocDeclare.getStatus() != UserDeclarationStatus.CREATED) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Declaration cannot be modified after it's been submitted or approved");
+        }
         // Find the category if provided
         AdHocCategory category = null;
         if (answerDTO.getCategoryId() != null) {
@@ -109,43 +112,6 @@ public class UserAdHocDeclareAnswerServiceImpl implements UserAdHocDeclareAnswer
         return answers.stream()
                 .map(this::convertToDTO)
                 .collect(Collectors.toList());
-    }
-
-    @Override
-    @Transactional
-    public UserAdHocDeclareAnswerDTO updateAnswer(Integer id, UserAdHocDeclareAnswerDTO answerDTO) {
-        UserAdHocDeclareAnswer answer = userAdHocDeclareAnswerRepository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Answer not found"));
-
-        // Check permissions
-        checkPermission(answer.getUserAdHocDeclare().getUser().getId());
-
-        // Find the category if provided
-        if (answerDTO.getCategoryId() != null) {
-            AdHocCategory category = adHocCategoryRepository.findById(answerDTO.getCategoryId())
-                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Category not found"));
-            answer.setCategory(category);
-        } else {
-            answer.setCategory(null);
-        }
-
-        // Validate that either category or otherCategory is provided
-        if (answer.getCategory() == null && (answerDTO.getOtherCategory() == null || answerDTO.getOtherCategory().trim().isEmpty())) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Either category or otherCategory must be provided");
-        }
-
-        // Validate that conflictDescription is provided
-        if (answerDTO.getConflictDescription() == null || answerDTO.getConflictDescription().trim().isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Conflict description is required");
-        }
-
-        // Update fields
-        answer.setOtherCategory(answerDTO.getOtherCategory());
-        answer.setConflictDescription(answerDTO.getConflictDescription());
-
-        // Save and return
-        answer = userAdHocDeclareAnswerRepository.save(answer);
-        return convertToDTO(answer);
     }
 
     @Override
