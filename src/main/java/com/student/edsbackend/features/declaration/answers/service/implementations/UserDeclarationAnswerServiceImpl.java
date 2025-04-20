@@ -314,7 +314,7 @@ public class UserDeclarationAnswerServiceImpl implements UserDeclarationAnswerSe
                                                 "No active declaration found. Please ask Administrator to activate a declaration first."));
 
                 UserInitialDeclaration userDeclaration = userInitialDeclarationRepository
-                                .findByUserIdAndDeclarationIdAndIsDeletedFalse(currentUser.getId(),
+                                .findByUserIdAndDeclarationIdAndIsDeletedFalse(user.getId(),
                                                 activeDeclaration.getId())
                                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
                                                 "No declaration found for current user"));
