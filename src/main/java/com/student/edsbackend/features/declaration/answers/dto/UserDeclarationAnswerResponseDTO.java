@@ -21,9 +21,9 @@ import java.util.List;
 @AllArgsConstructor
 public class UserDeclarationAnswerResponseDTO {
     private Integer userDeclarationId;
-    private User user;
-    private User createdBy;
-    private User responsible;
+    private UserDTO user;
+    private UserDTO createdBy;
+    private UserDTO responsible;
     private Integer declarationId;
     private LocalDateTime creationDate;
     private UserDeclarationStatus status;

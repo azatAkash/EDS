@@ -28,9 +28,9 @@ public class UserDeclarationDetailedResponseDTO {
     private Boolean hasConflict;
     private LocalDateTime creationDate;
     private UserDeclarationStatus status;
-    private User createdBy;
-    private User user;
-    private User responsible;
+    private UserDTO createdBy;
+    private UserDTO user;
+    private UserDTO responsible;
     private String message;
     private List<QuestionWithAnswerDTO> questionsWithAnswers;
     

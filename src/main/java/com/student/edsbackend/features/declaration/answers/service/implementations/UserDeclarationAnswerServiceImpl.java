@@ -18,6 +18,7 @@ import com.student.edsbackend.features.enums.UserDeclarationStatus;
 import com.student.edsbackend.features.enums.QuestionType;
 import com.student.edsbackend.features.declaration.initial.dal.questions.InitialDeclarationQuestion;
 import com.student.edsbackend.features.user.dal.User;
+import com.student.edsbackend.features.user.dal.UserDTO;
 import com.student.edsbackend.features.user.dal.UserRepository;
 import com.student.edsbackend.features.user.dal.UserDeclaration.UserInitialDeclaration;
 import com.student.edsbackend.features.user.dal.UserDeclaration.UserInitialDeclarationRepository;
@@ -290,9 +291,9 @@ public class UserDeclarationAnswerServiceImpl implements UserDeclarationAnswerSe
                 // Build and return response with processed answers
                 return UserDeclarationAnswerResponseDTO.builder()
                                 .userDeclarationId(userDeclaration.getId())
-                                .user(userDeclaration.getUser())
-                                .createdBy(userDeclaration.getCreatedBy())
-                                .responsible(userDeclaration.getResponsible())
+                                .user(mapUserToUserDTO(userDeclaration.getUser()))
+                                .createdBy(mapUserToUserDTO(userDeclaration.getCreatedBy()))
+                                .responsible(mapUserToUserDTO(userDeclaration.getResponsible()))
                                 .declarationId(activeDeclaration.getId())
                                 .creationDate(userDeclaration.getCreationDate())
                                 .status(userDeclaration.getStatus())
@@ -462,12 +463,14 @@ public class UserDeclarationAnswerServiceImpl implements UserDeclarationAnswerSe
 
                                         questionsWithAnswers.add(questionWithAnswer);
                                 });
+                
 
+                
                 return UserDeclarationDetailedResponseDTO.builder()
                                 .userDeclarationId(userDeclaration.getId())
-                                .user(currentUser)
-                                .createdBy(userDeclaration.getCreatedBy())
-                                .responsible(userDeclaration.getResponsible())
+                                .user(mapUserToUserDTO(currentUser))
+                                .createdBy(mapUserToUserDTO(userDeclaration.getCreatedBy()))
+                                .responsible(mapUserToUserDTO(userDeclaration.getResponsible()))
                                 .declarationId(activeDeclaration.getId())
                                 .declarationName(activeDeclaration.getName())
                                 .creationDate(userDeclaration.getCreationDate())
@@ -478,6 +481,22 @@ public class UserDeclarationAnswerServiceImpl implements UserDeclarationAnswerSe
                                 .build();
         }
 
+
+        private UserDTO mapUserToUserDTO(User user) {
+                return UserDTO.builder()
+                               .id(user.getId())
+                               .firstname(user.getFirstname())
+                               .lastname(user.getLastname())
+                               .email(user.getEmail())
+                               .role(user.getRole())
+                               .department(user.getDepartment())
+                               .middlename(user.getMiddlename())
+                               .isActive(user.getIsActive())
+                               .isDeleted(user.getIsDeleted())
+                               .position(user.getPosition())
+                               .registrationDate(user.getRegistrationDate())
+                               .build();       
+        }
         /**
          * Find existing user declaration or create a new one
          */
