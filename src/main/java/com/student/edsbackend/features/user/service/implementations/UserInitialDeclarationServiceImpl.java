@@ -5,6 +5,7 @@ import com.student.edsbackend.features.declaration.initial.dal.declaration_metad
 import com.student.edsbackend.features.enums.UserDeclarationStatus;
 import com.student.edsbackend.features.user.dal.Role;
 import com.student.edsbackend.features.user.dal.User;
+import com.student.edsbackend.features.user.dal.UserDTO;
 import com.student.edsbackend.features.user.dal.UserRepository;
 import com.student.edsbackend.features.user.dal.UserDeclaration.UserInitialDeclaration;
 import com.student.edsbackend.features.user.dal.UserDeclaration.UserInitialDeclarationDTO;
@@ -217,19 +218,34 @@ public class UserInitialDeclarationServiceImpl implements UserInitialDeclaration
         return mapToDTO(updatedDeclaration);
     }
     
+    private UserDTO mapUserToUserDTO(User user) {
+        return UserDTO.builder()
+                       .id(user.getId())
+                       .firstname(user.getFirstname())
+                       .lastname(user.getLastname())
+                       .email(user.getEmail())
+                       .role(user.getRole())
+                       .department(user.getDepartment())
+                       .middlename(user.getMiddlename())
+                       .isActive(user.getIsActive())
+                       .isDeleted(user.getIsDeleted())
+                       .position(user.getPosition())
+                       .registrationDate(user.getRegistrationDate())
+                       .build();       
+}
+
     /**
      * Maps a UserInitialDeclaration entity to its DTO representation
      */
     private UserInitialDeclarationDTO mapToDTO(UserInitialDeclaration declaration) {
         return UserInitialDeclarationDTO.builder()
                 .id(declaration.getId())
-                .userId(declaration.getUser().getId())
-                .userName(declaration.getUser().getFirstname() + " " + declaration.getUser().getLastname())
+                .user(mapUserToUserDTO(declaration.getUser()))
                 .declarationId(declaration.getDeclaration().getId())
                 .creationDate(declaration.getCreationDate())
-                .createdById(declaration.getCreatedBy().getId())
+                .createdBy(mapUserToUserDTO(declaration.getCreatedBy()))
                 .status(declaration.getStatus())
-                .responsibleId(declaration.getResponsible() != null ? declaration.getResponsible().getId() : null)
+                .responsible(mapUserToUserDTO(declaration.getResponsible() != null ? declaration.getResponsible() : null))
                 .responsibleName(declaration.getResponsible() != null
                         ? declaration.getResponsible().getFirstname() + " " + declaration.getResponsible().getLastname() : null)
                 .isDeleted(declaration.getIsDeleted())

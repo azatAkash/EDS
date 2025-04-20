@@ -27,5 +27,7 @@ public enum UserDeclarationStatus {
     /**
      * Declaration contains no conflict of interest
      */
-    NO_CONFLICT
+    NO_CONFLICT,
+
+    APPROVED,
 }

@@ -50,4 +50,6 @@ public interface UserAdHocDeclareRepository extends JpaRepository<UserAdHocDecla
      * @return optional of ad hoc declaration
      */
     Optional<UserAdHocDeclare> findByIdAndUser(Integer id, User user);
+
+    boolean existsByUserIdAndIsDeletedFalseAndStatusNotIn(Integer userId, List<UserDeclarationStatus> statuses);
 }

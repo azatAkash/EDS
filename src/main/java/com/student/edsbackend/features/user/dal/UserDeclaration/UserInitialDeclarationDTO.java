@@ -1,6 +1,8 @@
 package com.student.edsbackend.features.user.dal.UserDeclaration;
 
 import com.student.edsbackend.features.enums.UserDeclarationStatus;
+import com.student.edsbackend.features.user.dal.UserDTO;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -18,14 +20,13 @@ import java.time.LocalDateTime;
 public class UserInitialDeclarationDTO {
 
     private Integer id;
-    private Integer userId;
-    private String userName; // User's full name for display purposes
+    private UserDTO user;
     private Integer declarationId;
     private String declarationTitle; // Declaration title for display purposes
     private LocalDateTime creationDate;
     private UserDeclarationStatus status;
-    private Integer responsibleId;
-    private Integer createdById;
+    private UserDTO responsible;
+    private UserDTO createdBy;
     private String responsibleName; // Responsible person's name for display purposes
     private Boolean isDeleted;
 }

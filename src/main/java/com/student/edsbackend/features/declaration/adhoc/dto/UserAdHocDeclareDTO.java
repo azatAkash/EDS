@@ -23,7 +23,4 @@ public class UserAdHocDeclareDTO {
     private UserDTO responsible;
     private UserDTO createdBy;
     private UserDeclarationStatus status;
-    private List<Integer> answerIds;
-    private List<Integer> managementPlanIds;
-    private List<Integer> adHocExcludeIds;
 }
