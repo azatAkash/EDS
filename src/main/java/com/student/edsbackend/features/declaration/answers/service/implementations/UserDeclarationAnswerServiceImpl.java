@@ -78,6 +78,8 @@ public class UserDeclarationAnswerServiceImpl implements UserDeclarationAnswerSe
                                 .findByUserIdAndDeclarationIdAndIsDeletedFalse(currentUser.getId(),
                                                 activeDeclaration.getId());
 
+                
+
                 UserInitialDeclaration userDeclaration;
                 boolean isNewVersion = false;
 
@@ -95,13 +97,13 @@ public class UserDeclarationAnswerServiceImpl implements UserDeclarationAnswerSe
                         // Mark existing declaration as deleted (soft delete)
                         existingDeclaration.setIsDeleted(true);
                         userInitialDeclarationRepository.save(existingDeclaration);
-
+                        
                         // Create a new version of the declaration
                         userDeclaration = UserInitialDeclaration.builder()
                                         .user(currentUser)
                                         .declaration(activeDeclaration)
                                         .creationDate(LocalDateTime.now())
-                                        .status(existingDeclaration.getStatus())
+                                        .status(UserDeclarationStatus.SENT_FOR_APPROVAL)
                                         .responsible(existingDeclaration.getResponsible())
                                         .createdBy(currentUser) // Set the current user as the creator
                                         .isDeleted(false)
@@ -451,6 +453,7 @@ public class UserDeclarationAnswerServiceImpl implements UserDeclarationAnswerSe
                                                         .id(question.getId())
                                                         .description(question.getDescription())
                                                         .questionType(question.getQuestionType().toString())
+                                                        .orderNumber(question.getOrderNumber())
                                                         .note(question.getNote())
                                                         .isRequired(question.getIsRequired())
                                                         .optionsWithAnswers(optionsWithAnswers)
@@ -459,11 +462,6 @@ public class UserDeclarationAnswerServiceImpl implements UserDeclarationAnswerSe
                                         questionsWithAnswers.add(questionWithAnswer);
                                 });
 
-                if (userDeclaration.getStatus() != UserDeclarationStatus.CREATED) {
-                        throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                                        "Declaration can only be viewed when status is SENT_FOR_APPROVAL");
-                }
-
                 return UserDeclarationDetailedResponseDTO.builder()
                                 .userDeclarationId(userDeclaration.getId())
                                 .userId(currentUser.getId())
@@ -471,7 +469,7 @@ public class UserDeclarationAnswerServiceImpl implements UserDeclarationAnswerSe
                                 .declarationId(activeDeclaration.getId())
                                 .declarationName(activeDeclaration.getName())
                                 .creationDate(userDeclaration.getCreationDate())
-                                .status(UserDeclarationStatus.SENT_FOR_APPROVAL)
+                                .status(userDeclaration.getStatus())
                                 .hasConflict(globalHasConflict.get())
                                 .questionsWithAnswers(questionsWithAnswers)
                                 .message("User declaration answers retrieved successfully")

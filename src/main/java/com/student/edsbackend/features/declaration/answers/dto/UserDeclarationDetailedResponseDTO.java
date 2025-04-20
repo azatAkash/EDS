@@ -39,7 +39,7 @@ public class UserDeclarationDetailedResponseDTO {
     @AllArgsConstructor
     public static class QuestionWithAnswerDTO {
         private Integer id;
-        private Integer orderNumber;
+        private Short orderNumber;
         private Map<String, String> description;
         private String questionType;
         private Map<String, String> note;
