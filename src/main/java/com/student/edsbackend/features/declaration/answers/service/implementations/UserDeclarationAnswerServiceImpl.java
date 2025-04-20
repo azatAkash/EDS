@@ -304,12 +304,11 @@ public class UserDeclarationAnswerServiceImpl implements UserDeclarationAnswerSe
                 String currentUserEmail = authentication.getName();
 
                 User currentUser = userRepository.findByEmail(currentUserEmail)
-                              .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
-                                                "Current user not found"));                       
+                                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+                                                "Current user not found"));
                 User user = userRepository.findById(userId)
                                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
                                                 "Current user not found"));
-
 
                 if (!currentUserEmail.equals(user.getEmail()) && currentUser.getRole().equals(Role.USER)) {
                         throw new ResponseStatusException(HttpStatus.FORBIDDEN,
@@ -460,6 +459,11 @@ public class UserDeclarationAnswerServiceImpl implements UserDeclarationAnswerSe
                                         questionsWithAnswers.add(questionWithAnswer);
                                 });
 
+                if (userDeclaration.getStatus() != UserDeclarationStatus.CREATED) {
+                        throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                                        "Declaration can only be viewed when status is SENT_FOR_APPROVAL");
+                }
+
                 return UserDeclarationDetailedResponseDTO.builder()
                                 .userDeclarationId(userDeclaration.getId())
                                 .userId(currentUser.getId())
@@ -467,7 +471,7 @@ public class UserDeclarationAnswerServiceImpl implements UserDeclarationAnswerSe
                                 .declarationId(activeDeclaration.getId())
                                 .declarationName(activeDeclaration.getName())
                                 .creationDate(userDeclaration.getCreationDate())
-                                .status(userDeclaration.getStatus())
+                                .status(UserDeclarationStatus.SENT_FOR_APPROVAL)
                                 .hasConflict(globalHasConflict.get())
                                 .questionsWithAnswers(questionsWithAnswers)
                                 .message("User declaration answers retrieved successfully")
