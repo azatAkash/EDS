@@ -22,7 +22,11 @@ public interface UserDeclarationAnswerService {
      * 
      * @return A response DTO with information about the user's answers
      */
-    UserDeclarationDetailedResponseDTO getCurrentUserDeclarationAnswers();
+    UserDeclarationDetailedResponseDTO getDeclarationAnswersByUserId(Integer userId);
+    /**
+     * Get all user declaration answers (for admin and super admin only)
+     *
+     * @return A list of response DTOs with information about all user answers
 
     /**
      * Get user's declaration answer by ID (for admin and super admin only)

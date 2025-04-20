@@ -32,12 +32,12 @@ public class UserDeclarationAnswerController {
         return new ResponseEntity<>(responseDTO, HttpStatus.CREATED);
     }
 
-    @GetMapping
-    @Operation(summary = "Get current user's declaration answers", description = "Retrieves the current user's answers to the initial declaration questions. User is identified from the security context.")
+    @GetMapping("/{id}")
+    @Operation(summary = "Get declaration answers by user id", description = "Retrieves the answers to the initial declaration questions by user id. User is identified from the security context.")
     @PreAuthorize("hasAnyAuthority('USER', 'SUPER_ADMIN', 'ADMIN', 'MANAGER')")
-    public ResponseEntity<UserDeclarationDetailedResponseDTO> getCurrentUserDeclarationAnswers() {
+    public ResponseEntity<UserDeclarationDetailedResponseDTO> getCurrentUserDeclarationAnswers(@PathVariable Integer userId) {
         UserDeclarationDetailedResponseDTO responseDTO = userDeclarationAnswerService
-                .getCurrentUserDeclarationAnswers();
+                .getDeclarationAnswersByUserId(userId);
         return ResponseEntity.ok(responseDTO);
     }
 
