@@ -1,6 +1,9 @@
 package com.student.edsbackend.features.declaration.answers.dto;
 
 import com.student.edsbackend.features.enums.UserDeclarationStatus;
+import com.student.edsbackend.features.user.dal.User;
+import com.student.edsbackend.features.user.dal.UserDTO;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -20,13 +23,14 @@ import java.util.Map;
 @AllArgsConstructor
 public class UserDeclarationDetailedResponseDTO {
     private Integer userDeclarationId;
-    private Integer userId;
-    private String userName;
     private Integer declarationId;
     private String declarationName;
     private Boolean hasConflict;
     private LocalDateTime creationDate;
     private UserDeclarationStatus status;
+    private User createdBy;
+    private User user;
+    private User responsible;
     private String message;
     private List<QuestionWithAnswerDTO> questionsWithAnswers;
     

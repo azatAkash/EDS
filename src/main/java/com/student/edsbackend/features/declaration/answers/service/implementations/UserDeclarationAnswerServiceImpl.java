@@ -290,8 +290,9 @@ public class UserDeclarationAnswerServiceImpl implements UserDeclarationAnswerSe
                 // Build and return response with processed answers
                 return UserDeclarationAnswerResponseDTO.builder()
                                 .userDeclarationId(userDeclaration.getId())
-                                .userId(currentUser.getId())
-                                .userName(currentUser.getFirstname() + " " + currentUser.getLastname())
+                                .user(userDeclaration.getUser())
+                                .createdBy(userDeclaration.getCreatedBy())
+                                .responsible(userDeclaration.getResponsible())
                                 .declarationId(activeDeclaration.getId())
                                 .creationDate(userDeclaration.getCreationDate())
                                 .status(userDeclaration.getStatus())
@@ -464,8 +465,9 @@ public class UserDeclarationAnswerServiceImpl implements UserDeclarationAnswerSe
 
                 return UserDeclarationDetailedResponseDTO.builder()
                                 .userDeclarationId(userDeclaration.getId())
-                                .userId(currentUser.getId())
-                                .userName(currentUser.getFirstname() + " " + currentUser.getLastname())
+                                .user(currentUser)
+                                .createdBy(userDeclaration.getCreatedBy())
+                                .responsible(userDeclaration.getResponsible())
                                 .declarationId(activeDeclaration.getId())
                                 .declarationName(activeDeclaration.getName())
                                 .creationDate(userDeclaration.getCreationDate())

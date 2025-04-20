@@ -1,6 +1,9 @@
 package com.student.edsbackend.features.declaration.answers.dto;
 
 import com.student.edsbackend.features.enums.UserDeclarationStatus;
+import com.student.edsbackend.features.user.dal.User;
+import com.student.edsbackend.features.user.dal.UserDTO;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -18,8 +21,9 @@ import java.util.List;
 @AllArgsConstructor
 public class UserDeclarationAnswerResponseDTO {
     private Integer userDeclarationId;
-    private Integer userId;
-    private String userName;
+    private User user;
+    private User createdBy;
+    private User responsible;
     private Integer declarationId;
     private LocalDateTime creationDate;
     private UserDeclarationStatus status;
