@@ -96,21 +96,10 @@ public class UserDeclarationAnswerServiceImpl implements UserDeclarationAnswerSe
                         }
 
                         // Mark existing declaration as deleted (soft delete)
-                        existingDeclaration.setIsDeleted(true);
-                        userInitialDeclarationRepository.save(existingDeclaration);
+                        existingDeclaration.setStatus(UserDeclarationStatus.SENT_FOR_APPROVAL);
                         
-                        // Create a new version of the declaration
-                        userDeclaration = UserInitialDeclaration.builder()
-                                        .user(currentUser)
-                                        .declaration(activeDeclaration)
-                                        .creationDate(LocalDateTime.now())
-                                        .status(UserDeclarationStatus.SENT_FOR_APPROVAL)
-                                        .responsible(existingDeclaration.getResponsible())
-                                        .createdBy(currentUser) // Set the current user as the creator
-                                        .isDeleted(false)
-                                        .build();
 
-                        userDeclaration = userInitialDeclarationRepository.save(userDeclaration);
+                        userDeclaration = userInitialDeclarationRepository.save(existingDeclaration);
                         isNewVersion = true;
                 } else {
                         throw new ResponseStatusException(HttpStatus.NOT_FOUND,
