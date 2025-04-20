@@ -457,7 +457,7 @@ public class UserDeclarationAnswerServiceImpl implements UserDeclarationAnswerSe
                 
                 return UserDeclarationDetailedResponseDTO.builder()
                                 .userDeclarationId(userDeclaration.getId())
-                                .user(mapUserToUserDTO(currentUser))
+                                .user(mapUserToUserDTO(user))
                                 .createdBy(mapUserToUserDTO(userDeclaration.getCreatedBy()))
                                 .responsible(mapUserToUserDTO(userDeclaration.getResponsible()))
                                 .declarationId(activeDeclaration.getId())
