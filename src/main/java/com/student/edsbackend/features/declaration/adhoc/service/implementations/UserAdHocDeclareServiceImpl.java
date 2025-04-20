@@ -12,6 +12,7 @@ import com.student.edsbackend.features.user.dal.Role;
 import com.student.edsbackend.features.user.dal.User;
 import com.student.edsbackend.features.user.dal.UserDTO;
 import com.student.edsbackend.features.user.dal.UserRepository;
+import com.student.edsbackend.features.user.dal.UserDeclaration.UserInitialDeclarationRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -31,6 +32,7 @@ public class UserAdHocDeclareServiceImpl implements UserAdHocDeclareService {
 
         private final UserAdHocDeclareRepository adHocDeclareRepository;
         private final UserRepository userRepository;
+        private final UserInitialDeclarationRepository userInitialDeclarationRepository;
 
         @Override
         public Optional<UserAdHocDeclareDTO> findById(Integer id) {
@@ -91,6 +93,16 @@ public class UserAdHocDeclareServiceImpl implements UserAdHocDeclareService {
                 if (currentUser.getRole() != null && currentUser.getRole() == Role.USER) {
                         throw new RuntimeException("You cannot create ad hoc declaration");
                 }
+                
+                // Check if user has an initial declaration with SUBMITTED_FOR_APPROVAL status
+                boolean hasInitialDeclaration = userInitialDeclarationRepository.findByUserIdAndIsDeletedFalse(user.getId())
+                        .stream()
+                        .anyMatch(declaration -> declaration.getStatus() != UserDeclarationStatus.CREATED && declaration.getStatus()!= UserDeclarationStatus.SENT_FOR_APPROVAL);
+                
+                if (!hasInitialDeclaration) {
+                        throw new RuntimeException("User must have an initial declaration with SUBMITTED_FOR_APPROVAL status");
+                }
+                
                 if (adHocDeclareRepository.existsByUserIdAndIsDeletedFalseAndStatusNotIn(
                                 user.getId(),
                                 List.of(UserDeclarationStatus.CREATED, UserDeclarationStatus.SENT_FOR_APPROVAL))) {
