@@ -80,7 +80,7 @@ public class UserInitialDeclarationServiceImpl implements UserInitialDeclaration
         User currentUser = userRepository.findByEmail(currentUserEmail)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
                 "Current user not found"));
-        if (currentUser == user) {
+        if (currentUser == user && currentUser.getRole() != Role.SUPER_ADMIN && currentUser.getRole()!= Role.ADMIN) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
                     "You cannot set yourself as responsible for a declaration");
         }
