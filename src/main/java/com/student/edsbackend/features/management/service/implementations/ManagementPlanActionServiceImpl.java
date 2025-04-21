@@ -3,12 +3,14 @@ package com.student.edsbackend.features.management.service.implementations;
 import java.net.http.HttpResponse;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+import com.student.edsbackend.configs.JsonConverter;
 import com.student.edsbackend.features.management.ManagementPlanAction;
 import com.student.edsbackend.features.management.dto.ManagementPlanActionDTO;
 import com.student.edsbackend.features.management.dto.ManagementPlanActionRequestDTO;
@@ -25,12 +27,14 @@ public class ManagementPlanActionServiceImpl implements ManagementPlanActionServ
 
     public ManagementPlanAction createAction(ManagementPlanActionRequestDTO dto) {
     ManagementPlanAction action = ManagementPlanAction.builder()
-            .description(dto.getDescription()) // автоматически сохранится как JSON
+            .description(JsonConverter.ensureLangs(dto.getDescription())) // автоматически сохранится как JSON
             .isDeleted(false)
             .createdAt(LocalDateTime.now())
             .updatedAt(LocalDateTime.now())
             .build();
+    
 
+            
     return repository.save(action);
 }
 
