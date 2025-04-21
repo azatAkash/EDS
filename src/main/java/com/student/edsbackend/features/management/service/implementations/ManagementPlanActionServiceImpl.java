@@ -72,7 +72,7 @@ public class ManagementPlanActionServiceImpl implements ManagementPlanActionServ
 
     @Override
     public ManagementPlanActionDTO create(ManagementPlanActionRequestDTO requestDTO) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'create'");
+        ManagementPlanAction action = createAction(requestDTO);
+        return toDTO(action);
     }
 }
