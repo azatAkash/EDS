@@ -186,7 +186,7 @@ public class UserAdHocDeclareServiceImpl implements UserAdHocDeclareService {
                 .hasAgreedWithStatements(requestDTO.getHasAgreedWithStatements())
                 .agreedStatements(agreedStatements) // Map from DTO
                 .createdBy(user) // The user submitting the declaration is the creator
-                // Note: 'responsible' is typically set during approval/update, not creation
+                .responsible(null)
                 .build();
     }
 

@@ -33,7 +33,7 @@ public class UserAdHocDeclareController {
      * @param requestDTO The request data for creating the declaration
      * @return The created UserAdHocDeclareDTO
      */
-    @PostMapping("/users/{userId}")
+    @PostMapping("/{userId}")
     public ResponseEntity<UserAdHocDeclareDTO> createAdHocDeclaration(
             @PathVariable Integer userId,
             @Valid @RequestBody UserAdHocDeclareRequestDTO requestDTO) {
@@ -58,7 +58,7 @@ public class UserAdHocDeclareController {
      * @param userId The ID of the user to find declarations for
      * @return List of UserAdHocDeclareDTO objects
      */
-    @GetMapping("/users/{userId}")
+    @GetMapping("/{userId}")
     public ResponseEntity<List<UserAdHocDeclareDTO>> getAdHocDeclarationsByUserId(@PathVariable Integer userId) {
         List<UserAdHocDeclareDTO> declarations = adHocDeclareService.getAdHocDeclarationsByUserId(userId);
         return ResponseEntity.ok(declarations);
@@ -69,7 +69,7 @@ public class UserAdHocDeclareController {
      * @param userId The ID of the user
      * @return The latest UserAdHocDeclareDTO if found
      */
-    @GetMapping("/users/{userId}/latest")
+    @GetMapping("/{userId}/latest")
     public ResponseEntity<UserAdHocDeclareDTO> getLatestAdHocDeclarationByUserId(@PathVariable Integer userId) {
         UserAdHocDeclareDTO declaration = adHocDeclareService.getLatestAdHocDeclarationByUserId(userId)
                 .orElseThrow(() -> new ResponseStatusException(
@@ -83,7 +83,7 @@ public class UserAdHocDeclareController {
      * @param status The status to filter by
      * @return List of UserAdHocDeclareDTO objects
      */
-    @GetMapping("/status/{status}")
+    @GetMapping("/{status}")
     @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'ADMIN', 'MANAGER')")
     public ResponseEntity<List<UserAdHocDeclareDTO>> getAdHocDeclarationsByStatus(
             @PathVariable UserDeclarationStatus status) {
@@ -99,8 +99,8 @@ public class UserAdHocDeclareController {
      * @param responsibleUserId The ID of the user responsible for the update
      * @return The updated UserAdHocDeclareDTO
      */
-    @PutMapping("/{id}/status")
-    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'ADMIN', 'MANAGER')")
+    @PatchMapping("/status/{id}")
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'ADMIN', 'MANAGER', 'USER')")
     public ResponseEntity<UserAdHocDeclareDTO> updateAdHocDeclarationStatus(
             @PathVariable Integer id,
             @RequestParam UserDeclarationStatus status,
