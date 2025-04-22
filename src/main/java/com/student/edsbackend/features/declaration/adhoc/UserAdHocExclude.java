@@ -11,6 +11,7 @@ import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 
 import com.student.edsbackend.configs.JsonConverter;
+import com.student.edsbackend.configs.ListOfMapConverter;
 import com.student.edsbackend.features.enums.UserDeclarationStatus;
 import com.student.edsbackend.features.user.dal.User;
 import com.student.edsbackend.features.user.dal.UserDeclaration.UserInitialDeclaration;
@@ -72,7 +73,7 @@ public class UserAdHocExclude {
     @Column(name = "has_agreed_with_statements")
     private Boolean hasAgreedWithStatements;
 
-
-    @Column(name = "agreed_statements")
+    @Convert(converter = ListOfMapConverter.class)
+    @Column(name = "agreed_statements", columnDefinition = "json")
     private List<Map<String, String>> agreedStatements;
 }

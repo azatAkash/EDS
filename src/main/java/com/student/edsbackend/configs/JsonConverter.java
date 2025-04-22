@@ -43,5 +43,4 @@ public class JsonConverter implements AttributeConverter<Map<String, String>, St
         result.put("kz", input != null ? input.getOrDefault("kz", "") : "");
         return result;
     }
-    
 }
