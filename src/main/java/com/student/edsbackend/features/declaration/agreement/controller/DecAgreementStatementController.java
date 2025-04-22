@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/v1/declaration/agreement/statements")
+@RequestMapping("/api/v1/adhoc-declarations/agreement-statements")
 @RequiredArgsConstructor
 @Tag(name = "Declaration Agreement Statements", description = "Endpoints for managing declaration agreement statements")
 public class DecAgreementStatementController {

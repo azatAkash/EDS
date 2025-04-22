@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/v1/declaration/agreement/answers")
+@RequestMapping("/api/v1/adhoc-declarations/agreement-answers")
 @RequiredArgsConstructor
 @Tag(name = "User Declaration Agreement Answers", description = "Endpoints for managing user declaration agreement answers")
 public class UserDecAgreementAnswerController {
