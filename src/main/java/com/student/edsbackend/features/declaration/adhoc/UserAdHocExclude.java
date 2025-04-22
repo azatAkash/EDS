@@ -4,7 +4,12 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.Map;
 
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
+
+import com.student.edsbackend.configs.JsonConverter;
 import com.student.edsbackend.features.enums.UserDeclarationStatus;
 import com.student.edsbackend.features.user.dal.User;
 import com.student.edsbackend.features.user.dal.UserDeclaration.UserInitialDeclaration;
@@ -53,4 +58,13 @@ public class UserAdHocExclude {
 
     @Column(name = "is_confirmed")
     private Boolean isConfirmed;
+
+    @Column(name = "confirmed_agreements", nullable = false)
+    private Boolean confirmedAgreements;
+
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Convert(converter = JsonConverter.class)
+    @Column(name = "agreements_details", columnDefinition = "text")
+    private Map<String, String> agreements_details;
+    
 }

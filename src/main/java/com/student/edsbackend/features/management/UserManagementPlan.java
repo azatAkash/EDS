@@ -56,7 +56,7 @@ public class UserManagementPlan {
     @Column(name = "is_amended")
     private Boolean isAmended;
 
-    @Column(name = "action_required")
+    @Column(name = "action_required", nullable = false)
     private Boolean actionRequired;
 
     @ManyToOne(fetch = FetchType.LAZY)

@@ -1,5 +1,7 @@
 package com.student.edsbackend.features.declaration.answers;
 
+import java.util.List;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -20,4 +22,6 @@ public interface UserDeclarationAnswerRepository extends JpaRepository<UserDecla
     @Query("SELECT CASE WHEN COUNT(a) > 0 THEN true ELSE false END FROM UserDeclarationAnswer a " +
            "JOIN a.option o WHERE o.question.id = :questionId AND a.isDeleted = false")
     boolean existsAnswersForQuestion(@Param("questionId") Integer questionId);
+
+    List<UserDeclarationAnswer> findByUserDeclarationId(Integer initialDeclarationId);
 }
