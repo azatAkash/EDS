@@ -1,7 +1,5 @@
 package com.student.edsbackend.features.declaration.adhoc.service.implementations;
 
-
-
 import com.student.edsbackend.features.declaration.adhoc.AdHocCategory;
 import com.student.edsbackend.features.declaration.adhoc.UserAdHocDeclare;
 import com.student.edsbackend.features.declaration.adhoc.UserAdHocExclude; // Assuming this import exists
@@ -11,6 +9,7 @@ import com.student.edsbackend.features.declaration.adhoc.dto.UserAdHocDeclareReq
 import com.student.edsbackend.features.declaration.adhoc.dto.UserAdHocExcludeDTO; // Assuming this import exists
 import com.student.edsbackend.features.declaration.adhoc.repository.UserAdHocDeclareRepository;
 import com.student.edsbackend.features.declaration.adhoc.service.UserAdHocDeclareService;
+import com.student.edsbackend.features.declaration.agreement.repository.DecAgreementStatementRepository;
 import com.student.edsbackend.features.declaration.answers.UserAdHocDeclareAnswer;
 import com.student.edsbackend.features.declaration.answers.UserAdHocDeclareAnswerRepository;
 import com.student.edsbackend.features.enums.UserDeclarationStatus;
@@ -30,6 +29,7 @@ import org.springframework.util.CollectionUtils; // For checking empty collectio
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -46,7 +46,7 @@ public class UserAdHocDeclareServiceImpl implements UserAdHocDeclareService {
     private final UserAdHocDeclareRepository userAdHocDeclareRepository;
     private final UserAdHocDeclareAnswerRepository userAdHocDeclareAnswerRepository;
     private final UserRepository userRepository;
-
+    private final DecAgreementStatementRepository decAgreementStatementRepository;
     // --- Public Service Methods ---
 
     @Override
@@ -63,7 +63,7 @@ public class UserAdHocDeclareServiceImpl implements UserAdHocDeclareService {
             List<UserAdHocDeclareAnswer> answers = processAndSaveAnswers(savedDeclare, requestDTO.getAnswers());
             savedDeclare.setAnswers(answers); // Associate saved answers with the declaration entity
         }
-        
+
         log.info("Successfully created ad-hoc declaration with ID: {}", savedDeclare.getId());
         return convertToDTO(savedDeclare);
     }
@@ -97,8 +97,10 @@ public class UserAdHocDeclareServiceImpl implements UserAdHocDeclareService {
 
     @Override
     @Transactional
-    public UserAdHocDeclareDTO updateAdHocDeclarationStatus(Integer id, UserDeclarationStatus status, Integer responsibleUserId) {
-        log.info("Updating status to {} for ad-hoc declaration ID: {} by responsible user ID: {}", status, id, responsibleUserId);
+    public UserAdHocDeclareDTO updateAdHocDeclarationStatus(Integer id, UserDeclarationStatus status,
+            Integer responsibleUserId) {
+        log.info("Updating status to {} for ad-hoc declaration ID: {} by responsible user ID: {}", status, id,
+                responsibleUserId);
         UserAdHocDeclare adHocDeclare = findAdHocDeclareByIdOrThrow(id);
         User responsibleUser = findUserByIdOrThrow(responsibleUserId);
 
@@ -127,7 +129,8 @@ public class UserAdHocDeclareServiceImpl implements UserAdHocDeclareService {
     @Transactional(readOnly = true)
     public Optional<UserAdHocDeclareDTO> getLatestAdHocDeclarationByUserId(Integer userId) {
         log.debug("Fetching latest ad-hoc declaration for user ID: {}", userId);
-        // Assuming findLatestByUserId exists and correctly fetches the latest non-deleted record
+        // Assuming findLatestByUserId exists and correctly fetches the latest
+        // non-deleted record
         return userAdHocDeclareRepository.findLatestByUserId(userId)
                 .map(this::convertToDTO);
     }
@@ -146,13 +149,15 @@ public class UserAdHocDeclareServiceImpl implements UserAdHocDeclareService {
     }
 
     /**
-     * Finds a non-deleted UserAdHocDeclare by ID or throws a ResponseStatusException if not found.
+     * Finds a non-deleted UserAdHocDeclare by ID or throws a
+     * ResponseStatusException if not found.
      */
     private UserAdHocDeclare findAdHocDeclareByIdOrThrow(Integer declarationId) {
         return userAdHocDeclareRepository.findByIdAndIsDeletedFalse(declarationId)
                 .orElseThrow(() -> {
                     log.error("Ad-hoc declaration not found or is deleted with ID: {}", declarationId);
-                    return new ResponseStatusException(HttpStatus.NOT_FOUND, "Ad hoc declaration not found with ID: " + declarationId);
+                    return new ResponseStatusException(HttpStatus.NOT_FOUND,
+                            "Ad hoc declaration not found with ID: " + declarationId);
                 });
     }
 
@@ -160,13 +165,26 @@ public class UserAdHocDeclareServiceImpl implements UserAdHocDeclareService {
      * Builds a new UserAdHocDeclare entity from request data.
      */
     private UserAdHocDeclare buildNewAdHocDeclare(User user, UserAdHocDeclareRequestDTO requestDTO) {
+
+        // Fetch all non-deleted agreement statements and their descriptions
+        List<Object[]> statements = decAgreementStatementRepository.findAllDescriptionsAndIds();
+
+        // Map descriptions into a List<Map<String, String>> where each map represents
+        // one statement's description
+        List<Map<String, String>> agreedStatements = statements.stream()
+                .map(statement -> {
+                    Map<String, String> descriptionMap = (Map<String, String>) statement[1];
+                    return descriptionMap; // Just return the description map for each statement
+                })
+                .collect(Collectors.toList());
+
         return UserAdHocDeclare.builder()
                 .user(user)
                 .createAt(LocalDateTime.now())
                 .isDeleted(false)
                 .status(UserDeclarationStatus.SENT_FOR_APPROVAL) // Default status on creation
                 .hasAgreedWithStatements(requestDTO.getHasAgreedWithStatements())
-                .agreedStatements() // Map from DTO
+                .agreedStatements(agreedStatements) // Map from DTO
                 .createdBy(user) // The user submitting the declaration is the creator
                 // Note: 'responsible' is typically set during approval/update, not creation
                 .build();
@@ -175,7 +193,8 @@ public class UserAdHocDeclareServiceImpl implements UserAdHocDeclareService {
     /**
      * Processes and saves UserAdHocDeclareAnswer entities based on DTOs.
      */
-    private List<UserAdHocDeclareAnswer> processAndSaveAnswers(UserAdHocDeclare declaration, List<UserAdHocDeclareAnswerRequestDTO> answerDTOs) {
+    private List<UserAdHocDeclareAnswer> processAndSaveAnswers(UserAdHocDeclare declaration,
+            List<UserAdHocDeclareAnswerRequestDTO> answerDTOs) {
         List<UserAdHocDeclareAnswer> answers = answerDTOs.stream()
                 .map(dto -> buildAnswerEntity(declaration, dto))
                 .collect(Collectors.toList());
@@ -186,7 +205,8 @@ public class UserAdHocDeclareServiceImpl implements UserAdHocDeclareService {
     /**
      * Builds a single UserAdHocDeclareAnswer entity.
      */
-    private UserAdHocDeclareAnswer buildAnswerEntity(UserAdHocDeclare declaration, UserAdHocDeclareAnswerRequestDTO dto) {
+    private UserAdHocDeclareAnswer buildAnswerEntity(UserAdHocDeclare declaration,
+            UserAdHocDeclareAnswerRequestDTO dto) {
         UserAdHocDeclareAnswer answer = new UserAdHocDeclareAnswer();
         answer.setUserAdHocDeclare(declaration); // Link to parent declaration
 
@@ -218,8 +238,10 @@ public class UserAdHocDeclareServiceImpl implements UserAdHocDeclareService {
     }
 
     /**
-     * Converts a UserAdHocDeclareAnswer entity to a UserAdHocDeclareAnswerRequestDTO.
-     * Note: Consider creating a dedicated UserAdHocDeclareAnswerResponseDTO if needed.
+     * Converts a UserAdHocDeclareAnswer entity to a
+     * UserAdHocDeclareAnswerRequestDTO.
+     * Note: Consider creating a dedicated UserAdHocDeclareAnswerResponseDTO if
+     * needed.
      */
     private UserAdHocDeclareAnswerRequestDTO convertAnswerToDTO(UserAdHocDeclareAnswer answer) {
         if (answer == null) {
@@ -231,9 +253,10 @@ public class UserAdHocDeclareServiceImpl implements UserAdHocDeclareService {
                 .conflictDescription(answer.getConflictDescription())
                 .build();
     }
-    
+
     /**
-     * Converts a UserAdHocExclude entity to a UserAdHocExcludeDTO. Handles null input.
+     * Converts a UserAdHocExclude entity to a UserAdHocExcludeDTO. Handles null
+     * input.
      * Assumes UserAdHocExcludeDTO has a suitable builder or constructor.
      */
     private UserAdHocExcludeDTO convertExcludeToDTO(UserAdHocExclude exclude) {
@@ -243,12 +266,11 @@ public class UserAdHocDeclareServiceImpl implements UserAdHocDeclareService {
         // Assuming UserAdHocExcludeDTO has fields like id, reason, etc. and a builder
         // Replace with actual fields and builder/constructor of UserAdHocExcludeDTO
         return UserAdHocExcludeDTO.builder()
-                // .id(exclude.getId()) 
-                // .reason(exclude.getReason()) 
+                // .id(exclude.getId())
+                // .reason(exclude.getReason())
                 // ... map other relevant fields ...
-                .build(); 
+                .build();
     }
-
 
     /**
      * Converts a UserAdHocDeclare entity to its DTO representation.
@@ -269,14 +291,13 @@ public class UserAdHocDeclareServiceImpl implements UserAdHocDeclareService {
                 : entity.getAnswers().stream()
                         .map(this::convertAnswerToDTO)
                         .collect(Collectors.toList());
-                        
+
         // Convert excludes (FIXED)
         List<UserAdHocExcludeDTO> excludeDTOs = CollectionUtils.isEmpty(entity.getAdHocExcludes())
                 ? Collections.emptyList()
                 : entity.getAdHocExcludes().stream()
                         .map(this::convertExcludeToDTO)
                         .collect(Collectors.toList());
-
 
         return UserAdHocDeclareDTO.builder()
                 .id(entity.getId())

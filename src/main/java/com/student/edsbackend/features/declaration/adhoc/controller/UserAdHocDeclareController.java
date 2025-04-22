@@ -22,7 +22,7 @@ import java.util.List;
  */
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/v1/ad-hoc-declarations")
+@RequestMapping("/api/v1/adhoc-declarations/declare")
 public class UserAdHocDeclareController {
 
     private final UserAdHocDeclareService adHocDeclareService;
@@ -120,6 +120,6 @@ public class UserAdHocDeclareController {
     @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'ADMIN', 'MANAGER')")
     public ResponseEntity<ApiResponse> deleteAdHocDeclaration(@PathVariable Integer id) {
         adHocDeclareService.deleteAdHocDeclaration(id);
-        return ResponseEntity.ok(new ApiResponse(true, "Ad hoc declaration deleted successfully"));
+        return ResponseEntity.ok(new ApiResponse("Ad hoc declaration deleted successfully"));
     }
 }
