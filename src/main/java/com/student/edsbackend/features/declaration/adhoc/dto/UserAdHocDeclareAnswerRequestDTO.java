@@ -9,15 +9,16 @@ import lombok.*;
 /**
  * DTO for creating a new UserAdHocDeclare
  */
+
+
+
+
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class UserAdHocDeclareRequestDTO {
-    @NotNull(message = "User ID is required")
-    private Boolean hasAgreedWithStatements;
-    List<UserAdHocDeclareAnswerRequestDTO> answers;
+public class UserAdHocDeclareAnswerRequestDTO {
+    private Integer categoryId;
+    private String otherCategory;
+    private String conflictDescription;
 }
-
-
-
