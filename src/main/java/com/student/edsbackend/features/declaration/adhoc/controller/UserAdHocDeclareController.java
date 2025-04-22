@@ -94,10 +94,9 @@ public class UserAdHocDeclareController {
     @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'ADMIN', 'MANAGER')")
     public ResponseEntity<UserAdHocDeclareDTO> updateAdHocDeclarationStatus(
             @PathVariable Integer id,
-            @RequestParam UserDeclarationStatus status,
-            @RequestParam Integer responsibleUserId) {
+            @RequestParam UserDeclarationStatus status) {
         UserAdHocDeclareDTO updatedDeclaration = adHocDeclareService.updateAdHocDeclarationStatus(
-                id, status, responsibleUserId);
+                id, status);
         return ResponseEntity.ok(updatedDeclaration);
     }
 

@@ -49,7 +49,7 @@ public interface UserAdHocDeclareService {
      * @param responsibleUserId The ID of the user responsible for the update
      * @return The updated UserAdHocDeclareDTO
      */
-    UserAdHocDeclareDTO updateAdHocDeclarationStatus(Integer id, UserDeclarationStatus status, Integer responsibleUserId);
+    UserAdHocDeclareDTO updateAdHocDeclarationStatus(Integer id, UserDeclarationStatus status);
     
     /**
      * Delete an ad hoc declaration (soft delete)

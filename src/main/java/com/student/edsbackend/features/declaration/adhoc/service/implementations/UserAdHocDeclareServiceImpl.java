@@ -122,15 +122,15 @@ public UserAdHocDeclareDTO createAdHocDeclaration(Integer userId, UserAdHocDecla
 
     @Override
     @Transactional
-    public UserAdHocDeclareDTO updateAdHocDeclarationStatus(Integer id, UserDeclarationStatus status,
-            Integer responsibleUserId) {
-        log.info("Updating status to {} for ad-hoc declaration ID: {} by responsible user ID: {}", status, id,
-                responsibleUserId);
+    public UserAdHocDeclareDTO updateAdHocDeclarationStatus(Integer id, UserDeclarationStatus status) {
+        log.info("Updating status to {} for ad-hoc declaration ID: {}", status, id);
         UserAdHocDeclare adHocDeclare = findAdHocDeclareByIdOrThrow(id);
-        User responsibleUser = findUserByIdOrThrow(responsibleUserId);
-
+        
+        if (status == UserDeclarationStatus.SENT_FOR_APPROVAL || status == UserDeclarationStatus.SENT_FOR_APPROVAL) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "Cannot update status for a declaration with status SENT_FOR_APPROVAL");
+        }
         adHocDeclare.setStatus(status);
-        adHocDeclare.setResponsible(responsibleUser);
         // Note: Consider adding an 'updatedAt' timestamp field
 
         UserAdHocDeclare updatedDeclare = userAdHocDeclareRepository.save(adHocDeclare);
