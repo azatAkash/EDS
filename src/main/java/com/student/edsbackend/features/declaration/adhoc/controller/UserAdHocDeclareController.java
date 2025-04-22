@@ -100,7 +100,7 @@ public class UserAdHocDeclareController {
      * @return The updated UserAdHocDeclareDTO
      */
     @PatchMapping("/status/{id}")
-    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'ADMIN', 'MANAGER', 'USER')")
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'ADMIN', 'MANAGER')")
     public ResponseEntity<UserAdHocDeclareDTO> updateAdHocDeclarationStatus(
             @PathVariable Integer id,
             @RequestParam UserDeclarationStatus status,

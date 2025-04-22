@@ -4,6 +4,7 @@ import com.student.edsbackend.features.declaration.adhoc.AdHocCategory;
 import com.student.edsbackend.features.declaration.adhoc.UserAdHocDeclare;
 import com.student.edsbackend.features.declaration.adhoc.UserAdHocExclude; // Assuming this import exists
 import com.student.edsbackend.features.declaration.adhoc.dto.UserAdHocDeclareAnswerRequestDTO;
+import com.student.edsbackend.features.declaration.adhoc.dto.UserAdHocDeclareAnswerResponseDTO;
 import com.student.edsbackend.features.declaration.adhoc.dto.UserAdHocDeclareDTO;
 import com.student.edsbackend.features.declaration.adhoc.dto.UserAdHocDeclareRequestDTO;
 import com.student.edsbackend.features.declaration.adhoc.dto.UserAdHocExcludeDTO; // Assuming this import exists
@@ -59,10 +60,12 @@ public class UserAdHocDeclareServiceImpl implements UserAdHocDeclareService {
         UserAdHocDeclare savedDeclare = userAdHocDeclareRepository.save(adHocDeclare);
 
         // Process and save answers if provided
-        if (!CollectionUtils.isEmpty(requestDTO.getAnswers())) {
-            List<UserAdHocDeclareAnswer> answers = processAndSaveAnswers(savedDeclare, requestDTO.getAnswers());
-            savedDeclare.setAnswers(answers); // Associate saved answers with the declaration entity
+        if (CollectionUtils.isEmpty(requestDTO.getAnswers())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Answers cannot be empty");
         }
+
+        List<UserAdHocDeclareAnswer> answers = processAndSaveAnswers(savedDeclare, requestDTO.getAnswers());
+        savedDeclare.setAnswers(answers);
 
         log.info("Successfully created ad-hoc declaration with ID: {}", savedDeclare.getId());
         return convertToDTO(savedDeclare);
@@ -166,18 +169,12 @@ public class UserAdHocDeclareServiceImpl implements UserAdHocDeclareService {
      */
     private UserAdHocDeclare buildNewAdHocDeclare(User user, UserAdHocDeclareRequestDTO requestDTO) {
 
-        // Fetch all non-deleted agreement statements and their descriptions
-        List<Object[]> statements = decAgreementStatementRepository.findAllDescriptionsAndIds();
+        List<Map<String, String>> agreedStatements = decAgreementStatementRepository.findAllDescriptionsAndIsDeletedFalse();
 
-        // Map descriptions into a List<Map<String, String>> where each map represents
-        // one statement's description
-        List<Map<String, String>> agreedStatements = statements.stream()
-                .map(statement -> {
-                    Map<String, String> descriptionMap = (Map<String, String>) statement[1];
-                    return descriptionMap; // Just return the description map for each statement
-                })
-                .collect(Collectors.toList());
-
+        if (agreedStatements.isEmpty()){
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "No agreed statements found");
+        }
+        
         return UserAdHocDeclare.builder()
                 .user(user)
                 .createAt(LocalDateTime.now())
@@ -239,18 +236,24 @@ public class UserAdHocDeclareServiceImpl implements UserAdHocDeclareService {
 
     /**
      * Converts a UserAdHocDeclareAnswer entity to a
-     * UserAdHocDeclareAnswerRequestDTO.
-     * Note: Consider creating a dedicated UserAdHocDeclareAnswerResponseDTO if
-     * needed.
+     * UserAdHocDeclareAnswerResponseDTO.
      */
-    private UserAdHocDeclareAnswerRequestDTO convertAnswerToDTO(UserAdHocDeclareAnswer answer) {
+    private UserAdHocDeclareAnswerResponseDTO convertAnswerToDTO(UserAdHocDeclareAnswer answer) {
         if (answer == null) {
             return null;
         }
-        return UserAdHocDeclareAnswerRequestDTO.builder()
+
+        // Retrieve the category description
+        Map<String, String> categoryDescription = null;
+        if (answer.getCategory() != null && answer.getCategory().getDescription() != null) {
+            categoryDescription = answer.getCategory().getDescription();
+        }
+
+        return UserAdHocDeclareAnswerResponseDTO.builder()
                 .categoryId(answer.getCategory() != null ? answer.getCategory().getId() : null)
                 .otherCategory(answer.getOtherCategory())
                 .conflictDescription(answer.getConflictDescription())
+                .categoryDescription(categoryDescription) // Set the category description
                 .build();
     }
 
@@ -259,18 +262,6 @@ public class UserAdHocDeclareServiceImpl implements UserAdHocDeclareService {
      * input.
      * Assumes UserAdHocExcludeDTO has a suitable builder or constructor.
      */
-    private UserAdHocExcludeDTO convertExcludeToDTO(UserAdHocExclude exclude) {
-        if (exclude == null) {
-            return null;
-        }
-        // Assuming UserAdHocExcludeDTO has fields like id, reason, etc. and a builder
-        // Replace with actual fields and builder/constructor of UserAdHocExcludeDTO
-        return UserAdHocExcludeDTO.builder()
-                // .id(exclude.getId())
-                // .reason(exclude.getReason())
-                // ... map other relevant fields ...
-                .build();
-    }
 
     /**
      * Converts a UserAdHocDeclare entity to its DTO representation.
@@ -286,17 +277,10 @@ public class UserAdHocDeclareServiceImpl implements UserAdHocDeclareService {
         UserDTO createdByDTO = convertUserToDTO(entity.getCreatedBy());
 
         // Convert answers
-        List<UserAdHocDeclareAnswerRequestDTO> answerDTOs = CollectionUtils.isEmpty(entity.getAnswers())
+        List<UserAdHocDeclareAnswerResponseDTO> answerDTOs = CollectionUtils.isEmpty(entity.getAnswers())
                 ? Collections.emptyList()
                 : entity.getAnswers().stream()
                         .map(this::convertAnswerToDTO)
-                        .collect(Collectors.toList());
-
-        // Convert excludes (FIXED)
-        List<UserAdHocExcludeDTO> excludeDTOs = CollectionUtils.isEmpty(entity.getAdHocExcludes())
-                ? Collections.emptyList()
-                : entity.getAdHocExcludes().stream()
-                        .map(this::convertExcludeToDTO)
                         .collect(Collectors.toList());
 
         return UserAdHocDeclareDTO.builder()
@@ -306,8 +290,7 @@ public class UserAdHocDeclareServiceImpl implements UserAdHocDeclareService {
                 .isDeleted(entity.getIsDeleted())
                 .responsible(responsibleDTO)
                 .createdBy(createdByDTO)
-                .status(entity.getStatus())
-                .adHocExcludes(excludeDTOs) // Use the converted list
+                .status(entity.getStatus()) // Use the converted list
                 .hasAgreedWithStatements(entity.getHasAgreedWithStatements())
                 .statementAgreementStatuses(entity.getAgreedStatements()) // Map from entity field
                 .answers(answerDTOs)

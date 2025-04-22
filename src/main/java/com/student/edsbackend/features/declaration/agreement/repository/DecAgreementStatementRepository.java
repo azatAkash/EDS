@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 /**
@@ -29,5 +30,8 @@ public interface DecAgreementStatementRepository extends JpaRepository<DecAgreem
 
     @Query("SELECT d.id, d.description FROM DecAgreementStatement d WHERE d.isDeleted = false")
     List<Object[]> findAllDescriptionsAndIds();
+
+    @Query("SELECT das.description FROM DecAgreementStatement das WHERE das.isDeleted = false")
+    List<Map<String, String>> findAllDescriptionsAndIsDeletedFalse();
 
 }
