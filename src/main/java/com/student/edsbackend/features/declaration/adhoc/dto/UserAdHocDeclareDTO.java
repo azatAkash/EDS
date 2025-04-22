@@ -26,5 +26,6 @@ public class UserAdHocDeclareDTO {
     private UserDeclarationStatus status;
     private List<UserAdHocExcludeDTO> adHocExcludes;
     private Boolean hasAgreedWithStatements;
-    private List<Map<String, String>> statementAgreementStatuses; // Add this line to store statement agreement statuses
+    private List<Map<String, String>> statementAgreementStatuses; 
+    private List<UserAdHocDeclareAnswerRequestDTO> answers;
 }
