@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Map;
 
 import org.hibernate.annotations.JdbcTypeCode;
@@ -67,4 +68,11 @@ public class UserAdHocExclude {
     @Column(name = "agreements_details", columnDefinition = "text")
     private Map<String, String> agreements_details;
     
+
+    @Column(name = "has_agreed_with_statements")
+    private Boolean hasAgreedWithStatements;
+
+
+    @Column(name = "agreed_statements")
+    private List<Map<String, String>> agreedStatements;
 }

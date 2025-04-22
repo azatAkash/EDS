@@ -14,5 +14,5 @@ import lombok.*;
 public class UserAdHocDeclareRequestDTO {
     @NotNull(message = "User ID is required")
     private Integer userId;
-
+    private Boolean hasAgreedWithStatements;
 }

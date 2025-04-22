@@ -2,6 +2,7 @@ package com.student.edsbackend.features.declaration.agreement.repository;
 
 import com.student.edsbackend.features.declaration.agreement.DecAgreementStatement;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -25,4 +26,8 @@ public interface DecAgreementStatementRepository extends JpaRepository<DecAgreem
      * @return a list of all declaration agreement statements that are not deleted
      */
     List<DecAgreementStatement> findByIsDeletedFalse();
+
+    @Query("SELECT d.id, d.description FROM DecAgreementStatement d WHERE d.isDeleted = false")
+    List<Object[]> findAllDescriptionsAndIds();
+
 }

@@ -5,6 +5,7 @@ import lombok.*;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 
 import com.student.edsbackend.features.declaration.answers.UserAdHocDeclareAnswer;
 import com.student.edsbackend.features.enums.UserDeclarationStatus;
@@ -58,4 +59,12 @@ public class UserAdHocDeclare {
 
     @OneToMany(mappedBy = "userAdHocDeclare")
     private List<UserAdHocExclude> adHocExcludes;
+
+    @Column(name = "has_agreed_with_statements")
+    private Boolean hasAgreedWithStatements;
+
+
+    @Column(name = "agreed_statements")
+    private List<Map<String, String>> agreedStatements;
+
 }

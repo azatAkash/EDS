@@ -7,6 +7,7 @@ import com.student.edsbackend.features.declaration.adhoc.dto.UserAdHocDeclareReq
 import com.student.edsbackend.features.declaration.adhoc.dto.UserAdHocDeclareUpdateDTO;
 import com.student.edsbackend.features.declaration.adhoc.repository.UserAdHocDeclareRepository;
 import com.student.edsbackend.features.declaration.adhoc.service.UserAdHocDeclareService;
+import com.student.edsbackend.features.declaration.agreement.repository.DecAgreementStatementRepository;
 import com.student.edsbackend.features.enums.UserDeclarationStatus;
 import com.student.edsbackend.features.user.dal.Role;
 import com.student.edsbackend.features.user.dal.User;
@@ -20,6 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -33,6 +35,7 @@ public class UserAdHocDeclareServiceImpl implements UserAdHocDeclareService {
         private final UserAdHocDeclareRepository adHocDeclareRepository;
         private final UserRepository userRepository;
         private final UserInitialDeclarationRepository userInitialDeclarationRepository;
+        private final DecAgreementStatementRepository decAgreementStatementRepository;
 
         @Override
         public Optional<UserAdHocDeclareDTO> findById(Integer id) {
@@ -80,47 +83,44 @@ public class UserAdHocDeclareServiceImpl implements UserAdHocDeclareService {
         }
 
         @Override
-        @Transactional
-        public UserAdHocDeclareDTO createAdHocDeclaration(UserAdHocDeclareRequestDTO requestDTO) {
-                User user = userRepository.findById(requestDTO.getUserId())
-                                .orElseThrow(() -> new RuntimeException("User not found"));
+@Transactional
+public UserAdHocDeclareDTO createAdHocDeclaration(UserAdHocDeclareRequestDTO requestDTO) {
+    User user = userRepository.findById(requestDTO.getUserId())
+        .orElseThrow(() -> new RuntimeException("User not found"));
 
-                // Get current user from security context for createdBy field
-                String currentUserEmail = SecurityContextHolder.getContext().getAuthentication().getName();
-                User currentUser = userRepository.findByEmail(currentUserEmail)
-                                .orElseThrow(() -> new RuntimeException("Current user not found"));
+    // Get current user from security context for createdBy field
+    String currentUserEmail = SecurityContextHolder.getContext().getAuthentication().getName();
+    User currentUser = userRepository.findByEmail(currentUserEmail)
+        .orElseThrow(() -> new RuntimeException("Current user not found"));
 
-                if (currentUser.getRole() != null && currentUser.getRole() == Role.USER) {
-                        throw new RuntimeException("You cannot create ad hoc declaration");
-                }
-                
-                // Check if user has an initial declaration with SUBMITTED_FOR_APPROVAL status
-                boolean hasInitialDeclaration = userInitialDeclarationRepository.findByUserIdAndIsDeletedFalse(user.getId())
-                        .stream()
-                        .anyMatch(declaration -> declaration.getStatus() != UserDeclarationStatus.CREATED && declaration.getStatus()!= UserDeclarationStatus.SENT_FOR_APPROVAL);
-                
-                if (!hasInitialDeclaration) {
-                        throw new RuntimeException("User must have an initial declaration with SUBMITTED_FOR_APPROVAL status");
-                }
-                
-                if (adHocDeclareRepository.existsByUserIdAndIsDeletedFalseAndStatusNotIn(
-                                user.getId(),
-                                List.of(UserDeclarationStatus.CREATED, UserDeclarationStatus.SENT_FOR_APPROVAL))) {
-                        throw new RuntimeException("User already has a non-finished ad hoc declaration");
-                }
-                UserAdHocDeclare adHocDeclare = UserAdHocDeclare.builder()
-                                .user(user)
-                                .createAt(LocalDateTime.now())
-                                .isDeleted(false)
-                                .status(UserDeclarationStatus.CREATED)
-                                .responsible(currentUser)
-                                .createAt(LocalDateTime.now())
-                                .createdBy(currentUser)
-                                .build();
+    // Fetch all non-deleted agreement statements and their descriptions
+    List<Object[]> statements = decAgreementStatementRepository.findAllDescriptionsAndIds();
 
-                UserAdHocDeclare savedAdHocDeclare = adHocDeclareRepository.save(adHocDeclare);
-                return mapToDTO(savedAdHocDeclare);
-        }
+    // Map descriptions into a List<Map<String, String>> where each map represents one statement's description
+    List<Map<String, String>> agreedStatements = statements.stream()
+        .map(statement -> {
+            Map<String, String> descriptionMap = (Map<String, String>) statement[1];
+            return descriptionMap; // Just return the description map for each statement
+        })
+        .collect(Collectors.toList());
+
+    // Create the ad hoc declaration with the agreedStatements list
+    UserAdHocDeclare adHocDeclare = UserAdHocDeclare.builder()
+        .user(user)
+        .createAt(LocalDateTime.now())
+        .isDeleted(false)
+        .status(UserDeclarationStatus.CREATED)
+        .responsible(currentUser)
+        .hasAgreedWithStatements(requestDTO.getHasAgreedWithStatements())
+        .createdBy(currentUser)
+        .agreedStatements(agreedStatements)  // List<Map<String, String>> added here
+        .build();
+
+    // Save the ad hoc declaration
+    UserAdHocDeclare savedAdHocDeclare = adHocDeclareRepository.save(adHocDeclare);
+    return mapToDTO(savedAdHocDeclare);
+}
+
 
         @Override
         @Transactional
@@ -217,6 +217,8 @@ public class UserAdHocDeclareServiceImpl implements UserAdHocDeclareService {
                                 .responsible(responsibleDTO)
                                 .createdBy(createdByDTO)
                                 .status(adHocDeclare.getStatus())
+                                .hasAgreedWithStatements(adHocDeclare.getHasAgreedWithStatements())
+                                .statementAgreementStatuses(adHocDeclare.getAgreedStatements())
                                 .build();
         }
 }

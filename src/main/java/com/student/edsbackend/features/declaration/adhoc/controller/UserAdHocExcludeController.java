@@ -18,7 +18,7 @@ import java.util.List;
  * REST controller for managing UserAdHocExclude entities
  */
 @RestController
-@RequestMapping("/api/v1/exclusions")
+@RequestMapping("/api/v1/adhoc-declarations/exclude")
 @RequiredArgsConstructor
 public class UserAdHocExcludeController {
 
