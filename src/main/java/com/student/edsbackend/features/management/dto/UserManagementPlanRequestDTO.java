@@ -17,7 +17,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class UserManagementPlanRequestDTO {
     private Integer userDeclarationId;
-    private Integer adHocId;
+    private Integer adHocDeclareId;
     
     private Boolean actionRequired;
     private Integer actionId;

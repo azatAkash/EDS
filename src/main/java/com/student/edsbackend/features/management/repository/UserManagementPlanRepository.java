@@ -24,7 +24,7 @@ public interface UserManagementPlanRepository extends JpaRepository<UserManageme
     /**
      * Find all management plans for a specific ad hoc declaration
      */
-    List<UserManagementPlan> findByAdHocIdAndIsDeletedFalse(Integer adHocId);
+    List<UserManagementPlan> findByUserAdHocDeclareIdAndIsDeletedFalse(Integer adHocId);
     
     /**
      * Find all management plans created by a specific user

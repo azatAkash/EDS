@@ -32,8 +32,8 @@ public class UserManagementPlan {
     private UserInitialDeclaration userDeclaration;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "ad_hoc_id")
-    private UserAdHocDeclare adHoc;
+    @JoinColumn(name = "user_ad_hoc_declare_id")
+    private UserAdHocDeclare UserAdHocDeclare;
 
     @Column(name = "creation_date")
     private LocalDateTime creationDate;

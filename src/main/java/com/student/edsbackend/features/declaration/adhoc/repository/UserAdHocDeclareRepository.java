@@ -9,6 +9,7 @@ import java.util.Optional;
 import com.student.edsbackend.features.declaration.adhoc.UserAdHocDeclare;
 import com.student.edsbackend.features.user.dal.User;
 import com.student.edsbackend.features.enums.UserDeclarationStatus;
+import com.student.edsbackend.features.management.dto.UserManagementPlanDTO;
 
 /**
  * Repository interface for UserAdHocDeclare entity.
@@ -51,5 +52,9 @@ public interface UserAdHocDeclareRepository extends JpaRepository<UserAdHocDecla
      */
     Optional<UserAdHocDeclare> findByIdAndUser(Integer id, User user);
 
+    
+
     boolean existsByUserIdAndIsDeletedFalseAndStatusNotIn(Integer userId, List<UserDeclarationStatus> statuses);
+
+    Optional<UserAdHocDeclare> findByIdAndIsDeletedFalse(Integer adHocDeclareId);
 }

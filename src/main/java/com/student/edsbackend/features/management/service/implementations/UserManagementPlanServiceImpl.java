@@ -1,6 +1,7 @@
 package com.student.edsbackend.features.management.service.implementations;
 
 import com.student.edsbackend.features.declaration.adhoc.UserAdHocDeclare;
+import com.student.edsbackend.features.declaration.adhoc.repository.UserAdHocDeclareRepository;
 import com.student.edsbackend.features.enums.ManagementPlanStatus;
 import com.student.edsbackend.features.enums.UserDeclarationStatus;
 import com.student.edsbackend.features.management.ManagementPlanAction;
@@ -39,6 +40,7 @@ public class UserManagementPlanServiceImpl implements UserManagementPlanService 
     private final UserRepository userRepository;
     private final UserInitialDeclarationRepository userDeclarationRepository;
     private final ManagementPlanActionRepository actionRepository; // ✅ Added
+    private final UserAdHocDeclareRepository userAdHocDeclareRepository;
 
     @Override
     public Optional<UserManagementPlanDTO> getManagementPlanById(Integer id) {
@@ -82,10 +84,10 @@ public class UserManagementPlanServiceImpl implements UserManagementPlanService 
     @Override
     public UserManagementPlanDTO createManagementPlan(UserManagementPlanRequestDTO requestDTO) {
         // Validate that either userDeclarationId or adHocId is provided
-        if ((requestDTO.getUserDeclarationId() == null && requestDTO.getAdHocId() == null) ||
-                (requestDTO.getUserDeclarationId() != null && requestDTO.getAdHocId() != null)) {
+        if ((requestDTO.getUserDeclarationId() == null && requestDTO.getAdHocDeclareId() == null) ||
+                (requestDTO.getUserDeclarationId() != null && requestDTO.getAdHocDeclareId() != null)) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                    "Either userDeclarationId or adHocId must be provided, but not both");
+                    "Either userDeclarationId or adHocDeclareId must be provided, but not both");
         }
         
         // Validate that there is no existing active management plan for the same declaration or adhoc
@@ -102,9 +104,9 @@ public class UserManagementPlanServiceImpl implements UserManagementPlanService 
             }
         }
         
-        if (requestDTO.getAdHocId() != null) {
+        if (requestDTO.getAdHocDeclareId() != null) {
             List<UserManagementPlan> existingPlans = managementPlanRepository
-                .findByAdHocIdAndIsDeletedFalse(requestDTO.getAdHocId());
+                .findByUserAdHocDeclareIdAndIsDeletedFalse(requestDTO.getAdHocDeclareId());
                 
             boolean hasActiveManagementPlan = existingPlans.stream()
                 .anyMatch(plan -> !plan.getIsAmended());
@@ -117,7 +119,7 @@ public class UserManagementPlanServiceImpl implements UserManagementPlanService 
 
         User currentUser = getCurrentUser();
         UserManagementPlan managementPlan = new UserManagementPlan();
-        if (requestDTO.getUserDeclarationId() != null && requestDTO.getAdHocId() != null) {
+        if (requestDTO.getUserDeclarationId() != null && requestDTO.getAdHocDeclareId() != null) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
                     "Either userDeclarationId or adHocId must be provided, but not both");
         }
@@ -136,18 +138,19 @@ public class UserManagementPlanServiceImpl implements UserManagementPlanService 
         }
 
         // Set ad hoc if provided
-        if (requestDTO.getAdHocId() != null) {
-            // Assuming there's a repository for UserAdHocDeclare
-            // This would need to be injected as a dependency
-            // UserAdHocDeclare adHoc = adHocRepository.findById(requestDTO.getAdHocId())
-            // .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
-            // "Ad hoc declaration not found with id: " + requestDTO.getAdHocId()));
-            // managementPlan.setAdHoc(adHoc);
-
-            // For now, we'll just set the ID and let JPA handle the relationship
+        if (requestDTO.getAdHocDeclareId() != null) {
+            
             UserAdHocDeclare adHoc = new UserAdHocDeclare();
-            adHoc.setId(requestDTO.getAdHocId());
-            managementPlan.setAdHoc(adHoc);
+            adHoc.setId(requestDTO.getAdHocDeclareId());
+            managementPlan.setUserAdHocDeclare(adHoc);
+
+            if (userAdHocDeclareRepository.findByIdAndIsDeletedFalse(requestDTO.getAdHocDeclareId())
+                   .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+                            "User ad hoc declaration not found with id: " + requestDTO.getAdHocDeclareId()))
+                   .getStatus()!= UserDeclarationStatus.SENT_FOR_APPROVAL) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                        "User ad hoc declaration must be in SENT_FOR_APPROVAL status");
+            }
         }
 
         if (requestDTO.getActionRequired() == null) {
@@ -250,8 +253,8 @@ public class UserManagementPlanServiceImpl implements UserManagementPlanService 
             return true;
         }
 
-        if (managementPlan.getAdHoc() != null &&
-                managementPlan.getAdHoc().getUser().getId().equals(currentUser.getId())) {
+        if (managementPlan.getUserAdHocDeclare() != null &&
+                managementPlan.getUserAdHocDeclare().getUser().getId().equals(currentUser.getId())) {
             return true;
         }
 
@@ -334,7 +337,7 @@ public class UserManagementPlanServiceImpl implements UserManagementPlanService 
                 .userDeclarationId(
                         managementPlan.getUserDeclaration() != null ? managementPlan.getUserDeclaration().getId()
                                 : null)
-                .adHocId(managementPlan.getAdHoc() != null ? managementPlan.getAdHoc().getId() : null)
+                .adHocId(managementPlan.getUserAdHocDeclare() != null ? managementPlan.getUserAdHocDeclare().getId() : null)
                 .creationDate(managementPlan.getCreationDate())
                 .createdBy(createdByDTO)
                 .status(managementPlan.getStatus())
