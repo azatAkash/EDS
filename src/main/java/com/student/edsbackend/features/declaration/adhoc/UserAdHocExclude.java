@@ -66,13 +66,14 @@ public class UserAdHocExclude {
 
     @JdbcTypeCode(SqlTypes.JSON)
     @Convert(converter = JsonConverter.class)
-    @Column(name = "agreements_details", columnDefinition = "text")
-    private Map<String, String> agreements_details;
+    @Column(name = "agreement_details", columnDefinition = "text")
+    private Map<String, String> agreementDetails;
     
 
     @Column(name = "has_agreed_with_statements")
     private Boolean hasAgreedWithStatements;
 
+    @JdbcTypeCode(SqlTypes.JSON)
     @Convert(converter = ListOfMapConverter.class)
     @Column(name = "agreed_statements", columnDefinition = "json")
     private List<Map<String, String>> agreedStatements;

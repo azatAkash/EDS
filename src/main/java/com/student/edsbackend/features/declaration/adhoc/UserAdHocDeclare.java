@@ -7,6 +7,9 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
+
 import com.student.edsbackend.configs.ListOfMapConverter;
 import com.student.edsbackend.features.declaration.answers.UserAdHocDeclareAnswer;
 import com.student.edsbackend.features.enums.UserDeclarationStatus;
@@ -64,6 +67,8 @@ public class UserAdHocDeclare {
     @Column(name = "has_agreed_with_statements")
     private Boolean hasAgreedWithStatements;
 
+
+    @JdbcTypeCode(SqlTypes.JSON)
     @Convert(converter = ListOfMapConverter.class)
     @Column(name = "agreed_statements", columnDefinition = "json")
     private List<Map<String, String>> agreedStatements;

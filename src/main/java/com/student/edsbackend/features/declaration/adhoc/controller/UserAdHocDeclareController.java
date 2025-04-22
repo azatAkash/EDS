@@ -34,6 +34,7 @@ public class UserAdHocDeclareController {
      * @return The created UserAdHocDeclareDTO
      */
     @PostMapping("/{userId}")
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'ADMIN', 'MANAGER', 'USER')")
     public ResponseEntity<UserAdHocDeclareDTO> createAdHocDeclaration(
             @PathVariable Integer userId,
             @Valid @RequestBody UserAdHocDeclareRequestDTO requestDTO) {
@@ -46,6 +47,7 @@ public class UserAdHocDeclareController {
      * Accessible to super admin, admin, managers, and users assigned to the declaration
      */
     @GetMapping("/declarations/{id}")
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'ADMIN', 'MANAGER', 'USER')")
     public ResponseEntity<UserAdHocDeclareDTO> getAdHocDeclarationById(@PathVariable Integer id) {
         UserAdHocDeclareDTO declaration = adHocDeclareService.getAdHocDeclarationById(id)
                 .orElseThrow(() -> new ResponseStatusException(
@@ -59,6 +61,7 @@ public class UserAdHocDeclareController {
      * @return List of UserAdHocDeclareDTO objects
      */
     @GetMapping("/{userId}")
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'ADMIN', 'MANAGER', 'USER')")
     public ResponseEntity<List<UserAdHocDeclareDTO>> getAdHocDeclarationsByUserId(@PathVariable Integer userId) {
         List<UserAdHocDeclareDTO> declarations = adHocDeclareService.getAdHocDeclarationsByUserId(userId);
         return ResponseEntity.ok(declarations);
@@ -70,6 +73,7 @@ public class UserAdHocDeclareController {
      * @return The latest UserAdHocDeclareDTO if found
      */
     @GetMapping("/{userId}/latest")
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'ADMIN', 'MANAGER', 'USER')")
     public ResponseEntity<UserAdHocDeclareDTO> getLatestAdHocDeclarationByUserId(@PathVariable Integer userId) {
         UserAdHocDeclareDTO declaration = adHocDeclareService.getLatestAdHocDeclarationByUserId(userId)
                 .orElseThrow(() -> new ResponseStatusException(

@@ -31,6 +31,10 @@ public class DecAgreementStatementServiceImpl implements DecAgreementStatementSe
                 .isDeleted(false)
                 .build();
 
+        if (requestDTO.getDescription() == null || requestDTO.getDescription().isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Description cannot be empty");
+        }
+
         return toDTO(repository.save(statement));
     }
 
