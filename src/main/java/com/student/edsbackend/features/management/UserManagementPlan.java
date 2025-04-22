@@ -10,9 +10,6 @@ import com.student.edsbackend.features.enums.ManagementPlanStatus;
 import com.student.edsbackend.features.user.dal.User;
 import com.student.edsbackend.features.user.dal.UserDeclaration.UserInitialDeclaration;
 
-/**
- * Entity representing the user_management_plans table.
- */
 @Entity
 @Getter
 @Setter
@@ -33,7 +30,7 @@ public class UserManagementPlan {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_ad_hoc_declare_id")
-    private UserAdHocDeclare UserAdHocDeclare;
+    private UserAdHocDeclare userAdHocDeclare;  // Corrected name
 
     @Column(name = "creation_date")
     private LocalDateTime creationDate;

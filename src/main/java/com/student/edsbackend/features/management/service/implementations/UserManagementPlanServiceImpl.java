@@ -74,7 +74,7 @@ public class UserManagementPlanServiceImpl implements UserManagementPlanService 
     public List<UserManagementPlanDTO> getCurrentUserManagementPlans() {
         User currentUser = getCurrentUser();
 
-        return managementPlanRepository.findByUserDeclaration_UserIdOrAdHoc_UserIdAndIsDeletedFalse(
+        return managementPlanRepository.findByUserDeclaration_UserIdOrUserAdHocDeclare_UserIdAndIsDeletedFalse(
                 currentUser.getId(), currentUser.getId())
                 .stream()
                 .map(this::mapToDTO)
@@ -337,7 +337,7 @@ public class UserManagementPlanServiceImpl implements UserManagementPlanService 
                 .userDeclarationId(
                         managementPlan.getUserDeclaration() != null ? managementPlan.getUserDeclaration().getId()
                                 : null)
-                .adHocId(managementPlan.getUserAdHocDeclare() != null ? managementPlan.getUserAdHocDeclare().getId() : null)
+                .userAdHocDeclareId(managementPlan.getUserAdHocDeclare() != null ? managementPlan.getUserAdHocDeclare().getId() : null)
                 .creationDate(managementPlan.getCreationDate())
                 .createdBy(createdByDTO)
                 .status(managementPlan.getStatus())

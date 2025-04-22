@@ -16,7 +16,7 @@ import java.time.LocalDateTime;
 public class UserManagementPlanDTO {
     private Integer id;
     private Integer userDeclarationId;
-    private Integer adHocId;
+    private Integer userAdHocDeclareId;
     private LocalDateTime creationDate;
     private UserDTO createdBy;
     private ManagementPlanStatus status;

@@ -46,7 +46,7 @@ public class UserAdHocDeclare {
     @OneToMany(mappedBy = "userAdHocDeclare")
     private List<UserAdHocDeclareAnswer> answers;
 
-    @OneToMany(mappedBy = "adHoc")
+    @OneToMany(mappedBy = "userAdHocDeclare")
     private List<UserManagementPlan> managementPlans;
 
     @ManyToOne(fetch = FetchType.LAZY)
