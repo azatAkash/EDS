@@ -8,6 +8,7 @@ import com.student.edsbackend.features.declaration.adhoc.dto.UserAdHocDeclareAns
 import com.student.edsbackend.features.declaration.adhoc.dto.UserAdHocDeclareDTO;
 import com.student.edsbackend.features.declaration.adhoc.dto.UserAdHocDeclareRequestDTO;
 import com.student.edsbackend.features.declaration.adhoc.dto.UserAdHocExcludeDTO; // Assuming this import exists
+import com.student.edsbackend.features.declaration.adhoc.repository.AdHocCategoryRepository;
 import com.student.edsbackend.features.declaration.adhoc.repository.UserAdHocDeclareRepository;
 import com.student.edsbackend.features.declaration.adhoc.service.UserAdHocDeclareService;
 import com.student.edsbackend.features.declaration.agreement.repository.DecAgreementStatementRepository;
@@ -17,6 +18,7 @@ import com.student.edsbackend.features.enums.UserDeclarationStatus;
 import com.student.edsbackend.features.user.dal.User;
 import com.student.edsbackend.features.user.dal.UserDTO;
 import com.student.edsbackend.features.user.dal.UserRepository;
+import com.student.edsbackend.features.user.dal.UserDeclaration.UserInitialDeclarationRepository;
 
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
@@ -48,28 +50,48 @@ public class UserAdHocDeclareServiceImpl implements UserAdHocDeclareService {
     private final UserAdHocDeclareAnswerRepository userAdHocDeclareAnswerRepository;
     private final UserRepository userRepository;
     private final DecAgreementStatementRepository decAgreementStatementRepository;
+    private final AdHocCategoryRepository adHocCategoryRepository;
+    private final UserInitialDeclarationRepository userInitialDeclarationRepository;
     // --- Public Service Methods ---
 
     @Override
-    @Transactional // Ensures atomicity
-    public UserAdHocDeclareDTO createAdHocDeclaration(Integer userId, UserAdHocDeclareRequestDTO requestDTO) {
-        log.info("Creating ad-hoc declaration for user ID: {}", userId);
-        User user = findUserByIdOrThrow(userId);
+@Transactional
+public UserAdHocDeclareDTO createAdHocDeclaration(Integer userId, UserAdHocDeclareRequestDTO requestDTO) {
+    log.info("Creating ad-hoc declaration for user ID: {}", userId);
+    User user = findUserByIdOrThrow(userId);
 
-        UserAdHocDeclare adHocDeclare = buildNewAdHocDeclare(user, requestDTO);
-        UserAdHocDeclare savedDeclare = userAdHocDeclareRepository.save(adHocDeclare);
 
-        // Process and save answers if provided
-        if (CollectionUtils.isEmpty(requestDTO.getAnswers())) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Answers cannot be empty");
+    boolean hasFinalizedInitialDeclaration = userInitialDeclarationRepository
+                .findByUserIdAndIsDeletedFalse(userId)
+                .stream()
+                .anyMatch(decl -> decl.getStatus() != UserDeclarationStatus.CREATED && decl.getStatus() != UserDeclarationStatus.SENT_FOR_APPROVAL);
+
+        if (!hasFinalizedInitialDeclaration) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "Cannot create Ad Hoc Declaration before completing Initial Declaration");
         }
+    boolean alreadyExists = userAdHocDeclareRepository
+        .existsByUserAndStatusAndIsDeletedFalse(user, UserDeclarationStatus.SENT_FOR_APPROVAL);
 
-        List<UserAdHocDeclareAnswer> answers = processAndSaveAnswers(savedDeclare, requestDTO.getAnswers());
-        savedDeclare.setAnswers(answers);
-
-        log.info("Successfully created ad-hoc declaration with ID: {}", savedDeclare.getId());
-        return convertToDTO(savedDeclare);
+    if (alreadyExists) {
+        throw new ResponseStatusException(HttpStatus.CONFLICT,
+            "User already has a declaration with status SENT_FOR_APPROVAL");
     }
+
+    UserAdHocDeclare adHocDeclare = buildNewAdHocDeclare(user, requestDTO);
+    UserAdHocDeclare savedDeclare = userAdHocDeclareRepository.save(adHocDeclare);
+
+    if (CollectionUtils.isEmpty(requestDTO.getAnswers())) {
+        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Answers cannot be empty");
+    }
+
+    List<UserAdHocDeclareAnswer> answers = processAndSaveAnswers(savedDeclare, requestDTO.getAnswers());
+    savedDeclare.setAnswers(answers);
+
+    log.info("Successfully created ad-hoc declaration with ID: {}", savedDeclare.getId());
+    return convertToDTO(savedDeclare);
+}
+
 
     @Override
     @Transactional(readOnly = true) // Read-only transaction for query methods
@@ -169,12 +191,13 @@ public class UserAdHocDeclareServiceImpl implements UserAdHocDeclareService {
      */
     private UserAdHocDeclare buildNewAdHocDeclare(User user, UserAdHocDeclareRequestDTO requestDTO) {
 
-        List<Map<String, String>> agreedStatements = decAgreementStatementRepository.findAllDescriptionsAndIsDeletedFalse();
+        List<Map<String, String>> agreedStatements = decAgreementStatementRepository
+                .findAllDescriptionsAndIsDeletedFalse();
 
-        if (agreedStatements.isEmpty()){
+        if (agreedStatements.isEmpty()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "No agreed statements found");
         }
-        
+
         return UserAdHocDeclare.builder()
                 .user(user)
                 .createAt(LocalDateTime.now())
@@ -205,12 +228,13 @@ public class UserAdHocDeclareServiceImpl implements UserAdHocDeclareService {
     private UserAdHocDeclareAnswer buildAnswerEntity(UserAdHocDeclare declaration,
             UserAdHocDeclareAnswerRequestDTO dto) {
         UserAdHocDeclareAnswer answer = new UserAdHocDeclareAnswer();
-        answer.setUserAdHocDeclare(declaration); // Link to parent declaration
+        answer.setUserAdHocDeclare(declaration);
 
+        // Загружаем категорию полностью, чтобы получить описание
         if (dto.getCategoryId() != null) {
-            // We only need the ID for the relationship mapping
-            AdHocCategory category = new AdHocCategory();
-            category.setId(dto.getCategoryId());
+            AdHocCategory category = adHocCategoryRepository.findById(dto.getCategoryId())
+                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+                            "Category not found with ID: " + dto.getCategoryId()));
             answer.setCategory(category);
         }
 
@@ -231,6 +255,11 @@ public class UserAdHocDeclareServiceImpl implements UserAdHocDeclareService {
                 .email(user.getEmail())
                 .firstname(user.getFirstname())
                 .lastname(user.getLastname())
+                .department(user.getDepartment())
+                .isActive(user.getIsActive())
+                .role(user.getRole())
+                .position(user.getPosition())
+                .isDeleted(user.getIsDeleted())
                 .build();
     }
 

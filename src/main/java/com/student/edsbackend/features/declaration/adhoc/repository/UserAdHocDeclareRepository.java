@@ -24,7 +24,8 @@ public interface UserAdHocDeclareRepository extends JpaRepository<UserAdHocDecla
      * @return List of UserAdHocDeclare entities
      */
     List<UserAdHocDeclare> findByUserAndIsDeletedFalse(User user);
-    
+    boolean existsByUserAndStatusAndIsDeletedFalse(User user, UserDeclarationStatus status);
+
     /**
      * Find all ad hoc declarations with a specific status
      * @param status The status to filter by
