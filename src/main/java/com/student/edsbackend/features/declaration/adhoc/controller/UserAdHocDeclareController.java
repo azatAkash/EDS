@@ -45,7 +45,7 @@ public class UserAdHocDeclareController {
      * Get an ad hoc declaration by ID
      * Accessible to super admin, admin, managers, and users assigned to the declaration
      */
-    @GetMapping("/{id}")
+    @GetMapping("/declarations/{id}")
     public ResponseEntity<UserAdHocDeclareDTO> getAdHocDeclarationById(@PathVariable Integer id) {
         UserAdHocDeclareDTO declaration = adHocDeclareService.getAdHocDeclarationById(id)
                 .orElseThrow(() -> new ResponseStatusException(
@@ -77,19 +77,6 @@ public class UserAdHocDeclareController {
         return ResponseEntity.ok(declaration);
     }
 
-    /**
-     * Get all ad hoc declarations with a specific status
-     * Accessible to super admin, admin, and managers only
-     * @param status The status to filter by
-     * @return List of UserAdHocDeclareDTO objects
-     */
-    @GetMapping("/{status}")
-    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'ADMIN', 'MANAGER')")
-    public ResponseEntity<List<UserAdHocDeclareDTO>> getAdHocDeclarationsByStatus(
-            @PathVariable UserDeclarationStatus status) {
-        List<UserAdHocDeclareDTO> declarations = adHocDeclareService.getAdHocDeclarationsByStatus(status);
-        return ResponseEntity.ok(declarations);
-    }
 
     /**
      * Update the status of an ad hoc declaration
