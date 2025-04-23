@@ -38,7 +38,7 @@ public class UserAdHocExclude {
     private User user;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "initial_dec_id")
+    @JoinColumn(name = "user_initial_dec_id")
     private UserInitialDeclaration userInitialDeclaration;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -60,17 +60,8 @@ public class UserAdHocExclude {
 
     @Column(name = "is_confirmed")
     private Boolean isConfirmed;
-
-    @Column(name = "confirmed_agreements", nullable = false)
-    private Boolean confirmedAgreements;
-
-    @JdbcTypeCode(SqlTypes.JSON)
-    @Convert(converter = JsonConverter.class)
-    @Column(name = "agreement_details", columnDefinition = "text")
-    private Map<String, String> agreementDetails;
     
-
-    @Column(name = "has_agreed_with_statements")
+    @Column(name = "has_agreed_with_statements", nullable = false)
     private Boolean hasAgreedWithStatements;
 
     @JdbcTypeCode(SqlTypes.JSON)

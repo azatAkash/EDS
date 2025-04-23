@@ -64,7 +64,7 @@ public class UserAdHocDeclare {
     @OneToMany(mappedBy = "userAdHocDeclare")
     private List<UserAdHocExclude> adHocExcludes;
 
-    @Column(name = "has_agreed_with_statements")
+    @Column(name = "has_agreed_with_statements", nullable = false)
     private Boolean hasAgreedWithStatements;
 
 

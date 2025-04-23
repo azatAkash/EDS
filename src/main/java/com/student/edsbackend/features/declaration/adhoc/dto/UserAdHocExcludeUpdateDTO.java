@@ -15,10 +15,7 @@ import java.util.Map;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class UserAdHocExcludeRequestDTO {
-    private Integer initialDeclarationId;
-    private Integer userAdHocDeclareId;
-    private String excludeReason;
+public class UserAdHocExcludeUpdateDTO {
     private Boolean isConfirmed;
-    private Boolean hasAgreedWithStatements;
+    private UserDeclarationStatus status;
 }

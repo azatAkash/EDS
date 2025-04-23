@@ -43,16 +43,8 @@ public interface UserInitialDeclarationService {
      * @return The updated user initial declaration with status set to
      * SENT_FOR_APPROVAL
      */
-    UserInitialDeclarationDTO sendForApproval(Integer id);
+    UserInitialDeclarationDTO changeStatusById(Integer id, UserInitialDeclarationUpdateDTO updateDTO);
     
-    /**
-     * Send the current user's initial declaration for approval
-     * Finds the user from the security context, validates that they have a declaration with CREATED status
-     * and updates its status to SENT_FOR_APPROVAL
-     *
-     * @return The updated user initial declaration with status set to SENT_FOR_APPROVAL
-     */
-    UserInitialDeclarationDTO sendCurrentUserDeclarationForApproval();
 
     /**
      * Verify a user initial declaration
@@ -61,7 +53,7 @@ public interface UserInitialDeclarationService {
      * @param status The new status to set for the declaration
      * @return The updated user initial declaration with the new status
      */
-    UserInitialDeclarationDTO updateResponsible(Integer id, UserInitialDeclarationRequestDTO updateDTO);
+    UserInitialDeclarationDTO updateResponsible(Integer id, UserInitialDeclarationRequestDTO requestDTO);
 
     /**
      * Delete a user initial declaration (soft delete)

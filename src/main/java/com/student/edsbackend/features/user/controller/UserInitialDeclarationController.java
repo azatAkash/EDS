@@ -25,30 +25,22 @@ public class UserInitialDeclarationController {
 
     private final UserInitialDeclarationService userInitialDeclarationService;
 
-    // GET /{id} endpoint removed as per requirements
-    @PatchMapping("/{id}/send-for-approval")
+
+    @PatchMapping("/{id}/status")
     @Operation(summary = "Send a user initial declaration for approval by ID",
             description = "Sets the declaration status to SENT_FOR_APPROVAL. Accessible by SUPER_ADMIN only")
     @PreAuthorize("hasAnyAuthority('SUPER_ADMIN')")
-    public ResponseEntity<UserInitialDeclarationDTO> sendForApprovalById(@PathVariable Integer id) {
-        UserInitialDeclarationDTO updatedDeclaration = userInitialDeclarationService.sendForApproval(id);
+    public ResponseEntity<UserInitialDeclarationDTO> changeStatusByUserId(@PathVariable Integer id, @RequestBody UserInitialDeclarationUpdateDTO updateDTO) {
+        UserInitialDeclarationDTO updatedDeclaration = userInitialDeclarationService.changeStatusById(id, updateDTO);
         return ResponseEntity.ok(updatedDeclaration);
     }
-    
-    @PatchMapping("/send-for-approval")
-    @Operation(summary = "Send current user's initial declaration for approval",
-            description = "Finds the current user's CREATED declaration and sets its status to SENT_FOR_APPROVAL. Accessible by USER and SUPER_ADMIN only")
-    @PreAuthorize("hasAnyAuthority('USER', 'SUPER_ADMIN')")
-    public ResponseEntity<UserInitialDeclarationDTO> sendForApproval() {
-        UserInitialDeclarationDTO updatedDeclaration = userInitialDeclarationService.sendCurrentUserDeclarationForApproval();
-        return ResponseEntity.ok(updatedDeclaration);
-    }
+
 
     @PatchMapping("/{id}/responsible")
     @Operation(summary = "Verify a user initial declaration",
             description = "Changes the declaration status. Accessible by SUPER_ADMIN, ADMIN, and MANAGER")
     @PreAuthorize("hasAnyAuthority('SUPER_ADMIN', 'ADMIN')")
-    public ResponseEntity<UserInitialDeclarationDTO> verifyDeclaration(
+    public ResponseEntity<UserInitialDeclarationDTO> changeResponsible(
             @PathVariable Integer id,
             @RequestBody UserInitialDeclarationRequestDTO updateDTO) {
         UserInitialDeclarationDTO verifiedDeclaration = userInitialDeclarationService.updateResponsible(id, updateDTO);
