@@ -54,4 +54,6 @@ public interface UserAdHocExcludeRepository extends JpaRepository<UserAdHocExclu
      */
     @Query("SELECT CASE WHEN COUNT(e) > 0 THEN true ELSE false END FROM UserAdHocExclude e WHERE e.user.id = :userId AND e.isDeleted = false")
     boolean hasActiveExclusions(@Param("userId") Integer userId);
+
+    List<UserAdHocExclude> findAllByIsDeletedFalse();
 }

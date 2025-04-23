@@ -19,7 +19,8 @@ import java.util.List;
 
 /**
  * Controller for managing user ad hoc exclusions
- * Endpoints are accessible to super admin, admin, managers, and users assigned to the exclusion
+ * Endpoints are accessible to super admin, admin, managers, and users assigned
+ * to the exclusion
  */
 @RestController
 @RequiredArgsConstructor
@@ -30,7 +31,8 @@ public class UserAdHocExcludeController {
 
     /**
      * Create a new ad hoc exclusion
-     * @param userId The ID of the user creating the exclusion
+     * 
+     * @param userId     The ID of the user creating the exclusion
      * @param requestDTO The request data for creating the exclusion
      * @return The created UserAdHocExcludeDTO
      */
@@ -45,7 +47,8 @@ public class UserAdHocExcludeController {
 
     /**
      * Get an ad hoc exclusion by ID
-     * Accessible to super admin, admin, managers, and users assigned to the exclusion
+     * Accessible to super admin, admin, managers, and users assigned to the
+     * exclusion
      */
     @GetMapping("/{id}")
     @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'ADMIN', 'MANAGER', 'USER')")
@@ -56,7 +59,21 @@ public class UserAdHocExcludeController {
     }
 
     /**
+     * Get an ad hoc exclusion by ID
+     * Accessible to super admin, admin, managers, and users assigned to the
+     * exclusion
+     */
+    @GetMapping("/{id}")
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'ADMIN', 'MANAGER', 'USER')")
+    public ResponseEntity<List<UserAdHocExcludeDTO>> getAlltAdHocExclusions(@PathVariable Integer id) {
+        List<UserAdHocExcludeDTO> declarations = adHocExcludeService.getAllAdHocDeclarations();
+
+        return ResponseEntity.ok(declarations);
+    }
+
+    /**
      * Get all ad hoc exclusions for a specific user
+     * 
      * @param userId The ID of the user to get exclusions for
      * @return List of UserAdHocExcludeDTO objects
      */
@@ -69,6 +86,7 @@ public class UserAdHocExcludeController {
 
     /**
      * Get all ad hoc exclusions with a specific status
+     * 
      * @param status The status to filter by
      * @return List of UserAdHocExcludeDTO objects
      */
@@ -82,7 +100,8 @@ public class UserAdHocExcludeController {
 
     /**
      * Update an ad hoc exclusion (partial update - PATCH)
-     * @param id The ID of the exclusion to update
+     * 
+     * @param id        The ID of the exclusion to update
      * @param updateDTO The data to update
      * @return The updated UserAdHocExcludeDTO
      */
@@ -97,6 +116,7 @@ public class UserAdHocExcludeController {
 
     /**
      * Delete an ad hoc exclusion
+     * 
      * @param id The ID of the exclusion to delete
      * @return Success message
      */

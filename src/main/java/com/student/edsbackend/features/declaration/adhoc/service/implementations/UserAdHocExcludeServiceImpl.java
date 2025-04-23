@@ -175,6 +175,8 @@ public class UserAdHocExcludeServiceImpl implements UserAdHocExcludeService {
         return convertToDTO(updatedExclusion);
     }
 
+
+    
     /**
      * {@inheritDoc}
      */
@@ -187,6 +189,15 @@ public class UserAdHocExcludeServiceImpl implements UserAdHocExcludeService {
         // Soft delete
         exclusion.setIsDeleted(true);
         userAdHocExcludeRepository.save(exclusion);
+    }
+    
+
+    @Override
+    @Transactional
+    public List<UserAdHocExcludeDTO> getAllAdHocDeclarations(){
+        return userAdHocExcludeRepository.findAllByIsDeletedFalse().stream()
+        .map(this::convertToDTO)
+        .collect(Collectors.toList());
     }
     
     /**

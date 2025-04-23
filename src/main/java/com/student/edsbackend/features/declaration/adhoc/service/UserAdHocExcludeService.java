@@ -51,6 +51,8 @@ public interface UserAdHocExcludeService {
      */
     UserAdHocExcludeDTO updateAdHocExclusion(Integer id, UserAdHocExcludeUpdateDTO updateDTO);
     
+
+    List<UserAdHocExcludeDTO> getAllAdHocDeclarations();
     /**
      * Soft delete an ad hoc exclusion
      * @param id The ID of the exclusion to delete
