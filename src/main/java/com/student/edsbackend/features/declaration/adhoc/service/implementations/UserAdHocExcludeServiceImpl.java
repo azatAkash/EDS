@@ -254,7 +254,7 @@ public class UserAdHocExcludeServiceImpl implements UserAdHocExcludeService {
         UserDTO userDTO = convertUserToDTO(exclusion.getUser());
         UserDTO createdByDTO = convertUserToDTO(exclusion.getCreatedBy()); // This would need to be set if you track who created it
         UserDTO responsibleDTO = convertUserToDTO(exclusion.getResponsible()); // This would need to be set if you track who is responsible
-
+        
         // Convert initial declaration if present
         UserInitialDeclarationDTO initialDeclarationDTO = null;
         if (exclusion.getUserInitialDeclaration() != null) {
