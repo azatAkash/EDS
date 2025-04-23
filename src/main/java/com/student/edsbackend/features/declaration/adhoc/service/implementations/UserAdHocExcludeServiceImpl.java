@@ -140,7 +140,8 @@ public class UserAdHocExcludeServiceImpl implements UserAdHocExcludeService {
         } else {
             exclusion.setResponsible(null);
         }
-
+        exclusion.setCreatedBy(currentUser);
+        exclusion.setUser(currentUser);
         UserAdHocExclude savedExclusion = userAdHocExcludeRepository.save(exclusion);
         return convertToDTO(savedExclusion);
     }
