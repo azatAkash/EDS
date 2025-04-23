@@ -63,7 +63,7 @@ public class UserAdHocExcludeController {
      * Accessible to super admin, admin, managers, and users assigned to the
      * exclusion
      */
-    @GetMapping("/{id}")
+    @GetMapping
     @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'ADMIN', 'MANAGER', 'USER')")
     public ResponseEntity<List<UserAdHocExcludeDTO>> getAlltAdHocExclusions(@PathVariable Integer id) {
         List<UserAdHocExcludeDTO> declarations = adHocExcludeService.getAllAdHocDeclarations();
