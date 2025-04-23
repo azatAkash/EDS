@@ -58,7 +58,7 @@ public class SecurityConfig {
                 .requestMatchers(PATCH, "/api/v1/management-plans/**").hasAnyAuthority(Role.ADMIN.name(), Role.SUPER_ADMIN.name(), Role.MANAGER.name())
 
 
-                .requestMatchers("/api/v1/initial-declarations/**").hasAnyRole(Role.ADMIN.name(), Role.SUPER_ADMIN.name())
+                .requestMatchers("/api/v1/initial-declarations/**").hasAnyRole(Role.ADMIN.name(), Role.SUPER_ADMIN.name(), Role.MANAGER.name(), Role.USER.name())
                 .requestMatchers(GET, "/api/v1/initial-declarations/**").hasAnyAuthority(Role.SUPER_ADMIN.name(), Role.ADMIN.name())
                 .requestMatchers(POST, "/api/v1/initial-declarations/**").hasAuthority(Role.SUPER_ADMIN.name())
                 .requestMatchers(PUT, "/api/v1/initial-declarations/**").hasAuthority(Role.SUPER_ADMIN.name())
@@ -73,7 +73,7 @@ public class SecurityConfig {
                 .requestMatchers(DELETE, "/api/v1/adhoc-declarations/agreement-answers").hasAuthority(Role.SUPER_ADMIN.name())
                 .requestMatchers(PATCH, "/api/v1/adhoc-declarations/agreement-answers").hasAnyAuthority(Role.SUPER_ADMIN.name(), Role.ADMIN.name(), Role.MANAGER.name())
 
-                .requestMatchers("/api/v1/adhoc-declarations/").hasAnyRole(Role.ADMIN.name(), Role.SUPER_ADMIN.name())
+                .requestMatchers("/api/v1/adhoc-declarations/").hasAnyRole(Role.ADMIN.name(), Role.SUPER_ADMIN.name(), Role.MANAGER.name(), Role.USER.name())
                 .requestMatchers(GET, "/api/v1/adhoc-declarations/**").hasAnyAuthority(Role.SUPER_ADMIN.name(), Role.ADMIN.name())
                 .requestMatchers(POST, "/api/v1/adhoc-declarations/**").hasAnyAuthority(Role.SUPER_ADMIN.name(), Role.ADMIN.name())
                 .requestMatchers(PUT, "/api/v1/adhoc-declarations/**").hasAuthority(Role.SUPER_ADMIN.name())
