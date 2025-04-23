@@ -47,4 +47,5 @@ public interface UserAdHocDeclareRepository extends JpaRepository<UserAdHocDecla
      */
     @Query("SELECT d FROM UserAdHocDeclare d WHERE d.user.id = :userId AND d.isDeleted = false ORDER BY d.createAt DESC")
     Optional<UserAdHocDeclare> findLatestByUserId(@Param("userId") Integer userId);
+    Long countByResponsible(User manager);
 }

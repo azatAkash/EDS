@@ -15,6 +15,7 @@ import com.student.edsbackend.features.declaration.agreement.repository.DecAgree
 import com.student.edsbackend.features.declaration.answers.UserAdHocDeclareAnswer;
 import com.student.edsbackend.features.declaration.answers.UserAdHocDeclareAnswerRepository;
 import com.student.edsbackend.features.enums.UserDeclarationStatus;
+import com.student.edsbackend.features.user.dal.Role;
 import com.student.edsbackend.features.user.dal.User;
 import com.student.edsbackend.features.user.dal.UserDTO;
 import com.student.edsbackend.features.user.dal.UserRepository;
@@ -31,6 +32,7 @@ import org.springframework.util.CollectionUtils; // For checking empty collectio
 
 import java.time.LocalDateTime;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -55,43 +57,58 @@ public class UserAdHocDeclareServiceImpl implements UserAdHocDeclareService {
     // --- Public Service Methods ---
 
     @Override
-@Transactional
-public UserAdHocDeclareDTO createAdHocDeclaration(Integer userId, UserAdHocDeclareRequestDTO requestDTO) {
-    log.info("Creating ad-hoc declaration for user ID: {}", userId);
-    User user = findUserByIdOrThrow(userId);
+    @Transactional
+    public UserAdHocDeclareDTO createAdHocDeclaration(Integer userId, UserAdHocDeclareRequestDTO requestDTO) {
+        log.info("Creating ad-hoc declaration for user ID: {}", userId);
+        User user = findUserByIdOrThrow(userId);
 
-
-    boolean hasFinalizedInitialDeclaration = userInitialDeclarationRepository
+        boolean hasFinalizedInitialDeclaration = userInitialDeclarationRepository
                 .findByUserIdAndIsDeletedFalse(userId)
                 .stream()
-                .anyMatch(decl -> decl.getStatus() != UserDeclarationStatus.CREATED && decl.getStatus() != UserDeclarationStatus.SENT_FOR_APPROVAL);
+                .anyMatch(decl -> decl.getStatus() != UserDeclarationStatus.CREATED
+                        && decl.getStatus() != UserDeclarationStatus.SENT_FOR_APPROVAL);
 
         if (!hasFinalizedInitialDeclaration) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
                     "Cannot create Ad Hoc Declaration before completing Initial Declaration");
         }
-    boolean alreadyExists = userAdHocDeclareRepository
-        .existsByUserAndStatusAndIsDeletedFalse(user, UserDeclarationStatus.SENT_FOR_APPROVAL);
+        boolean alreadyExists = userAdHocDeclareRepository
+                .existsByUserAndStatusAndIsDeletedFalse(user, UserDeclarationStatus.SENT_FOR_APPROVAL);
 
-    if (alreadyExists) {
-        throw new ResponseStatusException(HttpStatus.CONFLICT,
-            "User already has a declaration with status SENT_FOR_APPROVAL");
+        if (alreadyExists) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT,
+                    "User already has a declaration with status SENT_FOR_APPROVAL");
+        }
+        UserAdHocDeclare adHocDeclare = buildNewAdHocDeclare(user, requestDTO);
+        // Find manager with the fewest assigned users
+        List<User> managers = userRepository.findByRole(Role.MANAGER);
+        if (!managers.isEmpty()) {
+
+            User managerWithFewestAssignments = managers.stream()
+                    .min(Comparator.comparingLong(manager -> userAdHocDeclareRepository.countByResponsible(manager)))
+                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
+                            "Failed to assign manager"));
+
+            
+            adHocDeclare.setResponsible(managerWithFewestAssignments);
+
+        }else{
+            adHocDeclare.setResponsible(null);
+        }
+
+        
+        UserAdHocDeclare savedDeclare = userAdHocDeclareRepository.save(adHocDeclare);
+
+        if (CollectionUtils.isEmpty(requestDTO.getAnswers())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Answers cannot be empty");
+        }
+
+        List<UserAdHocDeclareAnswer> answers = processAndSaveAnswers(savedDeclare, requestDTO.getAnswers());
+        savedDeclare.setAnswers(answers);
+
+        log.info("Successfully created ad-hoc declaration with ID: {}", savedDeclare.getId());
+        return convertToDTO(savedDeclare);
     }
-
-    UserAdHocDeclare adHocDeclare = buildNewAdHocDeclare(user, requestDTO);
-    UserAdHocDeclare savedDeclare = userAdHocDeclareRepository.save(adHocDeclare);
-
-    if (CollectionUtils.isEmpty(requestDTO.getAnswers())) {
-        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Answers cannot be empty");
-    }
-
-    List<UserAdHocDeclareAnswer> answers = processAndSaveAnswers(savedDeclare, requestDTO.getAnswers());
-    savedDeclare.setAnswers(answers);
-
-    log.info("Successfully created ad-hoc declaration with ID: {}", savedDeclare.getId());
-    return convertToDTO(savedDeclare);
-}
-
 
     @Override
     @Transactional(readOnly = true) // Read-only transaction for query methods
@@ -125,7 +142,7 @@ public UserAdHocDeclareDTO createAdHocDeclaration(Integer userId, UserAdHocDecla
     public UserAdHocDeclareDTO updateAdHocDeclarationStatus(Integer id, UserDeclarationStatus status) {
         log.info("Updating status to {} for ad-hoc declaration ID: {}", status, id);
         UserAdHocDeclare adHocDeclare = findAdHocDeclareByIdOrThrow(id);
-        
+
         if (status == UserDeclarationStatus.SENT_FOR_APPROVAL || status == UserDeclarationStatus.SENT_FOR_APPROVAL) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
                     "Cannot update status for a declaration with status SENT_FOR_APPROVAL");
