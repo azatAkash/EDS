@@ -82,9 +82,15 @@ public class UserAdHocExcludeServiceImpl implements UserAdHocExcludeService {
                     "You must agree with all statements before submitting the exclusion");
         }
 
+
+        if (requestDTO.getInitialDeclarationId() != null && requestDTO.getUserAdHocDeclareId() != null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "You can't submit an exclusion for both initial and ad hoc declarations");
+        }
+
         // Get the initial declaration if provided
         UserInitialDeclaration initialDeclaration = null;
-        if (requestDTO.getInitialDeclarationId() != null) {
+        if (requestDTO.getInitialDeclarationId() != null && requestDTO.getUserAdHocDeclareId() == null) {
             initialDeclaration = userInitialDeclarationRepository.findById(requestDTO.getInitialDeclarationId())
                     .orElseThrow(
                             () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Initial declaration not found"));
@@ -92,16 +98,13 @@ public class UserAdHocExcludeServiceImpl implements UserAdHocExcludeService {
 
         // Get the ad hoc declaration if provided
         UserAdHocDeclare adHocDeclare = null;
-        if (requestDTO.getUserAdHocDeclareId() != null) {
+        if (requestDTO.getUserAdHocDeclareId() != null && requestDTO.getInitialDeclarationId() == null) {
             adHocDeclare = userAdHocDeclareRepository.findById(requestDTO.getUserAdHocDeclareId())
                     .orElseThrow(
                             () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Ad hoc declaration not found"));
         }
 
-        if (requestDTO.getInitialDeclarationId() != null && requestDTO.getUserAdHocDeclareId() != null) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                    "You can't submit an exclusion for both initial and ad hoc declarations");
-        }
+        
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
 

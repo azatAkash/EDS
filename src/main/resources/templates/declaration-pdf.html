@@ -4,92 +4,83 @@
     <meta charset="UTF-8"/>
     <style>
         body { font-family: 'Times New Roman', serif; font-size: 12pt; margin: 2cm; }
-        h1, h2 { text-align: center; }
+        h1, h2, h3 { text-align: center; }
         .right-align { text-align: right; white-space: pre-line; }
         table { width: 100%; border-collapse: collapse; margin-top: 10px; }
         td, th { border: 1px solid black; padding: 5px; }
         .note-box { border: 1px solid black; padding: 10px; margin-top: 15px; }
-        .checkbox { font-family: DejaVu Sans, sans-serif; }
         .lines { line-height: 2; }
+        .checkbox-img { width: 14px; height: 14px; vertical-align: middle; margin-right: 5px; }
     </style>
 </head>
 <body>
 
-    <div class="right-align">
-Annex 3
-to the Policy and Procedure on
-Conflict of Interest of the
-Autonomous Organization of
+<div class="right-align">
+Annex 3<br/>
+to the Policy and Procedure on<br/>
+Conflict of Interest of the<br/>
+Autonomous Organization of<br/>
 Education Nazarbayev University
-    </div>
+</div>
 
-    <h1>DECLARATION FORM</h1>
-    <h2>Initial Conflict of Interest Declaration</h2>
+<h3>DECLARATION FORM</h3>
+<h3>Initial Conflict of Interest Declaration</h3>
 
-    <table>
-        <tr><th colspan="2">PERSONAL DETAILS</th></tr>
-        <tr>
-            <td>Full name:</td>
-            <td th:text="${declaration.user.firstname + ' ' + declaration.user.lastname}"></td>
-        </tr>
-        <tr>
-            <td>Position/Status:</td>
-            <td th:text="${declaration.user.position}"></td>
-        </tr>
-        <tr>
-            <td>Department/Office/School:</td>
-            <td th:text="${declaration.user.department}"></td>
-        </tr>
-    </table>
+<table>
+    <tr><th colspan="2">PERSONAL DETAILS</th></tr>
+    <tr>
+        <td>Full name:</td>
+        <td th:text="|${declaration.user.firstname} ${declaration.user.lastname}|"></td>
+    </tr>
+    <tr>
+        <td>Position/Status:</td>
+        <td th:text="${declaration.user.position}"></td>
+    </tr>
+    <tr>
+        <td>Department/Office/School:</td>
+        <td th:text="${declaration.user.department}"></td>
+    </tr>
+</table>
 
-    <p>1. I declare that I have no close relatives employed by Nazarbayev University and/or its organizations’ <b>management bodies</b>.</p>
-    <p class="checkbox">☐ I confirm the above declaration</p>
-
-    <p>If you have any close relatives who work at the University and/or its organizations’ management bodies, please describe (name, relationship, position, Department/Office/School):</p>
-
-    <p class="lines">____________________________________________________________________</p>
-    <p class="lines">____________________________________________________________________</p>
-    <p class="lines">____________________________________________________________________</p>
-
-    <div class="note-box">
-        <p><b>NOTE:</b></p>
-        <p>
-            In accordance with the Policy and Procedure on Conflicts of Interest, the following close relatives of staff members, with the exception of academic and administrative-academic staff members of the University, are not eligible for employment at the University:
-        </p>
-        <ul>
-            <li>Parents (parent), children, adoptive parents, adopted children</li>
-            <li>Half-siblings and siblings</li>
-            <li>Aunts, uncles, nieces, nephews</li>
-            <li>Spouse or domestic partner</li>
-            <li>Grandparents, grandchildren</li>
-        </ul>
-        <p>
-            The following relatives of staff members of the University are eligible for employment at the University, but subject to full disclosure:<br/>
-            Daughter-in-law, son-in-law, sister-in-law, brother-in-law, mother-in-law, father-in-law.
-        </p>
-    </div>
-
-<h2>Declaration Questions</h2>
 <div th:each="question : ${declaration.questionsWithAnswers}">
-    <p><b th:text="|${question.orderNumber}. ${question.description['en']}|"></b></p>
-    <ul>
-        <li th:each="option : ${question.optionsWithAnswers}">
-            <p th:text="|Option: ${option.description['en']}|"></p>
-            <p th:if="${option.isAnswered}">✔ Selected</p>
-            <p th:if="${option.answer != null}" th:text="'Answer: ' + option.answer"></p>
+    <div style="margin-bottom: 20px;">
+        <p><b th:text="|${question.orderNumber}. ${question.description['en']}|"></b></p>
 
-            <div th:if="${option.additionalAnswers != null}">
-                <p><i>Additional Answers:</i></p>
-                <ul>
-                    <li th:each="group : ${option.additionalAnswers.answers}">
-                        <ul>
-                            <li th:each="a : ${group.answers}" th:text="a.answer"></li>
-                        </ul>
-                    </li>
-                </ul>
+        <div th:if="${question.note != null}">
+            <div class="note-box" th:text="${question.note['en']}"></div>
+        </div>
+
+        <!-- YES_NO / AGREE -->
+        <ul th:if="${question.questionType == 'YES_NO' or question.questionType == 'AGREE'}">
+            <li th:each="option : ${question.optionsWithAnswers}">
+                <p>
+                    <img class="checkbox-img"
+                         th:src="@{/images/checkedbox.png}"
+                         th:if="${option.isAnswered}" />
+                    <img class="checkbox-img"
+                         th:src="@{/images/uncheckedbox.png}"
+                         th:unless="${option.isAnswered}" />
+                    <span th:text="|${option.description['en']}|"></span>
+                </p>
+                <p th:if="${option.answer != null}" th:text="|Answer: ${option.answer}|"></p>
+
+                <div th:if="${option.additionalAnswers != null}">
+                    <div th:each="group : ${option.additionalAnswers.answers}">
+                        <span th:each="a, stat : ${group.answers}"
+                              th:text="${a.answer + (stat.last ? '' : ', ')}"
+                              style="display: inline;"></span>
+                    </div>
+                </div>
+            </li>
+        </ul>
+
+        <!-- OPEN_ENDED -->
+        <div th:if="${question.questionType == 'OPEN_ENDED'}">
+            <div th:each="option : ${question.optionsWithAnswers}">
+                <p th:text="|${option.answer}|"></p>
             </div>
-        </li>
-    </ul>
+        </div>
+    </div>
 </div>
 
 </body>

@@ -33,6 +33,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -79,8 +80,6 @@ public class UserDeclarationAnswerServiceImpl implements UserDeclarationAnswerSe
                                 .findByUserIdAndDeclarationIdAndIsDeletedFalse(currentUser.getId(),
                                                 activeDeclaration.getId());
 
-                
-
                 UserInitialDeclaration userDeclaration;
                 boolean isNewVersion = false;
 
@@ -97,7 +96,6 @@ public class UserDeclarationAnswerServiceImpl implements UserDeclarationAnswerSe
 
                         // Mark existing declaration as deleted (soft delete)
                         existingDeclaration.setStatus(UserDeclarationStatus.SENT_FOR_APPROVAL);
-                        
 
                         userDeclaration = userInitialDeclarationRepository.save(existingDeclaration);
                         isNewVersion = true;
@@ -452,9 +450,11 @@ public class UserDeclarationAnswerServiceImpl implements UserDeclarationAnswerSe
 
                                         questionsWithAnswers.add(questionWithAnswer);
                                 });
-                
 
-                
+                // Сортировка вопросов по порядковому номеру
+                questionsWithAnswers.sort(Comparator
+                                .comparing(UserDeclarationDetailedResponseDTO.QuestionWithAnswerDTO::getOrderNumber));
+
                 return UserDeclarationDetailedResponseDTO.builder()
                                 .userDeclarationId(userDeclaration.getId())
                                 .user(mapUserToUserDTO(user))
@@ -470,22 +470,22 @@ public class UserDeclarationAnswerServiceImpl implements UserDeclarationAnswerSe
                                 .build();
         }
 
-
         private UserDTO mapUserToUserDTO(User user) {
                 return UserDTO.builder()
-                               .id(user.getId())
-                               .firstname(user.getFirstname())
-                               .lastname(user.getLastname())
-                               .email(user.getEmail())
-                               .role(user.getRole())
-                               .department(user.getDepartment())
-                               .middlename(user.getMiddlename())
-                               .isActive(user.getIsActive())
-                               .isDeleted(user.getIsDeleted())
-                               .position(user.getPosition())
-                               .registrationDate(user.getRegistrationDate())
-                               .build();       
+                                .id(user.getId())
+                                .firstname(user.getFirstname())
+                                .lastname(user.getLastname())
+                                .email(user.getEmail())
+                                .role(user.getRole())
+                                .department(user.getDepartment())
+                                .middlename(user.getMiddlename())
+                                .isActive(user.getIsActive())
+                                .isDeleted(user.getIsDeleted())
+                                .position(user.getPosition())
+                                .registrationDate(user.getRegistrationDate())
+                                .build();
         }
+
         /**
          * Find existing user declaration or create a new one
          */

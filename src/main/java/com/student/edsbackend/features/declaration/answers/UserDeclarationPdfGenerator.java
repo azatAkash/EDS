@@ -10,6 +10,7 @@ import org.thymeleaf.context.Context;
 
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
+import java.util.Comparator;
 
 @Component
 public class UserDeclarationPdfGenerator {
@@ -22,20 +23,32 @@ public class UserDeclarationPdfGenerator {
 
     public void generatePdfToHttpResponse(HttpServletResponse response, UserDeclarationDetailedResponseDTO dto) throws Exception {
         response.setContentType("application/pdf");
-        response.setHeader("Content-Disposition", "attachment; filename=User_Declaration.pdf");
-
+        String filename = "Declaration_" + dto.getUserDeclarationId() + ".pdf";
+        response.setHeader("Content-Disposition", "attachment; filename=" + filename);
+    
+        // Сортировка по orderNumber (вопросы)
+        dto.getQuestionsWithAnswers().sort(
+            Comparator.comparing(UserDeclarationDetailedResponseDTO.QuestionWithAnswerDTO::getOrderNumber)
+        );
+    
+        // Сортировка дополнительных ответов по orderIndex
+        dto.getQuestionsWithAnswers().forEach(q -> {
+            if (q.getOptionsWithAnswers() != null) {
+                q.getOptionsWithAnswers().forEach(option -> {
+                    if (option.getAdditionalAnswers() != null && option.getAdditionalAnswers().getAnswers() != null) {
+                        option.getAdditionalAnswers().getAnswers()
+                              .sort(Comparator.comparing(UserDeclarationDetailedResponseDTO.AdditionalAnswersGroupDTO::getOrderIndex));
+                    }
+                });
+            }
+        });
+    
         Context context = new Context();
         context.setVariable("declaration", dto);
-
+        context.setVariable("dateUtil", new java.text.SimpleDateFormat("dd-MM-yyyy HH:mm"));
+    
         String htmlContent = templateEngine.process("declaration-pdf", context);
-
-
-// 👇 Добавь это временно
-System.out.println("=== HTML CONTENT ===");
-System.out.println(htmlContent);
-System.out.println("====================");
-
-
+    
         try (OutputStream os = response.getOutputStream()) {
             PdfRendererBuilder builder = new PdfRendererBuilder();
             builder.useFastMode();
@@ -44,4 +57,6 @@ System.out.println("====================");
             builder.run();
         }
     }
-} 
+    
+    
+}

@@ -14,6 +14,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -59,6 +60,14 @@ public class UserDeclarationAnswerController {
                 .getDeclarationAnswersByUserId(id);
         pdfGenerator.generatePdfToHttpResponse(response, responseDTO);
     }
+
+    @GetMapping("/declaration-preview/{id}")
+public String previewDeclaration(@PathVariable Integer id, Model model) {
+    UserDeclarationDetailedResponseDTO declarationData = userDeclarationAnswerService.getDeclarationAnswersByUserId(id);
+    model.addAttribute("declaration", declarationData);
+    return "declaration-pdf";
+}
+
 
     // @GetMapping("/{id}")
     // @Operation(summary = "Get declaration answer by ID",
