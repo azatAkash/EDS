@@ -51,6 +51,15 @@ public class UserAdHocExclude {
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "responsible")
+    private User responsible;
+
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "created_by", nullable = false)
+    private User createdBy;
+    
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)
     private UserDeclarationStatus status;

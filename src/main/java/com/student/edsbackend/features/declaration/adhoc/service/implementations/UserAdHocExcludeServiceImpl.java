@@ -12,6 +12,7 @@ import com.student.edsbackend.features.declaration.adhoc.service.UserAdHocDeclar
 import com.student.edsbackend.features.declaration.adhoc.service.UserAdHocExcludeService;
 import com.student.edsbackend.features.declaration.agreement.repository.DecAgreementStatementRepository;
 import com.student.edsbackend.features.enums.UserDeclarationStatus;
+import com.student.edsbackend.features.user.dal.Role;
 import com.student.edsbackend.features.user.dal.User;
 import com.student.edsbackend.features.user.dal.UserDTO;
 import com.student.edsbackend.features.user.dal.UserRepository;
@@ -33,6 +34,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -60,49 +62,55 @@ public class UserAdHocExcludeServiceImpl implements UserAdHocExcludeService {
     @Override
     @Transactional
     public UserAdHocExcludeDTO createAdHocExclusion(Integer userId, UserAdHocExcludeRequestDTO requestDTO) {
-       // Get current user from security context
-       Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-       String currentUserEmail = authentication.getName();
+        // Get current user from security context
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String currentUserEmail = authentication.getName();
 
-       // Find the user by email
-       User currentUser = userRepository.findByEmail(currentUserEmail)
-               .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Current user not found"));
+        // Find the user by email
+        User currentUser = userRepository.findByEmail(currentUserEmail)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Current user not found"));
 
-       
-       // Validate that the declaration belongs to the current user or user has appropriate permissions
-       if (userId != currentUser.getId() && 
-           currentUser.getRole().name() != ("SUPER_ADMIN")) {
-           throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You don't have permission to save answers for this declaration");
-       }
-       if (requestDTO.getHasAgreedWithStatements() != true) {
-           throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "You must agree with all statements before submitting the exclusion");
-       }
+        // Validate that the declaration belongs to the current user or user has
+        // appropriate permissions
+        if (userId != currentUser.getId() &&
+                currentUser.getRole().name() != ("SUPER_ADMIN")) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+                    "You don't have permission to save answers for this declaration");
+        }
+        if (requestDTO.getHasAgreedWithStatements() != true) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "You must agree with all statements before submitting the exclusion");
+        }
 
-       
-       // Get the initial declaration if provided
+        // Get the initial declaration if provided
         UserInitialDeclaration initialDeclaration = null;
         if (requestDTO.getInitialDeclarationId() != null) {
             initialDeclaration = userInitialDeclarationRepository.findById(requestDTO.getInitialDeclarationId())
-                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Initial declaration not found"));
+                    .orElseThrow(
+                            () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Initial declaration not found"));
         }
-        
+
         // Get the ad hoc declaration if provided
         UserAdHocDeclare adHocDeclare = null;
         if (requestDTO.getUserAdHocDeclareId() != null) {
             adHocDeclare = userAdHocDeclareRepository.findById(requestDTO.getUserAdHocDeclareId())
-                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Ad hoc declaration not found"));
+                    .orElseThrow(
+                            () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Ad hoc declaration not found"));
         }
 
-        if (requestDTO.getInitialDeclarationId()!= null && requestDTO.getUserAdHocDeclareId()!= null) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "You can't submit an exclusion for both initial and ad hoc declarations");
+        if (requestDTO.getInitialDeclarationId() != null && requestDTO.getUserAdHocDeclareId() != null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "You can't submit an exclusion for both initial and ad hoc declarations");
         }
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
 
-
-        List<Map<String, String>> agreedStatements = decAgreementStatementRepository.findAllDescriptionsAndIsDeletedFalse();
+        List<Map<String, String>> agreedStatements = decAgreementStatementRepository
+                .findAllDescriptionsAndIsDeletedFalse();
         // Create the new exclusion
+
         UserAdHocExclude exclusion = UserAdHocExclude.builder()
-                .user(userRepository.findById(userId).orElseThrow(() -> 
-                    new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found")))
+                .user(user)
                 .createdAt(LocalDateTime.now())
                 .excludeReason(requestDTO.getExcludeReason())
                 .userInitialDeclaration(initialDeclaration)
@@ -110,10 +118,26 @@ public class UserAdHocExcludeServiceImpl implements UserAdHocExcludeService {
                 .status(UserDeclarationStatus.SENT_FOR_APPROVAL)
                 .isDeleted(false)
                 .isConfirmed(false)
+
                 .hasAgreedWithStatements(requestDTO.getHasAgreedWithStatements())
                 .agreedStatements(agreedStatements)
+
                 .build();
-        
+
+        List<User> managers = userRepository.findByRole(Role.MANAGER);
+        if (!managers.isEmpty()) {
+
+            User managerWithFewestAssignments = managers.stream()
+                    .min(Comparator.comparingLong(manager -> userAdHocExcludeRepository.countByResponsible(manager)))
+                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
+                            "Failed to assign manager"));
+
+            exclusion.setResponsible(managerWithFewestAssignments);
+
+        } else {
+            exclusion.setResponsible(null);
+        }
+
         UserAdHocExclude savedExclusion = userAdHocExcludeRepository.save(exclusion);
         return convertToDTO(savedExclusion);
     }
@@ -136,7 +160,7 @@ public class UserAdHocExcludeServiceImpl implements UserAdHocExcludeService {
     public List<UserAdHocExcludeDTO> getAdHocExclusionsByUserId(Integer userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
-        
+
         return userAdHocExcludeRepository.findByUserAndIsDeletedFalse(user).stream()
                 .map(this::convertToDTO)
                 .collect(Collectors.toList());
@@ -161,22 +185,20 @@ public class UserAdHocExcludeServiceImpl implements UserAdHocExcludeService {
     public UserAdHocExcludeDTO updateAdHocExclusion(Integer id, UserAdHocExcludeUpdateDTO updateDTO) {
         UserAdHocExclude exclusion = userAdHocExcludeRepository.findByIdAndIsDeletedFalse(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Ad hoc exclusion not found"));
-        
+
         // Update only the fields that are provided (PATCH behavior)
         if (updateDTO.getIsConfirmed() != null) {
             exclusion.setIsConfirmed(updateDTO.getIsConfirmed());
         }
-        
+
         if (updateDTO.getStatus() != null) {
             exclusion.setStatus(updateDTO.getStatus());
         }
-        
+
         UserAdHocExclude updatedExclusion = userAdHocExcludeRepository.save(exclusion);
         return convertToDTO(updatedExclusion);
     }
 
-
-    
     /**
      * {@inheritDoc}
      */
@@ -185,21 +207,20 @@ public class UserAdHocExcludeServiceImpl implements UserAdHocExcludeService {
     public void deleteAdHocExclusion(Integer id) {
         UserAdHocExclude exclusion = userAdHocExcludeRepository.findByIdAndIsDeletedFalse(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Ad hoc exclusion not found"));
-        
+
         // Soft delete
         exclusion.setIsDeleted(true);
         userAdHocExcludeRepository.save(exclusion);
     }
-    
 
     @Override
     @Transactional
-    public List<UserAdHocExcludeDTO> getAllAdHocDeclarations(){
+    public List<UserAdHocExcludeDTO> getAllAdHocDeclarations() {
         return userAdHocExcludeRepository.findAllByIsDeletedFalse().stream()
-        .map(this::convertToDTO)
-        .collect(Collectors.toList());
+                .map(this::convertToDTO)
+                .collect(Collectors.toList());
     }
-    
+
     /**
      * Converts a User entity to a UserDTO. Handles null input.
      */
@@ -228,33 +249,34 @@ public class UserAdHocExcludeServiceImpl implements UserAdHocExcludeService {
         if (exclusion == null) {
             return null;
         }
-        
+
         // Convert related entities to DTOs
         UserDTO userDTO = convertUserToDTO(exclusion.getUser());
-        UserDTO createdByDTO = null; // This would need to be set if you track who created it
-        UserDTO responsibleDTO = null; // This would need to be set if you track who is responsible
-        
+        UserDTO createdByDTO = convertUserToDTO(exclusion.getCreatedBy()); // This would need to be set if you track who created it
+        UserDTO responsibleDTO = convertUserToDTO(exclusion.getResponsible()); // This would need to be set if you track who is responsible
+
         // Convert initial declaration if present
         UserInitialDeclarationDTO initialDeclarationDTO = null;
         if (exclusion.getUserInitialDeclaration() != null) {
             UserInitialDeclaration declaration = exclusion.getUserInitialDeclaration();
             initialDeclarationDTO = UserInitialDeclarationDTO.builder()
-                .id(declaration.getId())
-                .user(convertUserToDTO(declaration.getUser()))
-                .declarationId(declaration.getId())
-                .creationDate(declaration.getCreationDate())
-                .status(declaration.getStatus())
-                .responsible(convertUserToDTO(declaration.getResponsible()))
-                .createdBy(convertUserToDTO(declaration.getCreatedBy()))
-                .build();
+                    .id(declaration.getId())
+                    .user(convertUserToDTO(declaration.getUser()))
+                    .declarationId(declaration.getId())
+                    .creationDate(declaration.getCreationDate())
+                    .status(declaration.getStatus())
+                    .responsible(convertUserToDTO(declaration.getResponsible()))
+                    .createdBy(convertUserToDTO(declaration.getCreatedBy()))
+                    .build();
         }
-        
+
         // Convert ad hoc declaration if present
         UserAdHocDeclareDTO adHocDeclareDTO = null;
         if (exclusion.getUserAdHocDeclare() != null) {
-            adHocDeclareDTO = userAdHocDeclareService.getAdHocDeclarationById(exclusion.getUserAdHocDeclare().getId()).orElse(null);
+            adHocDeclareDTO = userAdHocDeclareService.getAdHocDeclarationById(exclusion.getUserAdHocDeclare().getId())
+                    .orElse(null);
         }
-        
+
         return UserAdHocExcludeDTO.builder()
                 .id(exclusion.getId())
                 .user(userDTO)

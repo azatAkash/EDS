@@ -56,4 +56,6 @@ public interface UserAdHocExcludeRepository extends JpaRepository<UserAdHocExclu
     boolean hasActiveExclusions(@Param("userId") Integer userId);
 
     List<UserAdHocExclude> findAllByIsDeletedFalse();
+
+    Long countByResponsible(User manager);
 }
