@@ -6,7 +6,6 @@ import java.util.Map;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 
-
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -31,7 +30,8 @@ public class JsonConverter implements AttributeConverter<Map<String, String>, St
     @Override
     public Map<String, String> convertToEntityAttribute(String dbData) {
         try {
-            return objectMapper.readValue(dbData, new TypeReference<>() {});
+            return objectMapper.readValue(dbData, new TypeReference<>() {
+            });
         } catch (IOException e) {
             throw new IllegalArgumentException("Error reading JSON to map", e);
         }
@@ -42,16 +42,16 @@ public class JsonConverter implements AttributeConverter<Map<String, String>, St
         if (input == null) {
             throw new IllegalArgumentException("Input map is null");
         }
-    
+
         List<String> langs = List.of("en", "ru", "kz");
         if (!input.containsKey("en")) {
             throw new IllegalArgumentException("Input map does not contain key 'en'");
         }
         for (String lang : langs) {
-            
+
             result.put(lang, input.getOrDefault(lang, ""));
         }
-    
+
         return result;
     }
 
@@ -59,9 +59,10 @@ public class JsonConverter implements AttributeConverter<Map<String, String>, St
         Map<String, String> result = new HashMap<>();
         List<String> langs = List.of("en", "ru", "kz");
         for (String lang : langs) {
-            result.put(lang, input.getOrDefault(lang, ""));
+            
+            result.put(lang, input != null ? input.getOrDefault(lang, "") : "");
         }
-    
+
         return result;
     }
 }
