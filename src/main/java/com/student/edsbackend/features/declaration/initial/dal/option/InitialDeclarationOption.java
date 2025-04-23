@@ -39,7 +39,10 @@ public class InitialDeclarationOption {
     @Column(name = "description", nullable = false, columnDefinition = "json")
     private Map<String, String> description;
 
-    @Column(name = "additional_answer_description", columnDefinition = "text")
+
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Convert(converter = JsonConverter.class)
+    @Column(name = "additional_answer_description", columnDefinition = "json")
     private Map<String, String> additionalAnswerDescription;
 
     @Column(name = "multiple_additional_answers")

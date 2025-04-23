@@ -63,7 +63,7 @@ public class InitialDeclarationOptionServiceImpl implements InitialDeclarationOp
         // Convert DTO to entity
         InitialDeclarationOption option = InitialDeclarationOption.builder()
                 .question(question)
-                .description(JsonConverter.ensureLangs(request.getDescription()))
+                .description(JsonConverter.ensureLangsStrict(request.getDescription()))
                 .additionalAnswerDescription(JsonConverter.ensureLangs(request.getAdditionalAnswerDescription()))
                 .multipleAdditionalAnswers(request.getMultipleAdditionalAnswers())
                 .isConflict(request.getIsConflict())
@@ -95,7 +95,7 @@ public class InitialDeclarationOptionServiceImpl implements InitialDeclarationOp
         return InitialDeclarationOptionDTO.builder()
                 .id(option.getId())
                 .questionId(option.getQuestion().getId())
-                .description(JsonConverter.ensureLangs(option.getDescription()))
+                .description(JsonConverter.ensureLangsStrict(option.getDescription()))
                 .additionalAnswerDescription(JsonConverter.ensureLangs(option.getAdditionalAnswerDescription()))
                 .multipleAdditionalAnswers(option.getMultipleAdditionalAnswers())
                 .isConflict(option.getIsConflict())

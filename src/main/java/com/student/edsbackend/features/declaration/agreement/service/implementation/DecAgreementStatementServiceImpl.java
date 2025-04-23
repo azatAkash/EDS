@@ -27,7 +27,7 @@ public class DecAgreementStatementServiceImpl implements DecAgreementStatementSe
     @Override
     public DecAgreementStatementDTO create(DecAgreementStatementRequestDTO requestDTO) {
         DecAgreementStatement statement = DecAgreementStatement.builder()
-                .description(JsonConverter.ensureLangs(requestDTO.getDescription()))
+                .description(JsonConverter.ensureLangsStrict(requestDTO.getDescription()))
                 .isDeleted(false)
                 .build();
 
@@ -71,7 +71,7 @@ public DecAgreementStatementUpdateResponseDTO update(Integer id, DecAgreementSta
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Agreement statement not found"));
 
     Map<String, String> oldDescription = statement.getDescription();
-    Map<String, String> updatedDescription = JsonConverter.ensureLangs(requestDTO.getDescription());
+    Map<String, String> updatedDescription = JsonConverter.ensureLangsStrict(requestDTO.getDescription());
 
     statement.setDescription(updatedDescription);
     statement = repository.save(statement);

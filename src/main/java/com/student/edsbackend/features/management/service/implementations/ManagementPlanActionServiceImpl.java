@@ -27,7 +27,7 @@ public class ManagementPlanActionServiceImpl implements ManagementPlanActionServ
 
     public ManagementPlanAction createAction(ManagementPlanActionRequestDTO dto) {
     ManagementPlanAction action = ManagementPlanAction.builder()
-            .description(JsonConverter.ensureLangs(dto.getDescription())) // автоматически сохранится как JSON
+            .description(JsonConverter.ensureLangsStrict(dto.getDescription())) // автоматически сохранится как JSON
             .isDeleted(false)
             .createdAt(LocalDateTime.now())
             .updatedAt(LocalDateTime.now())

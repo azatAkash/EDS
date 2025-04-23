@@ -37,7 +37,7 @@ public class JsonConverter implements AttributeConverter<Map<String, String>, St
         }
     }
 
-    public static Map<String, String> ensureLangs(Map<String, String> input) {
+    public static Map<String, String> ensureLangsStrict(Map<String, String> input) {
         Map<String, String> result = new HashMap<>();
         if (input == null) {
             throw new IllegalArgumentException("Input map is null");
@@ -49,6 +49,16 @@ public class JsonConverter implements AttributeConverter<Map<String, String>, St
         }
         for (String lang : langs) {
             
+            result.put(lang, input.getOrDefault(lang, ""));
+        }
+    
+        return result;
+    }
+
+    public static Map<String, String> ensureLangs(Map<String, String> input) {
+        Map<String, String> result = new HashMap<>();
+        List<String> langs = List.of("en", "ru", "kz");
+        for (String lang : langs) {
             result.put(lang, input.getOrDefault(lang, ""));
         }
     

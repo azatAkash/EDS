@@ -46,12 +46,12 @@ public class AdHocCategoryServiceImpl implements AdHocCategoryService {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
                     "Description is required");
         }
-        Map<String, String> newDesc = JsonConverter.ensureLangs(categoryDTO.getDescription());
+        Map<String, String> newDesc = JsonConverter.ensureLangsStrict(categoryDTO.getDescription());
 
         
         List<AdHocCategory> existingCategories = adHocCategoryRepository.findAll();
         for (AdHocCategory existing : existingCategories) {
-            Map<String, String> existingDesc = JsonConverter.ensureLangs(existing.getDescription());
+            Map<String, String> existingDesc = JsonConverter.ensureLangsStrict(existing.getDescription());
 
 
             for (String lang : List.of("en", "ru", "kz")) {
@@ -83,12 +83,12 @@ public class AdHocCategoryServiceImpl implements AdHocCategoryService {
         }
 
 
-        Map<String, String> newDesc = JsonConverter.ensureLangs(categoryDTO.getDescription());
+        Map<String, String> newDesc = JsonConverter.ensureLangsStrict(categoryDTO.getDescription());
 
         
         List<AdHocCategory> existingCategories = adHocCategoryRepository.findAll();
         for (AdHocCategory existing : existingCategories) {
-            Map<String, String> existingDesc = JsonConverter.ensureLangs(existing.getDescription());
+            Map<String, String> existingDesc = JsonConverter.ensureLangsStrict(existing.getDescription());
 
 
             for (String lang : List.of("en", "ru", "kz")) {
@@ -139,7 +139,7 @@ public class AdHocCategoryServiceImpl implements AdHocCategoryService {
     private AdHocCategory mapToEntity(AdHocCategoryDTO categoryDTO) {
         return AdHocCategory.builder()
                 .id(categoryDTO.getId())
-                .description(JsonConverter.ensureLangs(categoryDTO.getDescription()))
+                .description(JsonConverter.ensureLangsStrict(categoryDTO.getDescription()))
                 .build();
     }
 }

@@ -47,7 +47,7 @@ public class AdditionalAnswerOptionServiceImpl implements AdditionalAnswerOption
         // Convert DTO to entity
         AdditionalAnswerOption additionalAnswerOption = AdditionalAnswerOption.builder()
                 .option(option)
-                .description(JsonConverter.ensureLangs(request.getDescription()))
+                .description(JsonConverter.ensureLangsStrict(request.getDescription()))
                 .isRequired(request.getIsRequired())
                 .isDeleted(false) // Set default value
                 .build();
@@ -67,7 +67,7 @@ public class AdditionalAnswerOptionServiceImpl implements AdditionalAnswerOption
                 "Additional answer option not found with id: " + id));
 
         // Update fields - optionId is not allowed to be changed
-        additionalAnswerOption.setDescription(JsonConverter.ensureLangs(request.getDescription()));
+        additionalAnswerOption.setDescription(JsonConverter.ensureLangsStrict(request.getDescription()));
         additionalAnswerOption.setIsRequired(request.getIsRequired());
 
         // Save the updated additional answer option
@@ -92,6 +92,7 @@ public class AdditionalAnswerOptionServiceImpl implements AdditionalAnswerOption
      * Maps an AdditionalAnswerOption entity to its DTO representation
      */
     private AdditionalAnswerOptionDTO mapToDTO(AdditionalAnswerOption additionalAnswerOption) {
+
         return AdditionalAnswerOptionDTO.builder()
                 .id(additionalAnswerOption.getId())
                 .optionId(additionalAnswerOption.getOption().getId())
