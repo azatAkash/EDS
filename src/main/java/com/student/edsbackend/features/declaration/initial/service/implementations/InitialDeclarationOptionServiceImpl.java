@@ -9,6 +9,9 @@ import com.student.edsbackend.features.declaration.initial.dal.questions.Initial
 import com.student.edsbackend.features.declaration.initial.dal.questions.InitialDeclarationQuestionRepository;
 import com.student.edsbackend.features.declaration.initial.service.InitialDeclarationOptionService;
 import com.student.edsbackend.features.enums.QuestionType;
+import com.student.edsbackend.features.user.dal.UserDeclaration.UserInitialDeclaration;
+import com.student.edsbackend.features.user.dal.UserDeclaration.UserInitialDeclarationRepository;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -24,7 +27,7 @@ public class InitialDeclarationOptionServiceImpl implements InitialDeclarationOp
 
     private final InitialDeclarationOptionRepository optionRepository;
     private final InitialDeclarationQuestionRepository questionRepository;
-
+    private final UserInitialDeclarationRepository userInitialDeclarationRepository;
     @Override
     public List<InitialDeclarationOptionDTO> getAllOptions() {
         return optionRepository.findAll().stream()
@@ -57,9 +60,17 @@ public class InitialDeclarationOptionServiceImpl implements InitialDeclarationOp
     @Override
     public InitialDeclarationOptionDTO createOption(InitialDeclarationOptionRequestDTO request) {
         // Ensure the question exists
-
+        
         InitialDeclarationQuestion question = ValidateYesNo(request);
+        if (question.getDeclaration().getIsActive()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "Declaration is active");
+        }
 
+        if (!userInitialDeclarationRepository.findAllByDeclarationId(question.getDeclaration().getId()).isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "Declaration already answers");
+        }
         // Convert DTO to entity
         InitialDeclarationOption option = InitialDeclarationOption.builder()
                 .question(question)

@@ -15,7 +15,8 @@ public interface UserInitialDeclarationRepository extends JpaRepository<UserInit
      * Find a user declaration by user ID and declaration ID where it's not
      * deleted
      */
-    Optional<UserInitialDeclaration> findByUserIdAndDeclarationIdAndIsDeletedFalse(Integer userId, Integer declarationId);
+    Optional<UserInitialDeclaration> findByUserIdAndDeclarationIdAndIsDeletedFalse(Integer userId,
+            Integer declarationId);
 
     /**
      * Find all declarations for a specific user that are not deleted
@@ -26,4 +27,7 @@ public interface UserInitialDeclarationRepository extends JpaRepository<UserInit
      * Find all declarations that are not deleted
      */
     List<UserInitialDeclaration> findByIsDeletedFalse();
+
+    List<UserInitialDeclaration> findAllByDeclarationId(Integer declarationId);
+
 }

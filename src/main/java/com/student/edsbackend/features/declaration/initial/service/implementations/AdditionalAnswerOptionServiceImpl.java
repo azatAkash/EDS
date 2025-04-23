@@ -10,6 +10,8 @@ import com.student.edsbackend.features.declaration.initial.dal.option.InitialDec
 import com.student.edsbackend.features.declaration.initial.dal.option.InitialDeclarationOptionRepository;
 import com.student.edsbackend.features.declaration.initial.service.AdditionalAnswerOptionService;
 import com.student.edsbackend.features.enums.QuestionType;
+import com.student.edsbackend.features.user.dal.UserDeclaration.UserInitialDeclarationRepository;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -23,6 +25,7 @@ public class AdditionalAnswerOptionServiceImpl implements AdditionalAnswerOption
 
     private final AdditionalAnswerOptionRepository additionalAnswerOptionRepository;
     private final InitialDeclarationOptionRepository optionRepository;
+    private final UserInitialDeclarationRepository userInitialDeclarationRepository;
 
     @Override
     public Optional<AdditionalAnswerOptionDTO> getAdditionalAnswerOptionById(Integer id) {
@@ -37,6 +40,17 @@ public class AdditionalAnswerOptionServiceImpl implements AdditionalAnswerOption
         InitialDeclarationOption option = optionRepository.findById(request.getOptionId())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
                 "Option not found with id: " + request.getOptionId()));
+        
+               
+                if (option.getQuestion().getDeclaration().getIsActive()) {
+                    throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                            "Declaration is active");
+                }
+        
+                if (!userInitialDeclarationRepository.findAllByDeclarationId(option.getQuestion().getDeclaration().getId()).isEmpty()) {
+                    throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                            "Declaration already answers");
+                }
 
         // Check if the option's question type is YES_NO
         if (option.getQuestion().getQuestionType() != QuestionType.YES_NO) {

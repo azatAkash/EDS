@@ -14,6 +14,8 @@ import com.student.edsbackend.features.declaration.initial.dal.questions.Initial
 import com.student.edsbackend.features.declaration.initial.dal.questions.InitialDeclarationQuestionRequestDTO;
 import com.student.edsbackend.features.declaration.initial.dal.questions.InitialDeclarationQuestionUpdateDTO;
 import com.student.edsbackend.features.declaration.initial.service.InitialDeclarationQuestionService;
+import com.student.edsbackend.features.user.dal.UserDeclaration.UserInitialDeclarationRepository;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -30,6 +32,7 @@ public class InitialDeclarationQuestionServiceImpl implements InitialDeclaration
     private final InitialDeclarationQuestionRepository questionRepository;
     private final InitialDeclarationRepository declarationRepository;
     private final UserDeclarationAnswerRepository userDeclarationAnswerRepository;
+    private final UserInitialDeclarationRepository userInitialDeclarationRepository;
 
     @Override
     public List<InitialDeclarationQuestionDTO> getAllQuestions() {
@@ -53,53 +56,60 @@ public class InitialDeclarationQuestionServiceImpl implements InitialDeclaration
     }
 
     @Override
-public InitialDeclarationQuestionDTO createQuestion(InitialDeclarationQuestionRequestDTO questionDTO) {
-    InitialDeclaration declaration = declarationRepository.findById(questionDTO.getDeclarationId())
-            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
-                    "Declaration not found with id: " + questionDTO.getDeclarationId()));
+    public InitialDeclarationQuestionDTO createQuestion(InitialDeclarationQuestionRequestDTO questionDTO) {
+        InitialDeclaration declaration = declarationRepository.findById(questionDTO.getDeclarationId())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+                        "Declaration not found with id: " + questionDTO.getDeclarationId()));
 
-    Short finalOrderNumber = questionDTO.getOrderNumber();
+        Short finalOrderNumber = questionDTO.getOrderNumber();
+        if (declaration.getIsActive()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "Declaration is active");
+        }
 
-    
-        boolean exists = questionRepository.existsByDeclarationIdAndOrderNumberAndIsDeletedFalse(declaration.getId(), finalOrderNumber);
+        if (!userInitialDeclarationRepository.findAllByDeclarationId(declaration.getId()).isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "Declaration already answers");
+        }
+
+        boolean exists = questionRepository.existsByDeclarationIdAndOrderNumberAndIsDeletedFalse(declaration.getId(),
+                finalOrderNumber);
         if (exists) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
                     "Question order number already used for this declaration.");
         }
-    
 
-    InitialDeclarationQuestion question = InitialDeclarationQuestion.builder()
-            .orderNumber(finalOrderNumber)
-            .declaration(declaration)
-            .description(JsonConverter.ensureLangsStrict(questionDTO.getDescription()))
-            .questionType(questionDTO.getQuestionType())
-            .note(JsonConverter.ensureLangs(questionDTO.getNote()))
-            .isRequired(questionDTO.getIsRequired())
-            .isDeleted(false)
-            .build();
+        InitialDeclarationQuestion question = InitialDeclarationQuestion.builder()
+                .orderNumber(finalOrderNumber)
+                .declaration(declaration)
+                .description(JsonConverter.ensureLangsStrict(questionDTO.getDescription()))
+                .questionType(questionDTO.getQuestionType())
+                .note(JsonConverter.ensureLangs(questionDTO.getNote()))
+                .isRequired(questionDTO.getIsRequired())
+                .isDeleted(false)
+                .build();
 
-    return mapToDTO(questionRepository.save(question));
-}
-
+        return mapToDTO(questionRepository.save(question));
+    }
 
     @Override
     public InitialDeclarationQuestionDTO updateQuestion(Integer id, InitialDeclarationQuestionUpdateDTO questionDTO) {
         // Find the existing question and ensure it's not deleted
         InitialDeclarationQuestion existingQuestion = questionRepository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, 
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
                         "Question not found with id: " + id));
-        
+
         if (existingQuestion.getIsDeleted()) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, 
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
                     "Cannot update a deleted question");
         }
-        
+
         // Check if any user has answered this question
         if (userDeclarationAnswerRepository.existsAnswersForQuestion(id)) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
                     "Cannot update a question that has been answered by users");
         }
-        
+
         // Update fields from DTO
         if (questionDTO.getOrderNumber() != null) {
             existingQuestion.setOrderNumber(questionDTO.getOrderNumber());
@@ -117,10 +127,9 @@ public InitialDeclarationQuestionDTO createQuestion(InitialDeclarationQuestionRe
             existingQuestion.setIsRequired(questionDTO.getIsRequired());
         }
 
-        
         // Save the updated question
         InitialDeclarationQuestion updatedQuestion = questionRepository.save(existingQuestion);
-        
+
         return mapToDTO(updatedQuestion);
     }
 
@@ -128,19 +137,19 @@ public InitialDeclarationQuestionDTO createQuestion(InitialDeclarationQuestionRe
     public void deleteQuestion(Integer id) {
         // Find the question
         InitialDeclarationQuestion question = questionRepository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, 
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
                         "Question not found with id: " + id));
-        
+
         // Soft delete by setting isDeleted to true
         question.setIsDeleted(true);
         questionRepository.save(question);
     }
-    
+
     /**
      * Maps an InitialDeclarationQuestion entity to its DTO representation
      */
     private InitialDeclarationQuestionDTO mapToDTO(InitialDeclarationQuestion question) {
-        
+
         return InitialDeclarationQuestionDTO.builder()
                 .id(question.getId())
                 .orderNumber(question.getOrderNumber())
