@@ -3,12 +3,14 @@ package com.student.edsbackend.features.declaration.adhoc.repository;
 import com.student.edsbackend.features.declaration.adhoc.UserAdHocDeclare;
 import com.student.edsbackend.features.enums.UserDeclarationStatus;
 import com.student.edsbackend.features.user.dal.User;
+import com.student.edsbackend.features.user.dal.UserDeclaration.UserInitialDeclaration;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
@@ -48,4 +50,7 @@ public interface UserAdHocDeclareRepository extends JpaRepository<UserAdHocDecla
     @Query("SELECT d FROM UserAdHocDeclare d WHERE d.user.id = :userId AND d.isDeleted = false ORDER BY d.createAt DESC")
     Optional<UserAdHocDeclare> findLatestByUserId(@Param("userId") Integer userId);
     Long countByResponsible(User manager);
+
+    
+    List<UserAdHocDeclare> findAllByIsDeletedFalse();
 }

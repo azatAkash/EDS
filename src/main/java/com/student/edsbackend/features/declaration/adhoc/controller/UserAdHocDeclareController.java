@@ -72,13 +72,11 @@ public class UserAdHocDeclareController {
      * @param userId The ID of the user
      * @return The latest UserAdHocDeclareDTO if found
      */
-    @GetMapping("/{userId}/latest")
-    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'ADMIN', 'MANAGER', 'USER')")
-    public ResponseEntity<UserAdHocDeclareDTO> getLatestAdHocDeclarationByUserId(@PathVariable Integer userId) {
-        UserAdHocDeclareDTO declaration = adHocDeclareService.getLatestAdHocDeclarationByUserId(userId)
-                .orElseThrow(() -> new ResponseStatusException(
-                        HttpStatus.NOT_FOUND, "No ad hoc declarations found for user with id " + userId));
-        return ResponseEntity.ok(declaration);
+    @GetMapping()
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'ADMIN', 'MANAGER')")
+    public ResponseEntity<List<UserAdHocDeclareDTO>> getAllAdHocDeclaration() {
+        List<UserAdHocDeclareDTO> declarations = adHocDeclareService.getAllAdHocDeclarations();
+        return ResponseEntity.ok(declarations);
     }
 
 

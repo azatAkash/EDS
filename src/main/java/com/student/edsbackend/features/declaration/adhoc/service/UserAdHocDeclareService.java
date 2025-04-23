@@ -35,6 +35,8 @@ public interface UserAdHocDeclareService {
      */
     List<UserAdHocDeclareDTO> getAdHocDeclarationsByUserId(Integer userId);
     
+
+    List<UserAdHocDeclareDTO> getAllAdHocDeclarations();
     /**
      * Get all ad hoc declarations with a specific status
      * @param status The status to filter by
@@ -57,10 +59,5 @@ public interface UserAdHocDeclareService {
      */
     void deleteAdHocDeclaration(Integer id);
     
-    /**
-     * Get the latest ad hoc declaration for a user
-     * @param userId The ID of the user
-     * @return Optional containing the latest UserAdHocDeclareDTO if found
-     */
-    Optional<UserAdHocDeclareDTO> getLatestAdHocDeclarationByUserId(Integer userId);
+ 
 }

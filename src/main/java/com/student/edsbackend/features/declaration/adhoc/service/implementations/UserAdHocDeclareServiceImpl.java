@@ -169,13 +169,12 @@ public class UserAdHocDeclareServiceImpl implements UserAdHocDeclareService {
 
     @Override
     @Transactional(readOnly = true)
-    public Optional<UserAdHocDeclareDTO> getLatestAdHocDeclarationByUserId(Integer userId) {
-        log.debug("Fetching latest ad-hoc declaration for user ID: {}", userId);
-        // Assuming findLatestByUserId exists and correctly fetches the latest
-        // non-deleted record
-        return userAdHocDeclareRepository.findLatestByUserId(userId)
-                .map(this::convertToDTO);
+    public List<UserAdHocDeclareDTO> getAllAdHocDeclarations(){
+        return userAdHocDeclareRepository.findAllByIsDeletedFalse().stream()
+               .map(this::convertToDTO)
+               .collect(Collectors.toList());
     }
+
 
     // --- Helper Methods ---
 
