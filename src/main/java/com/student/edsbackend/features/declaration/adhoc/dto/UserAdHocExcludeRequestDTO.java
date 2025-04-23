@@ -19,6 +19,5 @@ public class UserAdHocExcludeRequestDTO {
     private Integer initialDeclarationId;
     private Integer userAdHocDeclareId;
     private String excludeReason;
-    private Boolean isConfirmed;
     private Boolean hasAgreedWithStatements;
 }
