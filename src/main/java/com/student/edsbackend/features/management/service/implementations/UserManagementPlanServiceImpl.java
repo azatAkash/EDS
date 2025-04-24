@@ -185,14 +185,15 @@ public class UserManagementPlanServiceImpl implements UserManagementPlanService 
         managementPlan.setIsDeleted(false);
         managementPlan.setIsAmended(false);
         managementPlan.setActionRequired(requestDTO.getActionRequired());
-
+        ManagementPlanAction action = null;
         if (requestDTO.getActionId() != null) {
-            ManagementPlanAction action = actionRepository.findByIdAndIsDeletedFalse(requestDTO.getActionId())
+            action = actionRepository.findByIdAndIsDeletedFalse(requestDTO.getActionId())
                     .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
                             "Active action not found with id: " + requestDTO.getActionId()));
         }
 
         managementPlan.setActionDetails(requestDTO.getActionDetails());
+        managementPlan.setAction(action);
         managementPlan.setExecutionDate(requestDTO.getExecutionDate());
         managementPlan.setNotificationDate(LocalDateTime.now());
         managementPlan.setEnsuredByManager(true);

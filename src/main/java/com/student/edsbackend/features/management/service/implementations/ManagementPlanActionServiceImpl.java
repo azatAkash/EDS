@@ -25,7 +25,7 @@ public class ManagementPlanActionServiceImpl implements ManagementPlanActionServ
 
     private final ManagementPlanActionRepository repository;
 
-    public ManagementPlanAction createAction(ManagementPlanActionRequestDTO dto) {
+    public ManagementPlanActionDTO create(ManagementPlanActionRequestDTO dto) {
     ManagementPlanAction action = ManagementPlanAction.builder()
             .description(JsonConverter.ensureLangsStrict(dto.getDescription())) // автоматически сохранится как JSON
             .isDeleted(false)
@@ -35,7 +35,7 @@ public class ManagementPlanActionServiceImpl implements ManagementPlanActionServ
     
 
             
-    return repository.save(action);
+    return toDTO(repository.save(action));
 }
 
     @Override
@@ -72,11 +72,5 @@ public class ManagementPlanActionServiceImpl implements ManagementPlanActionServ
                 .createdAt(action.getCreatedAt())
                 .updatedAt(action.getUpdatedAt())
                 .build();
-    }
-
-    @Override
-    public ManagementPlanActionDTO create(ManagementPlanActionRequestDTO requestDTO) {
-        ManagementPlanAction action = createAction(requestDTO);
-        return toDTO(action);
     }
 }
