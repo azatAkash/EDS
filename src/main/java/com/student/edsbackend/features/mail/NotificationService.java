@@ -58,13 +58,13 @@ public class NotificationService {
         String subject = String.join(" / ",
                 "New Conflict Resolution Declaration Assigned",
                 "Вам назначена декларация по разрешению конфликта",
-                "Сізге дау шешу декларациясы тағайындалды");
+                "Сізге мүдделер қақтығыстарын шешу декларациясы тағайындалды");
 
         // Английский блок
         String bodyEn = String.format(
                 "<p>Dear %s,</p>"
                         + "<p>The Nazarbayev University Compliance Office has assigned a new Conflict Resolution Declaration to you. "
-                        + "Please complete the declaration by following this link: <a href=\"%s\">%s</a></p>"
+                        + "Please complete the declaration by following this link: <a href=\"%s\">link</a></p>"
                         + "<p>If you have any questions, feel free to contact the Compliance Office.</p>"
                         + "<p>Best regards,<br>Nazarbayev University Compliance Office</p>",
                 fullName, link, link);
@@ -73,7 +73,7 @@ public class NotificationService {
         String bodyRu = String.format(
                 "<p>Здравствуйте, %s!</p>"
                         + "<p>Отдел комплаенса Назарбаев Университета назначил вам новую Декларацию по разрешению конфликта. "
-                        + "Пожалуйста, перейдите по этой ссылке для её заполнения: <a href=\"%s\">%s</a></p>"
+                        + "Пожалуйста, перейдите по этой ссылке для её заполнения: <a href=\"%s\">ссылка</a></p>"
                         + "<p>Если у вас возникнут вопросы, обратитесь в Отдел комплаенса.</p>"
                         + "<p>С уважением,<br>Отдел комплаенса Назарбаев Университета</p>",
                 fullName, link, link);
@@ -89,11 +89,11 @@ public class NotificationService {
 
         // Собираем финальное тело
         String body = "<html><body style=\"font-family:Arial,sans-serif; font-size:14px;\">"
-                + "<h3>English</h3>" + bodyEn
+                + bodyEn
                 + "<hr/>"
-                + "<h3>Русский</h3>" + bodyRu
+                + bodyRu
                 + "<hr/>"
-                + "<h3>Қазақша</h3>" + bodyKk
+                + bodyKk
                 + "</body></html>";
 
         sendHtmlMessage(recipientEmail, subject, body);
