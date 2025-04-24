@@ -1,5 +1,6 @@
 package com.student.edsbackend.configs.auth;
 
+import jakarta.mail.MessagingException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -11,6 +12,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
 import com.student.edsbackend.features.ApiResponse;
+import com.student.edsbackend.features.mail.NotificationService;
 import com.student.edsbackend.features.user.dal.UserDTO;
 import com.student.edsbackend.features.user.dal.UserRegistrationRequestDTO;
 
@@ -21,11 +23,18 @@ import java.io.IOException;
 @RequiredArgsConstructor
 public class AuthenticationController {
 
-    private final AuthenticationService service;
+    private final AuthenticationService service; 
+    private final NotificationService notificationService;
 
-    @GetMapping("/test")
+    @GetMapping("/testEmail")
     public ResponseEntity<ApiResponse> test(@RequestParam String text) {
-        return ResponseEntity.ok(new ApiResponse(text + "123"));
+        try {
+            notificationService.sendTest(text);
+        } catch (MessagingException e) {
+            return ResponseEntity.status(HttpServletResponse.SC_INTERNAL_SERVER_ERROR)
+                   .body(new ApiResponse("Error sending email: " + e.getMessage()));
+        }
+        return ResponseEntity.ok(new ApiResponse(text));
     }
 
     @GetMapping("/test1")

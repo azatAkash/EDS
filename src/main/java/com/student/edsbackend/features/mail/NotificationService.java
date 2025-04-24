@@ -79,4 +79,12 @@ public class NotificationService {
 
         sendHtmlMessage(to, subject, body);
     }
+
+    public void sendTest(String to) throws MessagingException {
+        String link = String.format("%s/declarations/%d/fill", baseUrl, 1);
+
+        String subject = "Test";
+        String body = "Test";
+        sendHtmlMessage(to, link, body);
+    }
 }
