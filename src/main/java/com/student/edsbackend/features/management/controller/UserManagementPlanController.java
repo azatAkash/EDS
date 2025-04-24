@@ -99,7 +99,7 @@ public class UserManagementPlanController {
         return ResponseEntity.ok(new ApiResponse("Management plan deleted successfully"));
     }
 
-    @PatchMapping("/{id}")
+    @PatchMapping("/{id}/ammend")
     @PreAuthorize("hasAnyAuthority('SUPER_ADMIN', 'ADMIN', 'MANAGER')")
     public ResponseEntity<?> ammnedManagementPlan(@PathVariable Integer id) {
         boolean deleted = managementPlanService.ammendManagementPlan(id);

@@ -39,7 +39,7 @@ public class PdfGeneratorService {
 
     public byte[] generatePdf(UserDeclarationDetailedResponseDTO dto) {
         Context ctx = new Context();
-        ctx.setVariable("declaration", dto);
+        ctx.setVariable("initial_declaration", dto);
 
         // Читаем из static/images:
         String checkedBox = toDataUri("static/images/checkedbox.png");
