@@ -1,27 +1,37 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8"/>
     <style>
         body { font-family: 'Times New Roman', serif; font-size: 12pt; margin: 2cm; }
-        h1, h2, h3 { text-align: center; }
-        .right-align { text-align: right; white-space: pre-line; }
+        h1, h2, h3 { text-align: center; margin: 0; }
         table { width: 100%; border-collapse: collapse; margin-top: 10px; }
         td, th { border: 1px solid black; padding: 5px; }
-        .note-box { border: 1px solid black; padding: 10px; margin-top: 15px; }
-        .lines { line-height: 2; }
-        .checkbox-img { width: 14px; height: 14px; vertical-align: middle; margin-right: 5px; }
+
+        ul { list-style-type: none; margin: 0; padding: 0; }
+        li { margin: 6px 0; }
+
+        .note-box { border: 1px solid black; padding: 10px; margin: 15px 0; }
+        .note-box p.title { font-style: italic; font-weight: bold; margin: 0 0 8px 0; }
+        .checkbox-img { width: 12px; height: 12px; vertical-align: middle; margin-right: 6px; }
+
+        @page {
+            @top-left { content: counter(page); font-family: 'Times New Roman', serif; font-size: 10pt; }
+        }
     </style>
 </head>
 <body>
 
-<div class="right-align">
-Annex 3<br/>
-to the Policy and Procedure on<br/>
-Conflict of Interest of the<br/>
-Autonomous Organization of<br/>
-Education Nazarbayev University
+<!-- Page header: page number at top left, header text centered below -->
+<div style="position: running(headerText); text-align: center;">
+    <p style="margin-top: -20pt;">Annex 3</p>
+    <p>to the Policy and Procedure on</p>
+    <p>Conflict of Interest of the</p>
+    <p>Autonomous Organization of</p>
+    <p>Education Nazarbayev University</p>
 </div>
+
+<!-- Use the headerText element on every page -->
+<div style="display: none;" th:insert="~{this :: headerText}"></div>
 
 <h3>DECLARATION FORM</h3>
 <h3>Initial Conflict of Interest Declaration</h3>
@@ -46,21 +56,21 @@ Education Nazarbayev University
     <div style="margin-bottom: 20px;">
         <p><b th:text="|${question.orderNumber}. ${question.description['en']}|"></b></p>
 
+        <!-- NOTE block -->
         <div th:if="${question.note != null}">
-            <div class="note-box" th:text="${question.note['en']}"></div>
+            <div class="note-box">
+                <p class="title">NOTE:</p>
+                <div th:utext="${#strings.replace(question.note['en'], '\n', '<br/>')}"></div>
+            </div>
         </div>
 
         <!-- YES_NO / AGREE -->
-        <ul th:if="${question.questionType == 'YES_NO' or question.questionType == 'AGREE'}">
-            <li th:each="option : ${question.optionsWithAnswers}">
+        <div th:if="${question.questionType == 'YES_NO' or question.questionType == 'AGREE'}">
+            <div th:each="option : ${question.optionsWithAnswers}">
                 <p>
-                    <img class="checkbox-img"
-                         th:src="@{/images/checkedbox.png}"
-                         th:if="${option.isAnswered}" />
-                    <img class="checkbox-img"
-                         th:src="@{/images/uncheckedbox.png}"
-                         th:unless="${option.isAnswered}" />
-                    <span th:text="|${option.description['en']}|"></span>
+                    <img th:src="${option.isAnswered} ? ${checkedBox} : ${uncheckedBox}"
+                         alt="checkbox" class="checkbox-img"/>
+                    <span th:text="${option.description['en']}"></span>
                 </p>
                 <p th:if="${option.answer != null}" th:text="|Answer: ${option.answer}|"></p>
 
@@ -71,13 +81,13 @@ Education Nazarbayev University
                               style="display: inline;"></span>
                     </div>
                 </div>
-            </li>
-        </ul>
+            </div>
+        </div>
 
         <!-- OPEN_ENDED -->
         <div th:if="${question.questionType == 'OPEN_ENDED'}">
             <div th:each="option : ${question.optionsWithAnswers}">
-                <p th:text="|${option.answer}|"></p>
+                <p th:text="${option.answer}"></p>
             </div>
         </div>
     </div>

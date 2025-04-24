@@ -65,7 +65,7 @@ public class UserAdHocExcludeController {
      */
     @GetMapping
     @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'ADMIN', 'MANAGER', 'USER')")
-    public ResponseEntity<List<UserAdHocExcludeDTO>> getAlltAdHocExclusions(@PathVariable Integer id) {
+    public ResponseEntity<List<UserAdHocExcludeDTO>> getAlltAdHocExclusions() {
         List<UserAdHocExcludeDTO> declarations = adHocExcludeService.getAllAdHocDeclarations();
 
         return ResponseEntity.ok(declarations);
