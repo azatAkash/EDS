@@ -32,6 +32,7 @@ public interface UserManagementPlanService {
      */
     List<UserManagementPlanDTO> getCurrentUserManagementPlans();
     
+    List<UserManagementPlanDTO> getManagementPlansByUserDeclarationId(Integer id);
     /**
      * Create a new management plan
      * @param requestDTO the request DTO containing the data for the new management plan

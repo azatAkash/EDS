@@ -39,6 +39,11 @@ public class UserManagementPlanController {
         return ResponseEntity.ok(managementPlan);
     }
 
+    @GetMapping("/user-declaration/{id}")
+    public ResponseEntity<List<UserManagementPlanDTO>> getManagementPlansByUserDeclarationId(@PathVariable Integer id) {
+        List<UserManagementPlanDTO> managementPlan = managementPlanService.getManagementPlansByUserDeclarationId(id);
+        return ResponseEntity.ok(managementPlan);
+    }
     /**
      * Get all management plans
      * For super admin, admin, and managers: returns all management plans

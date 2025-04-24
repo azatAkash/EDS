@@ -44,13 +44,19 @@ public class UserManagementPlanServiceImpl implements UserManagementPlanService 
 
     @Override
     public Optional<UserManagementPlanDTO> getManagementPlanById(Integer id) {
-        Optional<UserManagementPlan> managementPlan = managementPlanRepository.findByIdAndIsDeletedFalse(id);
+        Optional<UserManagementPlan> managementPlan = managementPlanRepository.findById(id);
 
         if (managementPlan.isPresent() && !hasAccessToManagementPlan(managementPlan.get())) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You don't have access to this management plan");
         }
 
         return managementPlan.map(this::mapToDTO);
+    }
+
+    @Override
+    public List<UserManagementPlanDTO> getManagementPlansByUserDeclarationId(Integer id) {
+        return managementPlanRepository.findByUserDeclarationIdAndIsDeletedFalse(id).stream().map(this::mapToDTO)
+        .collect(Collectors.toList());
     }
 
     @Override
