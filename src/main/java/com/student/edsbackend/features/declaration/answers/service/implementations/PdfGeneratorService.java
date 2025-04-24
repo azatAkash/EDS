@@ -4,6 +4,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.util.Base64;
+import java.util.Optional;
 
 import org.springframework.stereotype.Service;
 import org.thymeleaf.TemplateEngine;
@@ -11,6 +12,11 @@ import org.thymeleaf.context.Context;
 
 import com.openhtmltopdf.pdfboxout.PdfRendererBuilder;
 import com.student.edsbackend.features.declaration.answers.dto.UserDeclarationDetailedResponseDTO;
+import com.student.edsbackend.features.enums.ManagementPlanStatus;
+import com.student.edsbackend.features.enums.UserDeclarationStatus;
+import com.student.edsbackend.features.management.UserManagementPlan;
+import com.student.edsbackend.features.management.dto.UserManagementPlanDTO;
+
 // В начале класса
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.util.StreamUtils;
@@ -37,9 +43,16 @@ public class PdfGeneratorService {
         }
     }
 
-    public byte[] generatePdf(UserDeclarationDetailedResponseDTO dto) {
+    public byte[] generateInitialDeclarationPdf(UserDeclarationDetailedResponseDTO dto) {
+        if (dto == null) {
+            throw new IllegalArgumentException("There is nothing to fill, data cannot be null");
+        }
+
+        if (dto.getStatus() == UserDeclarationStatus.CREATED && dto.getStatus() == UserDeclarationStatus.SENT_FOR_APPROVAL) {
+            throw new IllegalArgumentException("Declaration is not submitted");
+        }
         Context ctx = new Context();
-        ctx.setVariable("initial_declaration", dto);
+        ctx.setVariable("declaration", dto);
 
         // Читаем из static/images:
         String checkedBox = toDataUri("static/images/checkedbox.png");
@@ -57,7 +70,7 @@ public class PdfGeneratorService {
             builder.run();
             return os.toByteArray();
         } catch (Exception e) {
-            throw new RuntimeException("Не удалось сгенерировать PDF", e);
+            throw new RuntimeException("Could not generate PDF", e);
         }
     }
 
