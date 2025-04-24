@@ -59,6 +59,13 @@ public class UserManagementPlanServiceImpl implements UserManagementPlanService 
         .collect(Collectors.toList());
     }
 
+
+    @Override
+    public List<UserManagementPlanDTO> getManagementPlansByAdhocDeclarationId(Integer id) {
+        return managementPlanRepository.findByUserAdHocDeclareIdAndIsDeletedFalse(id).stream().map(this::mapToDTO)
+        .collect(Collectors.toList());
+    }
+
     @Override
     public List<UserManagementPlanDTO> getAllManagementPlans() {
         User currentUser = getCurrentUser();
