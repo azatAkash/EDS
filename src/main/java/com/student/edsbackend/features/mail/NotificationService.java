@@ -49,35 +49,54 @@ public class NotificationService {
         mailSender.send(msg);
     }
 
-    public void sendDeclarationAssigned(String to,
-                                        UserInitialDeclarationDTO dto) throws MessagingException {
-        String link = String.format("%s/declarations/%d/fill", baseUrl, dto.getId());
-        String firstName = dto.getUser().getFirstname();
-        String lastName  = dto.getUser().getLastname();
+    public void sendDeclarationAssigned(String recipientEmail,
+            UserInitialDeclarationDTO dto) throws MessagingException {
+        String fullName = dto.getUser().getFirstname() + " " + dto.getUser().getLastname();
+        String link = String.format("%s/initial-declaration", baseUrl);
 
-        String subject;
-        String body;
+        // Тема на трёх языках
+        String subject = String.join(" / ",
+                "New Conflict Resolution Declaration Assigned",
+                "Вам назначена декларация по разрешению конфликта",
+                "Сізге дау шешу декларациясы тағайындалды");
 
+        // Английский блок
+        String bodyEn = String.format(
+                "<p>Dear %s,</p>"
+                        + "<p>The Nazarbayev University Compliance Office has assigned a new Conflict Resolution Declaration to you. "
+                        + "Please complete the declaration by following this link: <a href=\"%s\">%s</a></p>"
+                        + "<p>If you have any questions, feel free to contact the Compliance Office.</p>"
+                        + "<p>Best regards,<br>Nazarbayev University Compliance Office</p>",
+                fullName, link, link);
 
-        subject = "Conflict resolution declaration has been assigned to you";
+        // Русский блок
+        String bodyRu = String.format(
+                "<p>Здравствуйте, %s!</p>"
+                        + "<p>Отдел комплаенса Назарбаев Университета назначил вам новую Декларацию по разрешению конфликта. "
+                        + "Пожалуйста, перейдите по этой ссылке для её заполнения: <a href=\"%s\">%s</a></p>"
+                        + "<p>Если у вас возникнут вопросы, обратитесь в Отдел комплаенса.</p>"
+                        + "<p>С уважением,<br>Отдел комплаенса Назарбаев Университета</p>",
+                fullName, link, link);
 
+        // Казахский блок
+        String bodyKk = String.format(
+                "<p>Құрметті %s,</p>"
+                        + "<p>Назарбаев Университетінің Комплаенс Офисы сізге жаңа Дауды шешу Декларациясын толтыруды тапсырды. "
+                        + "Оны мына <a href=\"%s\">сілтемеге</a> өтіп толтырыңыз.</p>"
+                        + "<p>Кез келген сұрақ туындаса, Комплаенс Офысқа хабарласыңыз.</p>"
+                        + "<p>Құрметпен,<br>Назарбаев Университеті, Комплаенс Офисы</p>",
+                fullName, link);
 
-        body = String.format(
-                    "<p>Dear %s %s,</p>"
-                  + "<p>Nazarbayev University compliance office assigned a new intial declaration to you."
-                  + "Please fill it out <a href=\"%s\">here</a>.</p>",
-                    firstName, lastName, link
-                + "<p>Уважаемый, %s %s!</p>"
-                  + "<p>Комплаенс офис Назарбаев Университета назначил вам декларацию. "
-                  + "Пожалуйста, заполните её <a href=\"%s\">здесь</a>.</p>",
-                    firstName, lastName, link
-                   + "<p>Құрметті, %s %s,</p>"
-                  + "<p>Назарбаев Университінің Комплаенс Офисы сізге декларацияны тағайындады.</p>"
-                  + "Оны мына <a href=\"%s\">сілтемеден</a> толтыра аласыз.</p>",
-                    firstName, lastName, link
-                );
+        // Собираем финальное тело
+        String body = "<html><body style=\"font-family:Arial,sans-serif; font-size:14px;\">"
+                + "<h3>English</h3>" + bodyEn
+                + "<hr/>"
+                + "<h3>Русский</h3>" + bodyRu
+                + "<hr/>"
+                + "<h3>Қазақша</h3>" + bodyKk
+                + "</body></html>";
 
-        sendHtmlMessage(to, subject, body);
+        sendHtmlMessage(recipientEmail, subject, body);
     }
 
     public void sendTest(String to) throws MessagingException {

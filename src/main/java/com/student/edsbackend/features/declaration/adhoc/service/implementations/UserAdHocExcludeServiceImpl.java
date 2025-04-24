@@ -164,7 +164,7 @@ public class UserAdHocExcludeServiceImpl implements UserAdHocExcludeService {
     public List<UserAdHocExcludeDTO> getAdHocExclusionsByUserId(Integer userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
-
+        
         return userAdHocExcludeRepository.findByUserAndIsDeletedFalse(user).stream()
                 .map(this::convertToDTO)
                 .collect(Collectors.toList());
