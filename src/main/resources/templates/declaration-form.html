@@ -1,97 +1,170 @@
 <!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
 <head>
-    <meta charset="UTF-8"/>
+    <meta charset="UTF-8" />
     <style>
-        body { font-family: 'Times New Roman', serif; font-size: 12pt; margin: 2cm; }
-        h1, h2, h3 { text-align: center; margin: 0; }
-        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-        td, th { border: 1px solid black; padding: 5px; }
+        body {
+            font-family: 'Times New Roman', serif;
+            font-size: 13pt;
+            margin-left: 0.7cm;
+            margin-right: 0.3cm;
+            margin-top: 1.5cm;
+            margin-bottom: 0.7cm;
+        }
 
-        ul { list-style-type: none; margin: 0; padding: 0; }
-        li { margin: 6px 0; }
+        h1, h2, h3 {
+            text-align: center;
+        }
 
-        .note-box { border: 1px solid black; padding: 10px; margin: 15px 0; }
-        .note-box p.title { font-style: italic; font-weight: bold; margin: 0 0 8px 0; }
-        .checkbox-img { width: 12px; height: 12px; vertical-align: middle; margin-right: 6px; }
+        /* Новый класс: непосредственно плавает справа */
+        .annex-block {
+            float: right;
+            width: 6.7cm;            /* отрегулируйте по иерархии содержимого */
+            text-align: left;       /* выравнивание текста внутри по левому краю */
+            white-space: pre-line;  /* сохраняет переносы строк */
+            margin: 0 0 20px 10px;  /* отступ слева и снизу */
+            line-height: 0.6;    /* 1.1×размер шрифта — можно уменьшить до 1.0 */
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+
+        td, th {
+            border: 1px solid black;
+            padding: 5px;
+        }
+
+        ul {
+            list-style-type: none;
+            margin: 0;
+            padding: 0;
+        }
+
+        li {
+            margin: 6px 0;
+        }
+
+        .note-box {
+            border: 1px solid black;
+            padding: 10px;
+            margin: 15px 0;
+        }
+
+        .note-box p.title {
+            font-style: italic;
+            font-weight: bold;
+            margin: 0 0 8px 0;
+        }
+
+        .checkbox-img {
+            width: 12px;
+            height: 12px;
+            vertical-align: middle;
+            margin-right: 6px;
+            margin-top: 5px;
+        }
 
         @page {
-            @top-left { content: counter(page); font-family: 'Times New Roman', serif; font-size: 10pt; }
+            @top-center {
+                content: counter(page);
+                font-family: 'Times New Roman', serif;
+                font-size: 13pt;
+                padding-top: 1cm;
+                padding-left: 1.5cm;
+            }
+            
+            @bottom-center {
+        content: "Policy and Procedure on Conflict of Interest of the Autonomous Organization of Education Nazarbayev University";
+        font-family: 'Times New Roman', serif;
+        font-size: 13pt;
+        /* отступ от низа страницы */
+        padding-bottom: 1cm;
+        /* сдвиг текста вправо */
+        padding-left: 1.5cm;
+        /* чтобы текст не обрезался */
+        white-space: pre-wrap;
+    }
+        }
+        .option {
+            margin-bottom: 0px;
         }
     </style>
 </head>
+
 <body>
+    <!-- Прямо используем annex-block без лишних обёрток -->
+    <div class="annex-block">
+        Annex 3<br/>
+        to the Policy and Procedure on<br/>
+        Conflict of Interest of the<br/>
+        Autonomous Organization of<br/>
+        Education Nazarbayev University
+    </div>
 
-<!-- Page header: page number at top left, header text centered below -->
-<div style="position: running(headerText); text-align: center;">
-    <p style="margin-top: -20pt;">Annex 3</p>
-    <p>to the Policy and Procedure on</p>
-    <p>Conflict of Interest of the</p>
-    <p>Autonomous Organization of</p>
-    <p>Education Nazarbayev University</p>
-</div>
+    <div style="clear: both;"></div>
+    <h3>DECLARATION FORM</h3>
+    <h3>Initial Conflict of Interest Declaration</h3>
 
-<!-- Use the headerText element on every page -->
-<div style="display: none;" th:insert="~{this :: headerText}"></div>
+    <table>
+        <tr><th colspan="2">PERSONAL DETAILS</th></tr>
+        <tr>
+            <td>Full name:</td>
+            <td th:text="|${declaration.user.firstname} ${declaration.user.lastname}|"></td>
+        </tr>
+        <tr>
+            <td>Position/Status:</td>
+            <td th:text="${declaration.user.position}"></td>
+        </tr>
+        <tr>
+            <td>Department/Office/School:</td>
+            <td th:text="${declaration.user.department}"></td>
+        </tr>
+    </table>
 
-<h3>DECLARATION FORM</h3>
-<h3>Initial Conflict of Interest Declaration</h3>
+    <div th:each="question : ${declaration.questionsWithAnswers}">
+        <div style="margin-bottom: 20px;">
+            <p><b th:text="|${question.orderNumber}. ${question.description['en']}|"></b></p>
 
-<table>
-    <tr><th colspan="2">PERSONAL DETAILS</th></tr>
-    <tr>
-        <td>Full name:</td>
-        <td th:text="|${declaration.user.firstname} ${declaration.user.lastname}|"></td>
-    </tr>
-    <tr>
-        <td>Position/Status:</td>
-        <td th:text="${declaration.user.position}"></td>
-    </tr>
-    <tr>
-        <td>Department/Office/School:</td>
-        <td th:text="${declaration.user.department}"></td>
-    </tr>
-</table>
-
-<div th:each="question : ${declaration.questionsWithAnswers}">
-    <div style="margin-bottom: 20px;">
-        <p><b th:text="|${question.orderNumber}. ${question.description['en']}|"></b></p>
-
-        <!-- NOTE block -->
-        <div th:if="${question.note != null}">
-            <div class="note-box">
-                <p class="title">NOTE:</p>
-                <div th:utext="${#strings.replace(question.note['en'], '\n', '<br/>')}"></div>
+            <!-- NOTE block -->
+            <div th:if="${question.note != null}">
+                <div class="note-box">
+                    <p class="title">NOTE:</p>
+                    <div th:utext="${#strings.replace(question.note['en'], '\n', '<br/>')}"></div>
+                </div>
             </div>
-        </div>
 
-        <!-- YES_NO / AGREE -->
-        <div th:if="${question.questionType == 'YES_NO' or question.questionType == 'AGREE'}">
-            <div th:each="option : ${question.optionsWithAnswers}">
-                <p>
-                    <img th:src="${option.isAnswered} ? ${checkedBox} : ${uncheckedBox}"
-                         alt="checkbox" class="checkbox-img"/>
-                    <span th:text="${option.description['en']}"></span>
-                </p>
-                <p th:if="${option.answer != null}" th:text="|Answer: ${option.answer}|"></p>
+            <!-- YES_NO / AGREE -->
+            <div th:if="${question.questionType == 'YES_NO' or question.questionType == 'AGREE'}">
+                <div th:each="option : ${question.optionsWithAnswers}" class="option">
+                    <p>
+                        <img th:src="${option.isAnswered} ? ${checkedBox} : ${uncheckedBox}"
+                             alt="checkbox" class="checkbox-img"/>
+                        <span th:text="${option.description['en']}"></span>
+                    </p>
+                    <p th:if="${option.answer != null}" th:text="|Answer: ${option.answer}|"></p>
 
-                <div th:if="${option.additionalAnswers != null}">
-                    <div th:each="group : ${option.additionalAnswers.answers}">
-                        <span th:each="a, stat : ${group.answers}"
-                              th:text="${a.answer + (stat.last ? '' : ', ')}"
-                              style="display: inline;"></span>
+                    <div th:if="${option.additionalAnswers != null}">
+                        <div th:each="group : ${option.additionalAnswers.answers}">
+                            <span th:each="a, stat : ${group.answers}"
+                                  th:text="${a.answer + (stat.last ? '' : ', ')}"
+                                  style="display: inline;"></span>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
 
-        <!-- OPEN_ENDED -->
-        <div th:if="${question.questionType == 'OPEN_ENDED'}">
-            <div th:each="option : ${question.optionsWithAnswers}">
-                <p th:text="${option.answer}"></p>
+            <!-- OPEN_ENDED -->
+            <div th:if="${question.questionType == 'OPEN_ENDED'}">
+                <div th:each="option : ${question.optionsWithAnswers}">
+                    <p th:text="${option.answer}"></p>
+                </div>
             </div>
         </div>
     </div>
-</div>
-
 </body>
+
 </html>

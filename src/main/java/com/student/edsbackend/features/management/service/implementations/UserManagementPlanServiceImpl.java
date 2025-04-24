@@ -129,9 +129,9 @@ public class UserManagementPlanServiceImpl implements UserManagementPlanService 
                     .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
                             "User declaration not found with id: " + requestDTO.getUserDeclarationId()));
 
-            if (userDeclaration.getStatus() != UserDeclarationStatus.SENT_FOR_APPROVAL) {
+            if (userDeclaration.getStatus() == UserDeclarationStatus.SENT_FOR_APPROVAL || userDeclaration.getStatus() == UserDeclarationStatus.CREATED) {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                        "User declaration must be in SENT_FOR_APPROVAL status");
+                        "User declaration cant be in SENT_FOR_APPROVAL status");
             }
 
             managementPlan.setUserDeclaration(userDeclaration);
