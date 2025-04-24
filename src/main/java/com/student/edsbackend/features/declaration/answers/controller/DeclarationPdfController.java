@@ -15,7 +15,7 @@ import com.student.edsbackend.features.declaration.answers.service.implementatio
 import jakarta.servlet.http.HttpServletResponse;
 
 @RestController
-@RequestMapping("/declarations")
+@RequestMapping("/initial-declarations")
 public class DeclarationPdfController {
 
     private final UserDeclarationAnswerService answerService;
