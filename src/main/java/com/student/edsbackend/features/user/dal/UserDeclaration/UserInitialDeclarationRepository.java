@@ -28,6 +28,8 @@ public interface UserInitialDeclarationRepository extends JpaRepository<UserInit
      */
     List<UserInitialDeclaration> findByIsDeletedFalse();
 
+    Optional<UserInitialDeclaration> findByIdAndIsDeletedFalse(Integer id);
+
     List<UserInitialDeclaration> findAllByDeclarationId(Integer declarationId);
 
 }

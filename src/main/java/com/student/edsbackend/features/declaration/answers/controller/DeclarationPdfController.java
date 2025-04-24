@@ -15,7 +15,7 @@ import com.student.edsbackend.features.declaration.answers.service.implementatio
 import jakarta.servlet.http.HttpServletResponse;
 
 @RestController
-@RequestMapping("/initial-declarations")
+@RequestMapping("api/v1/export/initial-declaration")
 public class DeclarationPdfController {
 
     private final UserDeclarationAnswerService answerService;
@@ -30,7 +30,7 @@ public class DeclarationPdfController {
     @GetMapping("/{id}/pdf")
     public void downloadPdf(@PathVariable Integer id, HttpServletResponse response) throws IOException {
         // 1) Получаем DTO
-        UserDeclarationDetailedResponseDTO dto = answerService.getDeclarationAnswersByUserId(id);
+        UserDeclarationDetailedResponseDTO dto = answerService.getDeclarationAnswersByDeclarationId(id);
 
         // 2) Генерируем PDF
         byte[] pdfBytes = pdfService.generatePdf(dto);

@@ -470,6 +470,184 @@ public class UserDeclarationAnswerServiceImpl implements UserDeclarationAnswerSe
                                 .build();
         }
 
+        @Override
+        public UserDeclarationDetailedResponseDTO getDeclarationAnswersByDeclarationId(Integer id) {
+                Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+                String currentUserEmail = authentication.getName();
+
+                User currentUser = userRepository.findByEmail(currentUserEmail)
+                                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+                                                "Current user not found"));
+
+                InitialDeclaration activeDeclaration = initialDeclarationRepository.findAll().stream()
+                                .filter(d -> d.getIsActive() && !d.getIsDeleted())
+                                .findFirst()
+                                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+                                                "No active declaration found. Please ask Administrator to activate a declaration first."));
+
+                UserInitialDeclaration userDeclaration = userInitialDeclarationRepository
+                                .findByIdAndIsDeletedFalse(id)
+                                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+                                                "No declaration found by this id"));
+
+                if (!currentUserEmail.equals(userDeclaration.getUser().getEmail()) && currentUser.getRole().equals(Role.USER)) {
+                        throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+                                        "You are not authorized to view this declaration");
+                }
+
+                List<InitialDeclarationOption> allOptions = initialDeclarationOptionRepository.findAll().stream()
+                                .filter(o -> !o.getIsDeleted())
+                                .toList();
+
+                List<UserDeclarationAnswer> userAnswers = userDeclarationAnswerRepository.findAll().stream()
+                                .filter(a -> a.getUserDeclaration().getId().equals(userDeclaration.getId())
+                                                && !a.getIsDeleted())
+                                .toList();
+
+                Map<Integer, UserDeclarationAnswer> optionAnswerMap = userAnswers.stream()
+                                .collect(Collectors.toMap(
+                                                answer -> answer.getOption().getId(),
+                                                answer -> answer));
+
+                Map<Integer, List<InitialDeclarationOption>> optionsByQuestionId = allOptions.stream()
+                                .collect(Collectors.groupingBy(option -> option.getQuestion().getId()));
+
+                List<UserDeclarationDetailedResponseDTO.QuestionWithAnswerDTO> questionsWithAnswers = new ArrayList<>();
+                AtomicBoolean globalHasConflict = new AtomicBoolean(false);
+
+                activeDeclaration.getQuestions().stream()
+                                .filter(q -> !q.getIsDeleted())
+                                .forEach(question -> {
+                                        List<UserDeclarationDetailedResponseDTO.OptionWithAnswerDTO> optionsWithAnswers = new ArrayList<>();
+                                        List<InitialDeclarationOption> questionOptions = optionsByQuestionId
+                                                        .getOrDefault(question.getId(), new ArrayList<>());
+
+                                        for (InitialDeclarationOption option : questionOptions) {
+                                                UserDeclarationAnswer userAnswer = optionAnswerMap.get(option.getId());
+
+                                                if (userAnswer != null &&
+                                                                Boolean.TRUE.equals(option.getIsConflict()) &&
+                                                                (Boolean.TRUE.equals(userAnswer.getIsAnswered())
+                                                                                || userAnswer.getAnswer() != null)) {
+                                                        globalHasConflict.set(true);
+                                                }
+
+                                                UserDeclarationDetailedResponseDTO.OptionWithAnswerDTO optionWithAnswer = UserDeclarationDetailedResponseDTO.OptionWithAnswerDTO
+                                                                .builder()
+                                                                .id(option.getId())
+                                                                .description(option.getDescription())
+                                                                .additionalAnswerDescription(
+                                                                                option.getAdditionalAnswerDescription())
+                                                                .multipleAdditionalAnswers(
+                                                                                option.getMultipleAdditionalAnswers())
+                                                                .isConflict(option.getIsConflict())
+                                                                .isAnswered(userAnswer != null && Boolean.TRUE
+                                                                                .equals(userAnswer.getIsAnswered()))
+                                                                .answer(userAnswer != null ? userAnswer.getAnswer()
+                                                                                : null)
+                                                                .hasConflict(userAnswer != null
+                                                                                ? userAnswer.getHasConflict()
+                                                                                : null)
+                                                                .build();
+
+                                                // Prepare additional answer data
+                                                List<AdditionalAnswerOption> allAdditionalOptions = additionalAnswerOptionRepository
+                                                                .findByOptionIdAndIsDeletedFalse(option.getId());
+
+                                                List<UserDeclarationDetailedResponseDTO.AdditionalQuestionDTO> additionalQuestions = allAdditionalOptions
+                                                                .stream()
+                                                                .map(opt -> UserDeclarationDetailedResponseDTO.AdditionalQuestionDTO
+                                                                                .builder()
+                                                                                .id(opt.getId())
+                                                                                .description(opt.getDescription())
+                                                                                .isRequired(opt.getIsRequired())
+                                                                                .build())
+                                                                .toList();
+
+                                                List<UserDeclarationDetailedResponseDTO.AdditionalAnswersGroupDTO> additionalAnswerGroups = new ArrayList<>();
+
+                                                if (userAnswer != null) {
+                                                        List<UserDeclarationAdditionalAnswer> additionalAnswers = userDeclarationAdditionalAnswerRepository
+                                                                        .findByUserDeclarationAnswerIdAndIsDeletedFalse(
+                                                                                        userAnswer.getId());
+
+                                                        if (!additionalAnswers.isEmpty()) {
+                                                                Map<Short, List<UserDeclarationAdditionalAnswer>> answersByOrderIndex = additionalAnswers
+                                                                                .stream()
+                                                                                .collect(Collectors.groupingBy(
+                                                                                                UserDeclarationAdditionalAnswer::getOrderIndex));
+
+                                                                for (Map.Entry<Short, List<UserDeclarationAdditionalAnswer>> entry : answersByOrderIndex
+                                                                                .entrySet()) {
+                                                                        List<UserDeclarationDetailedResponseDTO.AdditionalAnswerDTO> additionalAnswerDTOs = entry
+                                                                                        .getValue().stream()
+                                                                                        .map(additionalAnswer -> UserDeclarationDetailedResponseDTO.AdditionalAnswerDTO
+                                                                                                        .builder()
+                                                                                                        .id(additionalAnswer
+                                                                                                                        .getId())
+                                                                                                        .additionalAnswerId(
+                                                                                                                        additionalAnswer.getAnswerOption()
+                                                                                                                                        .getId())
+                                                                                                        .answer(additionalAnswer
+                                                                                                                        .getAnswer())
+                                                                                                        .build())
+                                                                                        .toList();
+
+                                                                        UserDeclarationDetailedResponseDTO.AdditionalAnswersGroupDTO groupDTO = UserDeclarationDetailedResponseDTO.AdditionalAnswersGroupDTO
+                                                                                        .builder()
+                                                                                        .orderIndex(entry.getKey())
+                                                                                        .answers(additionalAnswerDTOs)
+                                                                                        .build();
+
+                                                                        additionalAnswerGroups.add(groupDTO);
+                                                                }
+                                                        }
+                                                }
+
+                                                // Set even if answers are empty
+                                                optionWithAnswer.setAdditionalAnswers(
+                                                                UserDeclarationDetailedResponseDTO.AdditionalAnswersContainerDTO
+                                                                                .builder()
+                                                                                .questions(additionalQuestions)
+                                                                                .answers(additionalAnswerGroups)
+                                                                                .build());
+
+                                                optionsWithAnswers.add(optionWithAnswer);
+                                        }
+
+                                        UserDeclarationDetailedResponseDTO.QuestionWithAnswerDTO questionWithAnswer = UserDeclarationDetailedResponseDTO.QuestionWithAnswerDTO
+                                                        .builder()
+                                                        .id(question.getId())
+                                                        .description(question.getDescription())
+                                                        .questionType(question.getQuestionType().toString())
+                                                        .orderNumber(question.getOrderNumber())
+                                                        .note(question.getNote())
+                                                        .isRequired(question.getIsRequired())
+                                                        .optionsWithAnswers(optionsWithAnswers)
+                                                        .build();
+
+                                        questionsWithAnswers.add(questionWithAnswer);
+                                });
+
+                // Сортировка вопросов по порядковому номеру
+                questionsWithAnswers.sort(Comparator
+                                .comparing(UserDeclarationDetailedResponseDTO.QuestionWithAnswerDTO::getOrderNumber));
+
+                return UserDeclarationDetailedResponseDTO.builder()
+                                .userDeclarationId(userDeclaration.getId())
+                                .user(mapUserToUserDTO(userDeclaration.getUser()))
+                                .createdBy(mapUserToUserDTO(userDeclaration.getCreatedBy()))
+                                .responsible(mapUserToUserDTO(userDeclaration.getResponsible()))
+                                .declarationId(activeDeclaration.getId())
+                                .declarationName(activeDeclaration.getName())
+                                .creationDate(userDeclaration.getCreationDate())
+                                .status(userDeclaration.getStatus())
+                                .hasConflict(globalHasConflict.get())
+                                .questionsWithAnswers(questionsWithAnswers)
+                                .message("User declaration answers retrieved successfully")
+                                .build();
+        }
+
         private UserDTO mapUserToUserDTO(User user) {
                 return UserDTO.builder()
                                 .id(user.getId())

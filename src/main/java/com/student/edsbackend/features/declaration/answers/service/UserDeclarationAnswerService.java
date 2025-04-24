@@ -28,6 +28,7 @@ public interface UserDeclarationAnswerService {
      *
      * @return A list of response DTOs with information about all user answers
 
+     
     /**
      * Get user's declaration answer by ID (for admin and super admin only)
      * 
@@ -35,7 +36,7 @@ public interface UserDeclarationAnswerService {
      * @return A response DTO with information about the user's answer
      */
     // UserDeclarationDetailedResponseDTO getUserDeclarationAnswerById(Integer id);
-
+    UserDeclarationDetailedResponseDTO getDeclarationAnswersByDeclarationId(Integer Id);
     /**
      * Delete a specific user declaration answer by ID
      * 
