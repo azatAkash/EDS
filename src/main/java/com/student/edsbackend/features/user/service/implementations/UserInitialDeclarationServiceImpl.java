@@ -3,6 +3,7 @@ package com.student.edsbackend.features.user.service.implementations;
 import com.student.edsbackend.features.declaration.initial.dal.declaration_metadata.InitialDeclaration;
 import com.student.edsbackend.features.declaration.initial.dal.declaration_metadata.InitialDeclarationRepository;
 import com.student.edsbackend.features.enums.UserDeclarationStatus;
+import com.student.edsbackend.features.mail.NotificationService;
 import com.student.edsbackend.features.user.dal.Role;
 import com.student.edsbackend.features.user.dal.User;
 import com.student.edsbackend.features.user.dal.UserDTO;
@@ -14,6 +15,7 @@ import com.student.edsbackend.features.user.dal.UserDeclaration.UserInitialDecla
 import com.student.edsbackend.features.user.dal.UserDeclaration.UserInitialDeclarationUpdateDTO;
 import com.student.edsbackend.features.user.service.UserInitialDeclarationService;
 
+import jakarta.mail.MessagingException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
@@ -33,6 +35,7 @@ public class UserInitialDeclarationServiceImpl implements UserInitialDeclaration
         private final UserInitialDeclarationRepository userInitialDeclarationRepository;
         private final UserRepository userRepository;
         private final InitialDeclarationRepository initialDeclarationRepository;
+        private final NotificationService notificationService;
 
         @Override
         public Optional<UserInitialDeclarationDTO> getUserInitialDeclarationById(Integer id) {
@@ -99,7 +102,9 @@ public class UserInitialDeclarationServiceImpl implements UserInitialDeclaration
 
                 // Save and return
                 UserInitialDeclaration savedDeclaration = userInitialDeclarationRepository.save(userInitialDeclaration);
-                return mapToDTO(savedDeclaration);
+               UserInitialDeclarationDTO userInitialDeclarationDTO = mapToDTO(savedDeclaration);
+                assignDeclarationToUser(userInitialDeclarationDTO);
+                return userInitialDeclarationDTO;
         }
 
         @Override
@@ -174,8 +179,8 @@ public class UserInitialDeclarationServiceImpl implements UserInitialDeclaration
                                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
                                                 "Current user not found"));
 
-                if (currentUser.getRole()!= Role.SUPER_ADMIN && currentUser.getRole()!= Role.ADMIN
-                                && currentUser.getRole()!= Role.MANAGER) {
+                if (currentUser.getRole() != Role.SUPER_ADMIN && currentUser.getRole() != Role.ADMIN
+                                && currentUser.getRole() != Role.MANAGER) {
                         throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
                                         "You do not have permission to change the status of this declaration");
                 }
@@ -206,6 +211,18 @@ public class UserInitialDeclarationServiceImpl implements UserInitialDeclaration
                                 .position(user.getPosition())
                                 .registrationDate(user.getRegistrationDate())
                                 .build();
+        }
+
+        private void assignDeclarationToUser(UserInitialDeclarationDTO dto) {
+                try {
+                        notificationService.sendDeclarationAssigned(
+                                        dto.getUser().getEmail(),
+                                        dto
+                        );
+                } catch (MessagingException e) {
+                        // лог или повторная попытка
+                        e.printStackTrace();
+                }
         }
 
         /**
