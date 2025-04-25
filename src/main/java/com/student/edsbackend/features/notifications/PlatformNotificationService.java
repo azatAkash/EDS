@@ -45,7 +45,8 @@ public class PlatformNotificationService {
                 .isRead(false)
                 .isDeleted(false)
                 .build();
-        
+        System.out.println("Notification: " + notification);
+
         platformNotification savedNotification = notificationRepository.save(notification);
         return mapToDTO(savedNotification, countUnreadNotifications(user));
     }

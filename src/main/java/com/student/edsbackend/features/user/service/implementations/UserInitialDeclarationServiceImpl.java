@@ -115,7 +115,7 @@ public class UserInitialDeclarationServiceImpl implements UserInitialDeclaration
                                         "Failed to send email notification");
                 }
                 platformNotificationService.createNotification(userInitialDeclarationDTO.getUser().getEmail(),
-                                notificationService.newDeclrationMessage(userInitialDeclarationDTO.getUser().getEmail(),
+                                notificationService.newDeclarationMessageText(userInitialDeclarationDTO.getUser().getEmail(),
                                                 userInitialDeclarationDTO)[1]);
                 return userInitialDeclarationDTO;
         }

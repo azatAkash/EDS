@@ -194,7 +194,7 @@
             <!-- YES_NO -->
             <div th:if="${question.questionType == 'YES_NO'}">
                 <div th:each="option : ${question.optionsWithAnswers}" class="option">
-                    <p>
+                    <p style="margin-bottom: -20px;">
                         <img th:src="${option.isAnswered} ? ${checkedBox} : ${uncheckedBox}" alt="checkbox"
                             class="checkbox-img" />
                         <span th:text="${option.description['en']}"></span>
@@ -225,7 +225,7 @@
 
 
 
-    <table>
+    <table class="question-block">
         <tr>
             <td>
                 <h3 style="margin: 0px;  font-weight: bold; text-align: left;">

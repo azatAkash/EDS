@@ -34,9 +34,7 @@ public class platformNotification {
     @Column(name = "id")
     private Integer id;
 
-    @JdbcTypeCode(SqlTypes.JSON)
-    @Convert(converter = JsonConverter.class)
-    @Column(name = "description", columnDefinition = "json", nullable = false)
+    @Column(name = "description", columnDefinition = "text", nullable = false)
     private String description;
 
     @ManyToOne(fetch = FetchType.LAZY)

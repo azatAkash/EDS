@@ -1,6 +1,7 @@
 package com.student.edsbackend.features.notifications;
 
 import java.time.LocalDateTime;
+import java.util.Map;
 
 import com.student.edsbackend.features.user.dal.UserDTO;
 
@@ -18,7 +19,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class platformNotificationResponseDTO {
     private Integer id;
-    private String description;
+    private Map<String, String> description;
     private UserDTO reciever;
     private LocalDateTime creationDate;
     private Boolean isRead;
