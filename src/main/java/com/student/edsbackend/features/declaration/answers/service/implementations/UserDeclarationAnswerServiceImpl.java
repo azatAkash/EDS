@@ -744,10 +744,7 @@ public class UserDeclarationAnswerServiceImpl implements UserDeclarationAnswerSe
                 for (UserDeclarationAnswerRequestDTO.AdditionalAnswerGroupDTO groupDTO : additionalAnswerGroups) {
                         // Validate that when multipleAdditionalAnswers is false, only one additional
                         // answer is provided per group
-                        if (Boolean.FALSE.equals(allowsMultipleAnswers) && groupDTO.getAnswers().size() > 1) {
-                                throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                                                "This option does not allow multiple additional answers per group. Only one answer is allowed.");
-                        }
+                   
 
                         // Process each additional answer in the group
                         for (UserDeclarationAnswerRequestDTO.AdditionalAnswerDTO additionalAnswerDTO : groupDTO
