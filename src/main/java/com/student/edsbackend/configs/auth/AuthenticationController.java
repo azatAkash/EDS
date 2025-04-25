@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
 import com.student.edsbackend.features.ApiResponse;
-import com.student.edsbackend.features.mail.NotificationService;
+import com.student.edsbackend.features.notifications.NotificationService;
 import com.student.edsbackend.features.user.dal.UserDTO;
 import com.student.edsbackend.features.user.dal.UserRegistrationRequestDTO;
 

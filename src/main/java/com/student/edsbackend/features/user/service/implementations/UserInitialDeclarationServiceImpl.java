@@ -3,7 +3,8 @@ package com.student.edsbackend.features.user.service.implementations;
 import com.student.edsbackend.features.declaration.initial.dal.declaration_metadata.InitialDeclaration;
 import com.student.edsbackend.features.declaration.initial.dal.declaration_metadata.InitialDeclarationRepository;
 import com.student.edsbackend.features.enums.UserDeclarationStatus;
-import com.student.edsbackend.features.mail.NotificationService;
+import com.student.edsbackend.features.notifications.NotificationService;
+import com.student.edsbackend.features.notifications.PlatformNotificationService;
 import com.student.edsbackend.features.user.dal.Role;
 import com.student.edsbackend.features.user.dal.User;
 import com.student.edsbackend.features.user.dal.UserDTO;
@@ -36,6 +37,7 @@ public class UserInitialDeclarationServiceImpl implements UserInitialDeclaration
         private final UserRepository userRepository;
         private final InitialDeclarationRepository initialDeclarationRepository;
         private final NotificationService notificationService;
+        private final PlatformNotificationService platformNotificationService;
 
         @Override
         public Optional<UserInitialDeclarationDTO> getUserInitialDeclarationById(Integer id) {
@@ -102,8 +104,19 @@ public class UserInitialDeclarationServiceImpl implements UserInitialDeclaration
 
                 // Save and return
                 UserInitialDeclaration savedDeclaration = userInitialDeclarationRepository.save(userInitialDeclaration);
-               UserInitialDeclarationDTO userInitialDeclarationDTO = mapToDTO(savedDeclaration);
-                assignDeclarationToUser(userInitialDeclarationDTO);
+                UserInitialDeclarationDTO userInitialDeclarationDTO = mapToDTO(savedDeclaration);
+
+                try {
+                        notificationService.sendDeclarationAssigned(
+                                        userInitialDeclarationDTO.getUser().getEmail(),
+                                        userInitialDeclarationDTO);
+                } catch (MessagingException e) {
+                        throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
+                                        "Failed to send email notification");
+                }
+                platformNotificationService.createNotification(userInitialDeclarationDTO.getUser().getEmail(),
+                                notificationService.newDeclrationMessage(userInitialDeclarationDTO.getUser().getEmail(),
+                                                userInitialDeclarationDTO)[1]);
                 return userInitialDeclarationDTO;
         }
 
@@ -211,18 +224,6 @@ public class UserInitialDeclarationServiceImpl implements UserInitialDeclaration
                                 .position(user.getPosition())
                                 .registrationDate(user.getRegistrationDate())
                                 .build();
-        }
-
-        private void assignDeclarationToUser(UserInitialDeclarationDTO dto) {
-                try {
-                        notificationService.sendDeclarationAssigned(
-                                        dto.getUser().getEmail(),
-                                        dto
-                        );
-                } catch (MessagingException e) {
-                        // лог или повторная попытка
-                        e.printStackTrace();
-                }
         }
 
         /**

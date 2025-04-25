@@ -1,4 +1,4 @@
-package com.student.edsbackend.features.mail;
+package com.student.edsbackend.features.notifications;
 
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
@@ -49,8 +49,9 @@ public class NotificationService {
         mailSender.send(msg);
     }
 
-    public void sendDeclarationAssigned(String recipientEmail,
-            UserInitialDeclarationDTO dto) throws MessagingException {
+
+    public String[] newDeclrationMessage(String recipientEmail,
+            UserInitialDeclarationDTO dto){
         String fullName = dto.getUser().getFirstname() + " " + dto.getUser().getLastname();
         String link = String.format("%s/initial-declaration", baseUrl);
 
@@ -96,7 +97,14 @@ public class NotificationService {
                 + bodyKk
                 + "</body></html>";
 
-        sendHtmlMessage(recipientEmail, subject, body);
+        return new String[]{subject, body};
+    }
+
+
+    public void sendDeclarationAssigned(String recipientEmail,  UserInitialDeclarationDTO dto) throws MessagingException {
+        String[] vals =  newDeclrationMessage(recipientEmail, dto);
+
+        sendHtmlMessage(recipientEmail, vals[0], vals[1]);
     }
 
     public void sendTest(String to) throws MessagingException {
