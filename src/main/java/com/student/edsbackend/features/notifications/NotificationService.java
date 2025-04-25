@@ -62,8 +62,7 @@ public class NotificationService {
 
                 // Английский текст
                 String bodyEn = String.format(
-                                "Dear %s,\n\n" +
-                                                "Please complete the initial declaration: %s \n\n" +
+                                "Dear %s, Please complete the initial declaration: %s \n\n",
                                 fullName, link);
 
                 
