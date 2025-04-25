@@ -160,9 +160,9 @@ public class UserManagementPlanServiceImpl implements UserManagementPlanService 
             if (userAdHocDeclareRepository.findByIdAndIsDeletedFalse(requestDTO.getAdHocDeclareId())
                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
                             "User ad hoc declaration not found with id: " + requestDTO.getAdHocDeclareId()))
-                   .getStatus()!= UserDeclarationStatus.SENT_FOR_APPROVAL) {
+                   .getStatus()== UserDeclarationStatus.SENT_FOR_APPROVAL) {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                        "User ad hoc declaration must be in SENT_FOR_APPROVAL status");
+                        "User ad hoc declaration cant be in SENT_FOR_APPROVAL status");
             }
         }
 
