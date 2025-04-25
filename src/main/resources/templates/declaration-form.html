@@ -172,19 +172,19 @@
         <div style="margin-bottom: 20px;">
 
             <!-- AGREE: один чекбокс и текст самого вопроса -->
-                <p th:if="${question.questionType == 'AGREE' && question.optionsWithAnswers.size() == 1}">
-                    <img th:src="${question.optionsWithAnswers[0].isAnswered} ? ${checkedBox} : ${uncheckedBox}"
-                        alt="checkbox" class="checkbox-img" />
-                    <span th:text="${question.description['en']}"></span>
-                </p>
-            
+            <p th:if="${question.questionType == 'AGREE' && question.optionsWithAnswers.size() == 1}">
+                <img th:src="${question.optionsWithAnswers[0].isAnswered} ? ${checkedBox} : ${uncheckedBox}"
+                    alt="checkbox" class="checkbox-img" />
+                <span th:text="${question.description['en']}"></span>
+            </p>
+
             <!-- всё остальное (номер + текст) для НЕ-AGREE -->
             <p th:unless="${question.questionType == 'AGREE'}">
                 <b th:text="|${question.orderNumber}. ${question.description['en']}|"></b>
             </p>
 
             <!-- NOTE block -->
-            <div th:if="${question.note != null && question.questionType != 'AGREE'}">
+            <div th:if="${question.note != null && question.questionType != 'AGREE' && question.note['en'] != ''}">
                 <div class="note-box">
                     <p class="title">NOTE:</p>
                     <div th:utext="${#strings.replace(question.note['en'], '\n', '<br/>')}"></div>
@@ -194,7 +194,7 @@
             <!-- YES_NO -->
             <div th:if="${question.questionType == 'YES_NO'}">
                 <div th:each="option : ${question.optionsWithAnswers}" class="option">
-                    <p style="margin-bottom: -20px;">
+                    <p>
                         <img th:src="${option.isAnswered} ? ${checkedBox} : ${uncheckedBox}" alt="checkbox"
                             class="checkbox-img" />
                         <span th:text="${option.description['en']}"></span>
@@ -203,8 +203,9 @@
                     <!-- дополнительный ответ -->
                     <div th:if="${option.additionalAnswers != null}">
                         <div th:each="group : ${option.additionalAnswers.answers}">
-                            <span th:each="a, stat : ${group.answers}" th:text="${a.answer + (stat.last ? '' : ', ')}"
-                                style="display: inline;"></span>
+                            <p th:each="a : ${group.answers}" th:text="${a.answer}" style="margin: 0 0 8px 0;" class="underlined">
+                            </p>
+
                         </div>
                     </div>
                 </div>
