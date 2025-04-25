@@ -66,7 +66,7 @@ public class NotificationService {
                                                 "The Nazarbayev University Compliance Office has assigned a new Conflict Resolution Declaration to you. "
                                                 +
                                                 "Please complete the declaration by following this link: %s \n\n" +
-                                                "If you have any questions, feel free to contact the Compliance Office.\n\n"+
+                                                "If you have any questions, feel free to contact the Compliance Office.\n\n",
                                 fullName, link);
 
                 
