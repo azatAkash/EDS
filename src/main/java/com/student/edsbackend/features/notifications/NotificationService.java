@@ -63,10 +63,7 @@ public class NotificationService {
                 // Английский текст
                 String bodyEn = String.format(
                                 "Dear %s,\n\n" +
-                                                "The Nazarbayev University Compliance Office has assigned a new Conflict Resolution Declaration to you. "
-                                                +
-                                                "Please complete the declaration by following this link: %s \n\n" +
-                                                "If you have any questions, feel free to contact the Compliance Office.\n\n",
+                                                "Please complete the initial declaration: %s \n\n" +
                                 fullName, link);
 
                 
