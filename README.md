@@ -1,6 +1,4 @@
-Below is a **README.md** file for your Spring Boot-based **Electronic Declaration System (EDS)** project:
 
----
 
 # **Electronic Declaration System (EDS)**
 
